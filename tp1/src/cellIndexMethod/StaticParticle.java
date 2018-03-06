@@ -1,14 +1,16 @@
 package cellIndexMethod;
 
 public class StaticParticle implements Particle{
-    public double radius;
-    public double xPosition;
-    public double yPosition;
+    private double radius;
+    private double xPosition;
+    private double yPosition;
+    private int id;
 
-    public StaticParticle(double radius, double xPosition, double yPosition) {
+    public StaticParticle(double radius, double xPosition, double yPosition, int id) {
         this.radius = radius;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
+        this.id = id;
     }
 
     @Override
@@ -24,5 +26,10 @@ public class StaticParticle implements Particle{
     @Override
     public double getyPosition() {
         return yPosition;
+    }
+
+    @Override
+    public int getId() {
+        return id;
     }
 }

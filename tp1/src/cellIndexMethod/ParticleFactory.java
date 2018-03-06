@@ -30,7 +30,7 @@ public class ParticleFactory {
             double radius = randomGenerator.nextDouble()*maxRadius;
             double xPosition = randomGenerator.nextDouble()*xLimit;
             double yPosition = randomGenerator.nextDouble()*yLimit;
-            particleList.add(new StaticParticle(radius, xPosition, yPosition));
+            particleList.add(new StaticParticle(radius, xPosition, yPosition, i));
         }
         return particleList;
     }

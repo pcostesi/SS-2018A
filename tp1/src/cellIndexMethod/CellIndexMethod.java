@@ -8,58 +8,42 @@ public class CellIndexMethod {
     private ArrayList<List<Particle>> cells;
     private double blockLength;
     private int cellsPerRow;
+    private int totalCells;
+    private double Rc;
+    private ArrayList<List<Particle>> closeOnes;
 
-    public void magic(List<Particle> particleList, int N, int L, int M, double Rc) {
+    public List<List<Particle>> magic(List<Particle> particleList, int N, int L, int M, double Rc) {
 
+        closeOnes = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) {
+            closeOnes.add(i,new ArrayList<>());
+        }
+        this.Rc = Rc;
         long startTime = System.currentTimeMillis();
-        blockLength = L/M;
-        cellsPerRow = (int)(L/blockLength);
-        int downIsUp = cellsPerRow*(cellsPerRow-1)+1;
-        int rightIsLeft = (-cellsPerRow +1);
-        int upperRightCornerIsUpperLeft = rightIsLeft+cellsPerRow;
+        blockLength = L / M;
+        cellsPerRow = (int) (L / blockLength);
+        totalCells = cellsPerRow * cellsPerRow;
+        cells = new ArrayList<>(totalCells);
+        for (int i = 0; i < totalCells; i++) {
+            cells.add(new ArrayList<>());
+        }
 
-
-        for(Particle particle : particleList) {
+        for (Particle particle : particleList) {
             locateParticle(particle);
         }
 
-        int i;
-
-        //First Row
-        for (i = 0; i < blockLength -1 ; i++) {
-            for( Particle currentCellParticle: cells.get(i) ){
-                for( Particle adjacentCellParticle: cells.get(i+cellsPerRow) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-                for( Particle adjacentCellParticle: cells.get(i+cellsPerRow+1) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-                for( Particle adjacentCellParticle: cells.get(i+1) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-                for( Particle adjacentCellParticle: cells.get(i+downIsUp) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-            }
-        }
-        for( Particle currentCellParticle: cells.get(++i) ){
-            for( Particle adjacentCellParticle: cells.get(i+cellsPerRow) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-            for( Particle adjacentCellParticle: cells.get(i+upperRightCornerIsUpperLeft) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-            for( Particle adjacentCellParticle: cells.get(i+rightIsLeft) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
-            for( Particle adjacentCellParticle: cells.get(i+downIsUp+rightIsLeft) ){addIfInRange(currentCellParticle, adjacentCellParticle);}
+        for (int i = 0; i < totalCells; i++) {
+            List<Particle> currentCell = cells.get(i);
+            compareWithSelf(currentCell);
+            compareWithTopCell(currentCell, i);
+            compareWithTopRightCell(currentCell, i);
+            compareWithRight(currentCell, i);
+            compareWithBotRight(currentCell, i);
         }
 
-        //from row 1 to n-1
-        //row n
-        long duration =  System.currentTimeMillis() - startTime;
+        return closeOnes;
     }
 
-    /* Nobody aint got time for that
-    private ArrayList<Cell> getCells() {
-
-        ArrayList<Cell> cellList = new ArrayList<>();
-        for (int i = 0; i < cellsPerRow*cellsPerRow; i++) {
-            double minX = i%cellsPerRow*blockLength;
-            double minY = i/cellsPerRow*blockLength;
-            Cell cell = new BasicCell(i, new ArrayList<Particle>(),
-                    minX,  minX + blockLength,  minY,  minY + blockLength);
-            cellList.add(i,cell);
-        }
-        return cellList;
-    }
-    */
 
     private void locateParticle(Particle particle) {
         int cellNumber = (int)(particle.getxPosition()/blockLength)
@@ -68,7 +52,105 @@ public class CellIndexMethod {
     }
 
     private void addIfInRange(Particle particleA, Particle particleB){
+        double xDistance = 0;
+        double yDistance = 0;
+        xDistance = particleB.getxPosition() - particleA.getxPosition();
+        yDistance = particleB.getyPosition() - particleA.getyPosition();
+        double totalDistance =  Math.sqrt((xDistance * xDistance + yDistance * yDistance))
+                - particleB.getRadius() - particleA.getRadius();
+        if( totalDistance < Rc ){
+            closeOnes.get(particleA.getId()).add(particleB);
+            closeOnes.get(particleB.getId()).add(particleA);
+        }
+    }
+
+    private void compareWithTopCell(List<Particle> currentCell, int i) {
+        int neighborIndex = (i + cellsPerRow) % totalCells;
+        List<Particle> neighborCell = cells.get(neighborIndex);
+        checkCells(currentCell, neighborCell);
+    }
+
+    private void compareWithTopRightCell(List<Particle> currentCell, int i) {
+        int neighborIndex = (i + cellsPerRow +1) % totalCells;
+        if(neighborIndex == 0 && i != 0) {
+            neighborIndex = (i + cellsPerRow +1);
+        }
+        if((i+1) % cellsPerRow == 0){
+            neighborIndex -= cellsPerRow;
+        }
+        if( neighborIndex == -10){
+            System.out.println();
+        }
+        List<Particle> neighborCell = cells.get(neighborIndex);
+        checkCells(currentCell, neighborCell);
+    }
+
+    private void compareWithRight(List<Particle> currentCell, int i) {
+        int neighborIndex = i+1;
+        if((i+1) % cellsPerRow == 0){
+            neighborIndex -= cellsPerRow;
+        }
+        List<Particle> neighborCell = cells.get(neighborIndex);
+        checkCells(currentCell, neighborCell);
 
     }
 
+    private void compareWithBotRight(List<Particle> currentCell, int i) {
+        int neighborIndex = (i - cellsPerRow);
+        //me fui para abajo?
+        if(neighborIndex < 0) {
+            neighborIndex += cellsPerRow * cellsPerRow;
+        }
+        neighborIndex++;
+        //me fui para la derecha?
+        if((i+1) % cellsPerRow == 0){
+            neighborIndex -= cellsPerRow;
+        }
+        List<Particle> neighborCell = cells.get(neighborIndex);
+        checkCells(currentCell, neighborCell);
+    }
+
+    private void checkCells(List<Particle> currentCell, List<Particle> neighborCell) {
+        currentCell.forEach( particle -> {
+            for (int j = 0; j < neighborCell.size(); j++) {
+                addIfInRange(particle, neighborCell.get(j));
+            }
+        });
+    }
+
+    public List<List<Particle>> bruteForce(List<Particle> particleList, int N, int L, int M, double Rc) {
+        closeOnes = new ArrayList<>(N);
+        for (int i = 0; i < N; i++) {
+            closeOnes.add(i,new ArrayList<>());
+        }
+        particleList.forEach( particleA -> {
+            particleList.forEach( particleB -> {
+                addIfInRangeBruteForceEdition(particleA, particleB);
+            });
+        });
+        return closeOnes;
+    }
+
+    private void addIfInRangeBruteForceEdition(Particle particleA, Particle particleB){
+        if(particleA.getId() == particleB.getId()) {
+            return;
+        }
+        double xDistance = 0;
+        double yDistance = 0;
+        xDistance = particleB.getxPosition() - particleA.getxPosition();
+        yDistance = particleB.getyPosition() - particleA.getyPosition();
+        double totalDistance =  Math.sqrt((xDistance * xDistance + yDistance * yDistance))
+                - particleB.getRadius() - particleA.getRadius();
+        if( totalDistance < Rc ){
+            closeOnes.get(particleA.getId()).add(particleB);
+        }
+    }
+
+    private void compareWithSelf(List<Particle> currentCell) {
+        for (int i = 0; i < currentCell.size(); i++) {
+            for (int j = i+1; j < currentCell.size(); j++) {
+                addIfInRange(currentCell.get(i), currentCell.get(j));
+            }
+        }
+    }
 }

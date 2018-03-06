@@ -7,4 +7,6 @@ public interface Particle {
     public double getxPosition();
 
     public double getyPosition();
+
+    public int getId();
 }

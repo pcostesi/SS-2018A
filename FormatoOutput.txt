@@ -1,0 +1,5 @@
+[id de la particula "i"	    ids de las particulas cuya distancia borde-boder es menos de rc].
+
+
+
+Distancia Borde-borde=Dist Centros de masa - Ri -Rj.
