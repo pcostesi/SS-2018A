@@ -33,7 +33,7 @@ public class Tp1 {
 
         List<Particle> particleList = createParticles();
         CellIndexMethod method = new CellIndexMethod();
-        List<List<Particle>> result = method.magic(particleList, N, L, M, R);
+        List<List<Particle>> result = method.getPeriodicNeighbors(particleList, N, L, M, R);
         int index = 0;
         for(List<Particle> list: result){
             System.out.print("Id: " + index + " x: " + xPositions[index] + " y: " + yPositions[index] + " - ");
