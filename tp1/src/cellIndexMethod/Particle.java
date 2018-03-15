@@ -9,4 +9,6 @@ public interface Particle {
     public double getyPosition();
 
     public int getId();
+
+    public Particle updatePosition(double timeDelta, double theta);
 }
