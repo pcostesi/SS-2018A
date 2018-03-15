@@ -32,4 +32,8 @@ public class StaticParticle implements Particle{
     public int getId() {
         return id;
     }
+
+    @Override
+    public void updatePosition(double timeDelta) {
+    }
 }

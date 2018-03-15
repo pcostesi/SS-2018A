@@ -5,33 +5,47 @@ import java.util.List;
 import java.util.Random;
 
 public class ParticleFactory {
-    public enum particleType { staticParticle, dynamicParticle }
-
     private Random randomGenerator = new Random(System.currentTimeMillis());
-    private int xLimit, yLimit, maxRadius, amount;
+    private int xLimit, yLimit, maxRadius, amount, speedLimit;
     private List<Particle> particleList = new ArrayList<>();
 
-    public List<Particle> produceRoundParticles(int amount, particleType type, int xLimit, int yLimit, int maxRadius) {
+    public void setFactory(int amount, int xLimit, int yLimit, int maxRadius, int randSeed) {
+        if(randSeed != 0) {
+            randomGenerator = new Random(randSeed);
+        }
         this.xLimit = xLimit;
         this.yLimit = yLimit;
         this.maxRadius = maxRadius;
         this.amount = amount;
-
-        switch(type) {
-            case staticParticle: return produceBasicParticles();
-        }
-        return null;
     }
 
-    private List<Particle> produceBasicParticles() {
-
+        private List<Particle> produceStaticParticles() {
         particleList = new ArrayList<>();
-
         for (int i = 0; i < amount; i++) {
             double radius = randomGenerator.nextDouble()*maxRadius;
             double xPosition = randomGenerator.nextDouble()*xLimit;
             double yPosition = randomGenerator.nextDouble()*yLimit;
             Particle part = new StaticParticle(radius, xPosition, yPosition, i);
+            if (isOk(part)) {
+                particleList.add(part);
+            }
+            else {
+                i--;
+            }
+
+        }
+        return particleList;
+    }
+
+    private List<Particle> produceDynamicParticles(double speedModule) {
+        particleList = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            double radius = randomGenerator.nextDouble()*maxRadius;
+            double xPosition = randomGenerator.nextDouble()*xLimit;
+            double yPosition = randomGenerator.nextDouble()*yLimit;
+            double xSpeed = randomGenerator.nextDouble()*speedModule;
+            double ySpeed = Math.sqrt(speedModule*speedModule) - (xSpeed*xSpeed);
+            Particle part = new DynamicParticle(radius, xPosition, xSpeed, yPosition, ySpeed,  i);
             if (isOk(part)) {
                 particleList.add(part);
             }
