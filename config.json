@@ -1,0 +1,14 @@
+{
+    "Rc":3.0,
+    "amount":1000,
+    "maxRadius":1.0,
+    "eta":2.0,
+    "timeDelta":1.0,
+    "staticFilePath":"Static100.txt",
+    "speedModule":3.0,
+    "cycles":10000,
+    "type":"dynamic",
+    "m":100,
+    "randomGenerateParticles":false,
+    "dynamicFilePath":"Dynamic100.txt"
+}

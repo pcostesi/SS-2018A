@@ -34,6 +34,7 @@ public class StaticParticle implements Particle{
     }
 
     @Override
-    public void updatePosition(double timeDelta) {
+    public Particle updatePosition(double timeDelta, double theta) {
+        return null;
     }
 }

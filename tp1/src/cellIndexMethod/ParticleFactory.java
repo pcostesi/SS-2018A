@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class ParticleFactory {
     private Random randomGenerator = new Random(System.currentTimeMillis());
-    private int xLimit, yLimit, maxRadius, amount, speedLimit;
+    private int xLimit, yLimit, maxRadius, amount;
     private List<Particle> particleList = new ArrayList<>();
 
     public void setFactory(int amount, int xLimit, int yLimit, int maxRadius, int randSeed) {
