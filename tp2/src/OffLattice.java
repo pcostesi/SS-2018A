@@ -73,37 +73,23 @@ public class OffLattice {
     }
 
     private Stream<String> toXYZFrame(List<Particle> particles, int iteration) {
+        assert particles != null;
         Stream<String> header = Stream.of(Integer.toString(particles.size()), String.format("t%d", iteration));
         Stream<String> particleStream = particles.stream()
             .map(p -> String.format("%s\t%f\t%f\t%f\t%f", p.getId(), p.getxPosition(), p.getyPosition(), p.getxSpeed(), p.getySpeed()));
         return Stream.concat(header, particleStream);
     }
 
-    private void logToStdout(List<List<Particle>> result) {
-        for (List<Particle> list : result) {
-            System.out.println(list.stream()
-                .map(p -> Integer.toString(p.getId()))
-                .collect(Collectors.joining(" ")));
-        }
-    }
-
     public static void main(String args[]) {
         OffLattice lattice = new OffLattice();
         lattice.initialize();
-
-        List<Particle> sampleList = new ArrayList<>();
-        sampleList.add(new DynamicParticle(1, 0, 5, 0, 1, 0));
-        sampleList.add(new DynamicParticle(1, 1, 5, 1, 1, 1));
-        sampleList.add(new DynamicParticle(1, 2, 5, 2, 1, 2));
-        sampleList.add(new DynamicParticle(1, 3, 5, 3, 1, 3));
-        sampleList.add(new DynamicParticle(1, 1, 5, 1, 1, 4));
 
         lattice.runSimulation(lattice.getParticles());
     }
 
     private List<Particle> getParticles() {
         if(randomGenerateParticles) {
-            if(type.compareTo( "dynamic")) {
+            if(type.equalsIgnoreCase( "dynamic")) {
                 ParticleFactory factory = new ParticleFactory();
                 factory.setFactory(amount, l, l, maxRadius, (int) System.currentTimeMillis());
                 return factory.produceDynamicParticles(speedModule);

@@ -36,7 +36,7 @@ public class Murder {
     }
 
     public double getOrder() {
-        double speeds = murderOfCrows.stream().mapToDouble(p -> p.getSpeed()).sum();
+        double speeds = murderOfCrows.parallelStream().mapToDouble(p -> p.getSpeed()).sum();
         return speeds / N;
     }
 
@@ -53,7 +53,15 @@ public class Murder {
     }
 
     private static double getAngleFromNeighbors(List<Particle> neighbors) {
-        return neighbors.stream().mapToDouble(p -> p.getId()).average().orElse(0);
+        double sins = neighbors.parallelStream()
+            .mapToDouble(p -> Math.sin(p.getAngle()))
+            .average()
+            .orElse(0);
+        double coss = neighbors.parallelStream()
+            .mapToDouble(p -> Math.cos(p.getAngle()))
+            .average()
+            .orElse(0);
+        return Math.atan2(sins, coss);
     }
 
     public List<Particle> getCrows() {
@@ -63,7 +71,9 @@ public class Murder {
     public Murder step() {
         CellIndexMethod cim = new CellIndexMethod();
         List<List<Particle>> cells = cim.getPeriodicNeighbors(this.murderOfCrows, N, L, M, Rc);
-        List<Double> angles = cells.stream().map(Murder::getAngleFromNeighbors).collect(Collectors.toList());
+        List<Double> angles = cells.stream()
+            .map(Murder::getAngleFromNeighbors)
+            .collect(Collectors.toList());
         List<Particle> newMurder = IntStream.range(0, murderOfCrows.size())
             .mapToObj(i -> {
                 Particle crow = murderOfCrows.get(i);
