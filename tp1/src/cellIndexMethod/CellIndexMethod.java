@@ -12,7 +12,7 @@ public class CellIndexMethod {
     private double Rc;
     private ArrayList<List<Particle>> closeOnes;
 
-    private void initialize(List<Particle> particleList, int N, int L, int M, double Rc) {
+    private void initialize(List<? extends Particle> particleList, int N, int L, int M, double Rc) {
         closeOnes = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
             closeOnes.add(i,new ArrayList<>());
@@ -31,7 +31,7 @@ public class CellIndexMethod {
         }
     }
 
-    public List<List<Particle>> getPeriodicNeighbors(List<Particle> particleList, int N, int L, int M, double Rc) {
+    public List<List<Particle>> getPeriodicNeighbors(List<? extends Particle> particleList, int N, int L, int M, double Rc) {
 
         initialize(particleList, N, L, M, Rc);
         for (int i = 0; i < totalCells; i++) {
@@ -62,6 +62,7 @@ public class CellIndexMethod {
     private void locateParticle(Particle particle) {
         int cellNumber = (int)(particle.getxPosition()/blockLength)
                 + (int)(particle.getyPosition()/blockLength)*cellsPerRow;
+        /*(cellNumber % cells.size() + cells.size()) % cells.size()*/
         cells.get(cellNumber).add(particle);
     }
 
@@ -116,6 +117,7 @@ public class CellIndexMethod {
 
     private void compareWithSelf(List<Particle> currentCell) {
         for (int i = 0; i < currentCell.size(); i++) {
+            addIfInRange(currentCell.get(i), currentCell.get(i));
             for (int j = i+1; j < currentCell.size(); j++) {
                 addIfInRange(currentCell.get(i), currentCell.get(j));
             }

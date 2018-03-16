@@ -47,11 +47,33 @@ public class DynamicParticle implements Particle{
         return new DynamicParticle(radius, newxPosition, newxSpeed, newyPosition, newySpeed, id);
     }
 
+    @Override
+    public double getAngle() {
+        return Math.atan2(ySpeed, xSpeed);
+    }
+
+    @Override
+    public double getSpeed() {
+        return Math.sqrt(xSpeed * xSpeed + ySpeed * ySpeed);
+    }
+
     private double getXSpeedForTheta(double theta) {
-        return Math.cos(theta);
+
+        return getSpeed() * Math.cos(theta);
     }
 
     private double getYSpeedForTheta(double theta) {
-        return Math.sin(theta);
+
+        return getSpeed() * Math.sin(theta);
+    }
+
+    @Override
+    public double getxSpeed() {
+        return xSpeed;
+    }
+
+    @Override
+    public double getySpeed() {
+        return ySpeed;
     }
 }

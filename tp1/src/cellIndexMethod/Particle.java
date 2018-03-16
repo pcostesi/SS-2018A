@@ -11,4 +11,12 @@ public interface Particle {
     public int getId();
 
     public Particle updatePosition(double timeDelta, double theta);
+
+    public double getAngle();
+
+    public double getSpeed();
+
+    public double getxSpeed();
+
+    public double getySpeed();
 }

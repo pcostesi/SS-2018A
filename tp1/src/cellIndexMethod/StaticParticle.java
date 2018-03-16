@@ -1,5 +1,7 @@
 package cellIndexMethod;
 
+import jdk.jshell.spi.ExecutionControl;
+
 public class StaticParticle implements Particle{
     private double radius;
     private double xPosition;
@@ -36,5 +38,25 @@ public class StaticParticle implements Particle{
     @Override
     public Particle updatePosition(double timeDelta, double theta) {
         return null;
+    }
+
+    @Override
+    public double getAngle() {
+        throw new Error("Static particles cannot move");
+    }
+
+    @Override
+    public double getSpeed() {
+        return 0;
+    }
+
+    @Override
+    public double getxSpeed() {
+        return 0;
+    }
+
+    @Override
+    public double getySpeed() {
+        return 0;
     }
 }
