@@ -1,7 +1,7 @@
 {
     "Rc":3.0,
     "amount":1000,
-    "maxRadius":1.0,
+    "maxRadius":0.0,
     "l": 300,
     "eta":2.0,
     "timeDelta":1.0,
@@ -10,6 +10,6 @@
     "cycles":10000,
     "type":"dynamic",
     "m":100,
-    "randomGenerateParticles":false,
+    "randomGenerateParticles":true,
     "outputPath":"murder.xyz"
 }
