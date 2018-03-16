@@ -1,5 +1,6 @@
 import cellIndexMethod.DynamicParticle;
 import cellIndexMethod.Particle;
+import cellIndexMethod.ParticleFactory;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import java.io.FileReader;
@@ -47,6 +48,8 @@ public class OffLattice {
             amount = ((Long) jsonObject.get("amount")).intValue();
             type = (String) jsonObject.get("type");
             maxRadius = (Double) jsonObject.get("maxRadius");
+            DynamicParticle.xLimit = l;
+            DynamicParticle.yLimit = l;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -95,6 +98,19 @@ public class OffLattice {
         sampleList.add(new DynamicParticle(1, 3, 5, 3, 1, 3));
         sampleList.add(new DynamicParticle(1, 1, 5, 1, 1, 4));
 
-        lattice.runSimulation(sampleList);
+        lattice.runSimulation(lattice.getParticles());
+    }
+
+    private List<Particle> getParticles() {
+        if(randomGenerateParticles) {
+            if(type.compareTo( "dynamic")) {
+                ParticleFactory factory = new ParticleFactory();
+                factory.setFactory(amount, l, l, maxRadius, (int) System.currentTimeMillis());
+                return factory.produceDynamicParticles(speedModule);
+            }
+        } else {
+            return null;
+        }
+        return null;
     }
 }

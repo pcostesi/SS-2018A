@@ -1,6 +1,8 @@
 package cellIndexMethod;
 
-public class DynamicParticle implements Particle{
+public class DynamicParticle implements Particle {
+    public static int xLimit;
+    public static int yLimit;
     private double radius;
     private double xPosition;
     private double yPosition;
@@ -41,7 +43,19 @@ public class DynamicParticle implements Particle{
     @Override
     public Particle updatePosition(double timeDelta, double theta) {
         double newxPosition = xPosition + xSpeed * timeDelta;
+        if(newxPosition >= xLimit) {
+            newxPosition = newxPosition % xLimit;
+         }
+         if(newxPosition < 0) {
+            newxPosition += xLimit;
+         }
         double newyPosition = yPosition + ySpeed * timeDelta;
+        if(newyPosition >= yLimit) {
+            newyPosition = newyPosition % yLimit;
+        }
+        if(newyPosition < 0) {
+            newyPosition += yLimit;
+        }
         double newxSpeed = getXSpeedForTheta(theta);
         double newySpeed = getYSpeedForTheta(theta);
         return new DynamicParticle(radius, newxPosition, newxSpeed, newyPosition, newySpeed, id);
@@ -58,7 +72,6 @@ public class DynamicParticle implements Particle{
     }
 
     private double getXSpeedForTheta(double theta) {
-
         return getSpeed() * Math.cos(theta);
     }
 

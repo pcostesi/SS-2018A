@@ -6,10 +6,11 @@ import java.util.Random;
 
 public class ParticleFactory {
     private Random randomGenerator = new Random(System.currentTimeMillis());
-    private int xLimit, yLimit, maxRadius, amount;
+    private int xLimit, yLimit, amount;
+    private double maxRadius;
     private List<Particle> particleList = new ArrayList<>();
 
-    public void setFactory(int amount, int xLimit, int yLimit, int maxRadius, int randSeed) {
+    public void setFactory(int amount, int xLimit, int yLimit, double maxRadius, int randSeed) {
         if(randSeed != 0) {
             randomGenerator = new Random(randSeed);
         }
@@ -19,7 +20,7 @@ public class ParticleFactory {
         this.amount = amount;
     }
 
-        private List<Particle> produceStaticParticles() {
+    public List<Particle> produceStaticParticles() {
         particleList = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             double radius = randomGenerator.nextDouble()*maxRadius;
@@ -37,7 +38,7 @@ public class ParticleFactory {
         return particleList;
     }
 
-    private List<Particle> produceDynamicParticles(double speedModule) {
+    public List<Particle> produceDynamicParticles(double speedModule) {
         particleList = new ArrayList<>();
         for (int i = 0; i < amount; i++) {
             double radius = randomGenerator.nextDouble()*maxRadius;
