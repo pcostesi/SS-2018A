@@ -32,7 +32,7 @@ public class OffLattice {
     public void initialize (){
         JSONParser parser = new JSONParser();
         try {
-            Object obj = parser.parse(new FileReader("config.json"));
+            Object obj = parser.parse(new FileReader("tp2config.json"));
 
             JSONObject jsonObject = (JSONObject) obj;
             m = ((Long) jsonObject.get("m")).intValue();

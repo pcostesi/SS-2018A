@@ -1,6 +1,9 @@
 import cellIndexMethod.CellIndexMethod;
+import cellIndexMethod.DynamicParticle;
 import cellIndexMethod.Particle;
 import cellIndexMethod.StaticParticle;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -15,38 +18,57 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+
 public class Tp1 {
 
     private int N;
     private int L;
     private int M;
-    private int R;
+    private double Rc;
     private double T0;
     private double[] radiouses;
     private double[] properties;
     private double[] xPositions;
     private double[] yPositions;
+    private boolean periodicCondition;
+
+    // File locations
+    private Path outputPath;
+    private Path dynamicPath;
+    private Path staticPath;
+    // Generator config
+    private boolean randomGenerateParticles;
+    private int amount;
+    private double maxRadius;
 
     public void runTp(String[] args) {
-        String staticInputFileName = args[0];
-        String dynamicInputFileName = args[1];
-        M = Integer.parseInt(args[2]);
-        R = Integer.parseInt(args[3]);
 
-        parseStaticFile(staticInputFileName);
-        parseDynamicFile(dynamicInputFileName);
+        this.initialize();
+
+        if(!randomGenerateParticles){
+            parseStaticFile();
+            parseDynamicFile();
+        } else {
+            // TODO Generate parts with generator
+        }
 
         List<Particle> particleList = createParticles();
         CellIndexMethod method = new CellIndexMethod();
         List<List<Particle>> result;
 
+
         try {
-            result = method.getPeriodicNeighbors(particleList, N, L, M, R);
+            if(periodicCondition) {
+                result = method.getPeriodicNeighbors(particleList, N, L, M, Rc);
+            } else {
+                result = method.getNonPeriodicNeighbors(particleList, N, L, M, Rc);
+            }
+
             logToStdout(result);
             streamPoints(result).forEachOrdered(line -> System.out.println(line));
             writeToFile(Paths.get("boundless.data"), result);
 
-            result = method.bruteForce(particleList, N, L, M, R);
+            result = method.bruteForce(particleList, N, L, M, Rc);
             streamPoints(result).forEachOrdered(line -> System.out.println(line));
             logToStdout(result);
             writeToFile(Paths.get("boundless-brute-force.data"), result);
@@ -63,9 +85,9 @@ public class Tp1 {
 
     private Stream<String> streamPoints(List<List<Particle>> particles) {
         return IntStream.range(0, particles.size())
-         .mapToObj(idx -> String.format("%d %s", idx, particles.get(idx).stream()
-          .map(p -> Integer.toString(p.getId()))
-          .collect(Collectors.joining(" "))));
+                .mapToObj(idx -> String.format("%d %s", idx, particles.get(idx).stream()
+                        .map(p -> Integer.toString(p.getId()))
+                        .collect(Collectors.joining(" "))));
     }
 
     private void logToStdout(List<List<Particle>> result) {
@@ -80,20 +102,16 @@ public class Tp1 {
         }
     }
 
-    private void parseDynamicFile(String fileName) {
+    private void parseDynamicFile() {
 
         String line;
-
         try {
-            FileReader fileReader =
-             new FileReader(fileName);
-
-            BufferedReader bufferedReader =
-             new BufferedReader(fileReader);
+            FileReader fileReader = new FileReader(dynamicPath.toFile());
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
             line = bufferedReader.readLine();
             T0 = Integer.parseInt(line.trim());
-            xPositions = new double[100];
-            yPositions = new double[100];
+            xPositions = new double[N];
+            yPositions = new double[N];
             int i = 0, j = 0;
             while ((line = bufferedReader.readLine()) != null) {
                 line = line.trim();
@@ -104,24 +122,22 @@ public class Tp1 {
             bufferedReader.close();
         } catch (FileNotFoundException ex) {
             System.out.println(
-             "Unable to open file '" +
-              fileName + "'");
+                    "Unable to open file '" +
+                            dynamicPath + "'");
         } catch (IOException ex) {
             System.out.println(
-             "Error reading file '"
-              + fileName + "'");
+                    "Error reading file '"
+                            + dynamicPath + "'");
         }
     }
 
-    private void parseStaticFile(String fileName) {
+    private void parseStaticFile() {
 
         String line;
 
         try {
-            FileReader fileReader =
-             new FileReader(fileName);
-            BufferedReader bufferedReader =
-             new BufferedReader(fileReader);
+            FileReader fileReader = new FileReader(staticPath.toFile());
+            BufferedReader bufferedReader = new BufferedReader(fileReader);
             line = bufferedReader.readLine();
             N = Integer.parseInt(line.trim());
             line = bufferedReader.readLine();
@@ -139,15 +155,16 @@ public class Tp1 {
             bufferedReader.close();
         } catch (FileNotFoundException ex) {
             System.out.println(
-             "Unable to open file '" +
-              fileName + "'");
+                    "Unable to open file '" +
+                            staticPath + "'");
         } catch (IOException ex) {
             System.out.println(
-             "Error reading file '"
-              + fileName + "'");
+                    "Error reading file '"
+                            + staticPath + "'");
         }
     }
 
+    // TODO
     private List<Particle> createParticles() {
         List<Particle> particleList = new ArrayList<>(N);
         for (int i = 0; i < N; i++) {
@@ -155,5 +172,30 @@ public class Tp1 {
         }
         return particleList;
     }
+
+
+    public void initialize() {
+        JSONParser parser = new JSONParser();
+        try {
+            Object obj = parser.parse(new FileReader("tp1config.json"));
+
+            JSONObject jsonObject = (JSONObject) obj;
+            M = ((Long) jsonObject.get("m")).intValue();
+            L = ((Long) jsonObject.get("l")).intValue();
+            Rc = (Double) jsonObject.get("Rc");
+            randomGenerateParticles = (Boolean) jsonObject.get("randomGenerateParticles");
+            staticPath = Paths.get((String) jsonObject.get("staticPath"));
+            dynamicPath = Paths.get((String) jsonObject.get("dynamicPath"));
+            outputPath = Paths.get((String) jsonObject.get("outputPath"));
+            amount = ((Long) jsonObject.get("amount")).intValue();
+            maxRadius = (Double) jsonObject.get("maxRadius");
+            periodicCondition = (Boolean) jsonObject.get("periodicCondition");
+            DynamicParticle.xLimit = L;
+            DynamicParticle.yLimit = L;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 

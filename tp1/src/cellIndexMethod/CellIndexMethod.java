@@ -45,7 +45,7 @@ public class CellIndexMethod {
         return closeOnes;
     }
 
-    public List<List<Particle>> periodicNeighbors(List<Particle> particleList, int N, int L, int M, double Rc) {
+    public List<List<Particle>> getNonPeriodicNeighbors(List<Particle> particleList, int N, int L, int M, double Rc) {
         initialize(particleList, N, L, M, Rc);
         for (int i = 0; i < totalCells; i++) {
             List<Particle> currentCell = cells.get(i);
