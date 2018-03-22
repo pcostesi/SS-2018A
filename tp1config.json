@@ -5,7 +5,7 @@
   "staticPath":"Static100.txt",
   "dynamicPath":"Dynamic100.txt",
   "randomGenerateParticles": true,
-  "amount":1000,
+  "n":1000,
   "maxRadius":0.0,
   "outputPath":"tp1out.xyz",
   "periodicCondition": true

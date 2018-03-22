@@ -38,7 +38,6 @@ public class Tp1 {
     private Path staticPath;
     // Generator config
     private boolean randomGenerateParticles;
-    private int amount;
     private double maxRadius;
 
     public void runTp(String[] args) {
@@ -187,7 +186,7 @@ public class Tp1 {
             staticPath = Paths.get((String) jsonObject.get("staticPath"));
             dynamicPath = Paths.get((String) jsonObject.get("dynamicPath"));
             outputPath = Paths.get((String) jsonObject.get("outputPath"));
-            amount = ((Long) jsonObject.get("amount")).intValue();
+            N = ((Long) jsonObject.get("n")).intValue();
             maxRadius = (Double) jsonObject.get("maxRadius");
             periodicCondition = (Boolean) jsonObject.get("periodicCondition");
             DynamicParticle.xLimit = L;
