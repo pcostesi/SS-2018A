@@ -44,20 +44,6 @@ public class Particle2D implements Particle {
     }
 
     @Override
-    public boolean isWithinRadius(double radius, Particle p) {
-        if (!(p instanceof Particle2D)) {
-            throw new IllegalArgumentException("Provided particle is not an instance of a comparable type");
-        }
-
-        double distanceInX = this.getXCoordinate() - ((Particle2D) p).getXCoordinate();
-        double distanceInY = this.getYCoordinate() - ((Particle2D) p).getYCoordinate();
-        double sumOfRadius = this.getRadius() + p.getRadius();
-        double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
-
-        return rawDistance - sumOfRadius <= radius;
-    }
-
-    @Override
     public String[] values() {
         return new String[] {
             getId(),

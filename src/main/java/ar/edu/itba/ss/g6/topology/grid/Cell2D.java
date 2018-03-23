@@ -77,8 +77,8 @@ public class Cell2D<T extends Particle2D> implements Cell {
 
     public Cell2D getNeighbor(int x, int y) {
         long delta = side / buckets;
-        Cell2D newCell = new Cell2D(this.grid, xStart + Math.copySign(delta, x), yStart + Math.copySign(delta, y));
-        return this.equals(newCell) ? null : newCell;
+        Cell2D newCell = new Cell2D(this.grid, xStart + delta * x, yStart + delta * y);
+        return newCell;
     }
 
     public Stream<? extends Cell> semisphereNeighborhood() {

@@ -54,7 +54,7 @@ public class CommandLineOptions {
 
     @Option(name = "-p", aliases = { "--periodic" }, required = false,
      usage = "periodic")
-    private boolean periodic = true;
+    private boolean periodic;
 
     public File getDynamicParticles() {
         return dynamicParticles;

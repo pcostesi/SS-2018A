@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public abstract class MapGrid <T extends Particle, G extends Cell> implements Grid<T> {
@@ -45,13 +44,15 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     private void bruteForceSet(Collection<T> particles) {
         for (T particle : particles) {
             for (T other : particles) {
-                if (particle.isWithinRadius(radius, other)) {
+                if (areWithinDistance(particle, other, radius)) {
                     addBothWaysBF(particle, other);
                 }
             }
         }
     }
 
+
+    abstract boolean areWithinDistance(T p1, T p2, double distance);
 
     private T place(Map<G, Set<T>> grid, T particle) {
         G cell = cellProvider.provide(this, particle);
@@ -67,7 +68,7 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     private void cellIndexMethod(Collection<T> particles) {
         Map<G, Set<T>> grid = new HashMap<>();
         particles.forEach(particle -> place(grid, particle));
-        assert particles.size() == grid.values().parallelStream().mapToInt(Set::size).sum();
+        assert particles.size() == grid.values().stream().mapToInt(Set::size).sum();
 
         for (G cell : grid.keySet()) {
             Set<T> ownCellParticles = grid.get(cell);
@@ -79,7 +80,7 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
 
             for (T particle : ownCellParticles) {
                 for (T neighbor : neighboringCellParticles) {
-                    if (particle.isWithinRadius(radius, neighbor)) {
+                    if (areWithinDistance(particle, neighbor, radius)) {
                         addBothWays(particle, neighbor);
                     }
                 }
@@ -99,6 +100,9 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
         assert usingBF.size() == usingCIM.size();
         for (T p : usingBF) {
             assert usingCIM.contains(p);
+        }
+        for (T p : usingCIM) {
+            assert usingBF.contains(p);
         }
         return usingCIM;
     }

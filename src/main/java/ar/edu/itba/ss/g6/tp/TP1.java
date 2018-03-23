@@ -16,10 +16,10 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.DoubleStream;
 
 public class TP1 {
 
@@ -41,25 +41,30 @@ public class TP1 {
         int amount = values.getN();
         int buckets = values.getBuckets();
         double searchRadius = values.getSearchRadius();
-        boolean isPeriodic = values.isPeriodic();
 
-
-        if (values.getStaticParticles() == null || values.getDynamicParticles() == null) {
+        if (values.getStaticParticles() == null && values.getDynamicParticles() == null) {
             ParticleGenerator<Particle2D> generator = new Particle2DGenerator(radius, side, amount);
             particles = generator.generate();
+            Exporter<Particle2D> exporter = new Static2DExporter<>();
+            try {
+                exporter.saveFrameToFile("rand.xyz", particles, 0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else if (values.getStaticParticles() != null) {
             StaticLoaderResult<Particle2D> loaderResult = StaticDataLoader.importFromFile(values.getStaticParticles(), arr ->
-             new Particle2D(arr[0], Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3])));
+                new Particle2D(arr[0], Double.parseDouble(arr[3]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2])));
+            particles = loaderResult.getParticles();
         } else {
             System.exit(-1);
         }
 
-        Grid<Particle2D> grid = new MapGrid2D<>(side, buckets, searchRadius, isPeriodic);
+        Grid<Particle2D> grid = new MapGrid2D<>(side, buckets, searchRadius, values.isPeriodic());
         grid.set(particles);
 
         Optional<Particle2D> target;
         if (values.getHighlight() == null) {
-            target = particles.stream().findFirst();
+            target = particles.stream().sorted((p1, p2) -> (int) Math.ceil(p1.getYCoordinate() - p2.getYCoordinate())).findFirst();
         } else {
             target = particles.stream()
              .filter(p -> values.getHighlight().equals(p.getId()))
@@ -69,13 +74,6 @@ public class TP1 {
         Set<Particle2D> neighbors = target
             .map(targetParticle -> grid.getNeighbors(targetParticle))
             .orElse(Collections.emptySet());
-
-        System.out.println("Generated:");
-        System.out.println(grid.countParticles());
-        System.out.println("Neighbors:");
-        neighbors.stream().forEach(p -> System.out.println(p));
-        System.out.println("All:");
-        grid.getParticles().stream().forEach(p -> System.out.println(p));
 
         Exporter<ColoredParticle2D> exporter = new Static2DExporter<>();
         Brush brush = new Brush(particles, 128, 128, 128);
