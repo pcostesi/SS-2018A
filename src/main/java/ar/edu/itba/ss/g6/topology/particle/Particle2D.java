@@ -26,12 +26,21 @@ public class Particle2D implements Particle {
 
     @Override
     public boolean equals(Object obj) {
-        return id.equals(obj);
+        if (!(obj instanceof Particle)) {
+            return false;
+        }
+        return id.equals(((Particle) obj).getId());
     }
 
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Particle2D <%5s> (%.3e, %.3e) rad %.3e",
+            getId(), getXCoordinate(), getYCoordinate(), getRadius());
     }
 
     @Override
@@ -45,7 +54,17 @@ public class Particle2D implements Particle {
         double sumOfRadius = this.getRadius() + p.getRadius();
         double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
 
-        return rawDistance - sumOfRadius < radius;
+        return rawDistance - sumOfRadius <= radius;
+    }
+
+    @Override
+    public String[] values() {
+        return new String[] {
+            getId(),
+            String.format("%3f", getXCoordinate()),
+            String.format("%3f", getYCoordinate()),
+            String.format("%3f", getRadius())
+        };
     }
 
     public Particle2D(String id, double radius, double xCoord, double yCoord) {

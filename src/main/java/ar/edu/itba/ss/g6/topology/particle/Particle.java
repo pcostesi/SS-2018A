@@ -4,4 +4,5 @@ public interface Particle {
     String getId();
     double getRadius();
     boolean isWithinRadius(double radius, Particle p);
+    String[] values();
 }

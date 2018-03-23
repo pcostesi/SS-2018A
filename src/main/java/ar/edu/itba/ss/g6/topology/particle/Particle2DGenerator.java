@@ -2,6 +2,7 @@ package ar.edu.itba.ss.g6.topology.particle;
 
 import ar.edu.itba.ss.g6.topology.grid.Grid;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Particle2DGenerator implements ParticleGenerator<Particle2D> {
@@ -16,14 +17,13 @@ public class Particle2DGenerator implements ParticleGenerator<Particle2D> {
     }
 
     @Override
-    public Set<Particle2D> generate(Grid<Particle2D> grid) {
-        int particles;
-        while ((particles = grid.countParticles()) < amount) {
+    public Set<Particle2D> generate() {
+        Set<Particle2D> particles = new HashSet<>();
+        for (int idx = 0; idx < amount; idx++) {
             double x = Math.random() * side;
             double y = Math.random() * side;
-            Particle2D particle = new Particle2D(String.valueOf(particles), x, y, radius);
-            grid.place(particle);
+            particles.add(new Particle2D(String.valueOf(idx), radius, x, y));
         }
-        return grid.getParticles();
+        return particles;
     }
 }

@@ -2,6 +2,8 @@ package ar.edu.itba.ss.g6.topology.grid;
 
 import ar.edu.itba.ss.g6.topology.particle.Particle2D;
 
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class Cell2D<T extends Particle2D> implements Cell {
@@ -10,6 +12,11 @@ public class Cell2D<T extends Particle2D> implements Cell {
     private double xStart;
     private double yStart;
     private Grid grid;
+
+    @Override
+    public String toString() {
+        return String.format("<x=%f, y=%f>", xStart, yStart);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -70,7 +77,8 @@ public class Cell2D<T extends Particle2D> implements Cell {
 
     public Cell2D getNeighbor(int x, int y) {
         long delta = side / buckets;
-        return new Cell2D(this.grid, xStart + Math.copySign(delta, x), yStart + Math.copySign(delta, y));
+        Cell2D newCell = new Cell2D(this.grid, xStart + Math.copySign(delta, x), yStart + Math.copySign(delta, y));
+        return this.equals(newCell) ? null : newCell;
     }
 
     public Stream<? extends Cell> semisphereNeighborhood() {
@@ -78,6 +86,6 @@ public class Cell2D<T extends Particle2D> implements Cell {
         Cell2D upperRightCell = this.getNeighbor(1, 1);
         Cell2D rightCell = this.getNeighbor(1, 0);
         Cell2D bottomRightCell = this.getNeighbor(1, -1);
-        return Stream.of(this, upperCell, upperRightCell, rightCell, bottomRightCell);
+        return Stream.of(this, upperCell, upperRightCell, rightCell, bottomRightCell).filter(Objects::nonNull);
     }
 }
