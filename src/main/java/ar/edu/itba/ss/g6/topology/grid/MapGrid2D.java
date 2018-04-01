@@ -30,14 +30,6 @@ public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
             double otherX = p2.getXCoordinate();
             double otherY = p2.getYCoordinate();
 
-            /*
-            double distanceInX = ((thisX - otherX) % maxDist + maxDist) % maxDist;
-            double distanceInY = ((thisY - otherY) % maxDist + maxDist) % maxDist;
-            double sumOfRadius = p1.getRadius() + p2.getRadius();
-            double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
-
-            withinPeriodicDistance = rawDistance - sumOfRadius <= radius;
-            */
 
             if( thisX - radius < 0 && otherX + radius > maxDist) {
                 thisX += maxDist;
@@ -58,7 +50,6 @@ public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
             double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
 
             withinPeriodicDistance = rawDistance - sumOfRadius <= radius;
-
         }
         return withinDistance || withinPeriodicDistance;
     }

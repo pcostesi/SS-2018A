@@ -16,7 +16,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -47,7 +46,7 @@ public class TP1 {
             particles = generator.generate();
             Exporter<Particle2D> exporter = new Static2DExporter<>();
             try {
-                exporter.saveFrameToFile("rand.xyz", particles, 0);
+                exporter.saveFrameToFile("rand.xyz", particles, side);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -55,10 +54,11 @@ public class TP1 {
             StaticLoaderResult<Particle2D> loaderResult = StaticDataLoader.importFromFile(values.getStaticParticles(), arr ->
                 new Particle2D(arr[0], Double.parseDouble(arr[3]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2])));
             particles = loaderResult.getParticles();
+            side = (long) Double.parseDouble(loaderResult.getHeader().substring(1));
         } else {
             System.exit(-1);
         }
-
+        assert values.isPeriodic();
         Grid<Particle2D> grid = new MapGrid2D<>(side, buckets, searchRadius, values.isPeriodic());
         grid.set(particles);
 
@@ -74,6 +74,11 @@ public class TP1 {
         Set<Particle2D> neighbors = target
             .map(targetParticle -> grid.getNeighbors(targetParticle))
             .orElse(Collections.emptySet());
+
+        System.out.println(particles.size());
+
+        System.out.println(values.isPeriodic());
+        System.out.println(neighbors.size());
 
         Exporter<ColoredParticle2D> exporter = new Static2DExporter<>();
         Brush brush = new Brush(particles, 128, 128, 128);

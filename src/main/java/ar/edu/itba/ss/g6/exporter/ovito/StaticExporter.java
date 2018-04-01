@@ -13,7 +13,7 @@ public abstract class StaticExporter<T extends Particle> extends Exporter<T> {
     @Override
     public Stream<String> exportFrame(Collection<T> particles, double time) {
         Stream<String> header = Stream.of(String.valueOf(particles.size()), String.format("t%10f", time));
-        Stream<String> particleStream = particles.parallelStream()
+        Stream<String> particleStream = particles.stream()
             .map(this::serializeParticle);
         return Stream.concat(header, particleStream);
     }
