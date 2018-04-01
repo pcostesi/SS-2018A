@@ -6,7 +6,7 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
 
     @Override
     public double getSpeed() {
-        return 0;
+        return Math.sqrt(getYSpeed() * getYSpeed() + getXSpeed()* getXSpeed());
     }
 
     public double getXSpeed() {
