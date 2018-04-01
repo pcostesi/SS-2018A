@@ -9,6 +9,32 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         return Math.sqrt(getYSpeed() * getYSpeed() + getXSpeed()* getXSpeed());
     }
 
+    @Override
+    public <T extends DynamicParticle> double timeToCollision(T other) {
+        if (!(other instanceof DynamicParticle2D)) {
+            throw new IllegalArgumentException("Wrong particle type :)");
+        }
+        double timeToCollision;
+        DynamicParticle2D p = (DynamicParticle2D) other;
+        double sigma = this.getRadius() + p.getRadius();
+        double DeltaRX = this.getXCoordinate() - p.getXCoordinate();
+        double DeltaRY = this.getYCoordinate() - p.getYCoordinate();
+        double DeltaVX = this.getXSpeed() - p.getXSpeed();
+        double DeltaVY = this.getYSpeed() - p.getYSpeed();
+        double DeltaRDotDeltaR = DeltaRX*DeltaRX + DeltaRY*DeltaRY;
+        double DeltaVDotDeltaV = DeltaVX*DeltaVX + DeltaVY*DeltaVY;
+        double DeltaVDotDeltaR = DeltaVX*DeltaRX + DeltaVY*DeltaRY;
+        double delta = (DeltaVDotDeltaR*DeltaVDotDeltaR) - DeltaVDotDeltaV*(DeltaRDotDeltaR-sigma*sigma);
+        if(DeltaVDotDeltaR >= 0) {
+            timeToCollision = -1;
+        }else if(delta < 0){
+            timeToCollision = -1;
+        }else {
+            timeToCollision =  (-1) * ( (DeltaVDotDeltaR + Math.sqrt(delta)) / (DeltaVDotDeltaV));
+        }
+        return timeToCollision;
+    }
+
     public double getXSpeed() {
         return xSpeed;
     }
