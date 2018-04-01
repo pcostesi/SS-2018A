@@ -5,7 +5,7 @@ import ar.edu.itba.ss.g6.topology.particle.Particle;
 import java.util.Set;
 
 public interface SimulationFrame<T extends Particle> {
-    long getTimestamp();
+    double getTimestamp();
     Set<T> getDelta();
     Set<T> getState();
 }
