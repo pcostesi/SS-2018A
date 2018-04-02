@@ -5,6 +5,7 @@ import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicParticle2D, SimulationFrame<WeightedDynamicParticle2D>> {
@@ -21,7 +22,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
 
     @Override
     public TimeDrivenSimulation toTimeDrivenSimulation() {
-        return new BrownianMovementTimeDrivenSimulation(this);
+        return new BrownianMovementTimeDrivenSimulation(new BrownianMovement(duration, Collections.unmodifiableSet(particles)));
     }
 
     @Override

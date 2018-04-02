@@ -43,6 +43,10 @@ public class CommandLineOptions {
      usage = "weight for the particles")
     private double weight = 1;
 
+    @Option(name = "-t", aliases = { "--time" }, required = false,
+     usage = "weight for the particles")
+    private double duration = 1;
+
     @Option(name = "-W", aliases = { "--weight-multiplier" }, required = false,
      usage = "weight multiplier for Daddy Particle")
     private int weightMultiplier = 1;
@@ -96,6 +100,10 @@ public class CommandLineOptions {
 
     public double getWeight() {
         return weight;
+    }
+
+    public double getDuration() {
+        return duration;
     }
 
     public int getWeightMultiplier() {
