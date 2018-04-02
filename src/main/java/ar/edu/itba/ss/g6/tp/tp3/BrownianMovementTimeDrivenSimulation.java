@@ -94,7 +94,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
 
         SimulationFrame<WeightedDynamicParticle2D> frame = new BrownianMovementSimulationTimedFrame(currentTimeStep,
             particles);
-        currentTimeStep += (1 / fps);
+        currentTimeStep += (1.0 / fps);
         return frame;
     }
 }

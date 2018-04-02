@@ -50,6 +50,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         System.out.println("Particles:");
         System.out.println(particles.stream().map(p -> p.toString()).collect(joining("\n")));
         currentTime = frame.getTimestamp();
+        System.out.println(currentTime);
         particles = frame.getState();
         return frame;
     }
