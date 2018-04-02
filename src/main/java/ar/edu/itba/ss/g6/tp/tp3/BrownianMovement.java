@@ -133,8 +133,10 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
 
     private void resolveCollition(BrownianMovementSimulationFrame frame) {
         if (frame.getDelta().size() == 1) {
+            System.out.println("PARED");
             frame.getDelta().forEach(x -> {
-                WeightedDynamicParticle2D b = updateWallCollisionSpeed(x);
+                WeightedDynamicParticle2D b = moveParticle(x, frame.getTimestamp() - currentTime);
+                b = updateWallCollisionSpeed(x);
                 frame.getDelta().remove(x);
                 frame.getDelta().add(b);
                 frame.getState().remove(x);
@@ -144,6 +146,11 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
             frame.getDelta().clear();
             drunkard = moveParticle(drunkard, frame.getTimestamp() - currentTime);
             sober = moveParticle(sober, frame.getTimestamp() - currentTime);
+            if(sober.getWeight() > drunkard.getWeight()) {
+                WeightedDynamicParticle2D aux = sober;
+                sober = drunkard;
+                drunkard = aux;
+            }
             double sigma = drunkard.getRadius() + sober.getRadius();
             double DeltaRX = drunkard.getXCoordinate() - sober.getXCoordinate();
             double DeltaRY = drunkard.getYCoordinate() - sober.getYCoordinate();
@@ -155,7 +162,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
             double JX = J * DeltaRX / sigma;
             double JY = J * DeltaRY / sigma;
             double newDrunkardVX = drunkard.getXSpeed() + JX / drunkard.getWeight();
-            double newDrunkardVY = drunkard.getXSpeed() + JY / drunkard.getWeight();
+            double newDrunkardVY = drunkard.getYSpeed() + JY / drunkard.getWeight();
             double newSoberVX = sober.getXSpeed() - JX / sober.getWeight();
             double newSoberVY = sober.getYSpeed() - JY / sober.getWeight();
 
