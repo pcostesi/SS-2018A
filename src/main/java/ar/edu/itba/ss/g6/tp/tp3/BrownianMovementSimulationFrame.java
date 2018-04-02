@@ -1,9 +1,8 @@
-package ar.edu.itba.ss.g6.tp.TP3;
+package ar.edu.itba.ss.g6.tp.tp3;
 
 import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
-import java.util.Collections;
 import java.util.Set;
 
 public class BrownianMovementSimulationFrame implements SimulationFrame<WeightedDynamicParticle2D> {

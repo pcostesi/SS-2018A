@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.g6.tp.TP3;
+package ar.edu.itba.ss.g6.tp.tp3;
 
 import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
@@ -15,7 +15,16 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     BrownianMovement movement;
     SimulationFrame<WeightedDynamicParticle2D> currentEventFrame;
     SimulationFrame<WeightedDynamicParticle2D> nextEventFrame;
-    static int FPS = 30;
+
+    public int getFps() {
+        return fps;
+    }
+
+    public void setFps(int fps) {
+        this.fps = fps;
+    }
+
+    int fps = 30;
     private double currentTimeStep;
 
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {
@@ -54,7 +63,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
             nextEventFrame = movement.getNextStep();
         }
 
-        if (nextEventFrame != null && currentTimeStep >= nextEventFrame.getTimestamp()) {
+        while (nextEventFrame != null && currentTimeStep >= nextEventFrame.getTimestamp()) {
             // advance the sim by one step;
             currentEventFrame = nextEventFrame;
             nextEventFrame = movement.getNextStep();
@@ -85,7 +94,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
 
         SimulationFrame<WeightedDynamicParticle2D> frame = new BrownianMovementSimulationTimedFrame(currentTimeStep,
             particles);
-        currentTimeStep += (1 / FPS);
+        currentTimeStep += (1 / fps);
         return frame;
     }
 }
