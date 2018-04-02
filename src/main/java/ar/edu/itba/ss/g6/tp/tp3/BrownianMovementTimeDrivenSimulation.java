@@ -1,4 +1,4 @@
-package ar.edu.itba.ss.g6.tp.TP3;
+package ar.edu.itba.ss.g6.tp.tp3;
 
 import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
