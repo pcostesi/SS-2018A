@@ -56,10 +56,16 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
 
     private BrownianMovementSimulationFrame getNextFrame() {
         Set<WeightedDynamicParticle2D> colliders = new HashSet<>();
-        double deltaTime;
-        Optional<WeightedDynamicParticle2D> closestToWall =
-                particles.stream().min((x, y) -> timeToClosestWall(x) < timeToClosestWall(y) ? 1 : -1);
-        double wallTime = timeToClosestWall(closestToWall.get());
+        double deltaTime ;
+        WeightedDynamicParticle2D closestToWall = null;
+        double wallTime = 10000000;
+        for(WeightedDynamicParticle2D p: particles) {
+            double aux = timeToClosestWall(p);
+            if(aux < wallTime ){
+                wallTime = aux;
+                closestToWall = p;
+            }
+        }
         double particlesTime = wallTime;
         sober = null;
         drunkard = null;
@@ -74,9 +80,9 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                 }
             }
         }
-        if (wallTime < particlesTime || particlesTime <= 0) {
+        if (wallTime <= particlesTime || particlesTime <= 0) {
             deltaTime = wallTime;
-            colliders.add(closestToWall.get());
+            colliders.add(closestToWall);
         } else {
             deltaTime = particlesTime;
             colliders.add(drunkard);
@@ -96,20 +102,20 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         double xTime;
         double yTime;
         if (particle.getXSpeed() == 0) {
-            xTime = -1;
+            xTime = 1000000000;
         } else if (particle.getXSpeed() > 0) {
             xTime = particle.timeToX(wallLength);
         } else {
             xTime = particle.timeToX(0);
         }
         if (particle.getXSpeed() == 0) {
-            yTime = -1;
+            yTime = 1000000000;
         } else if (particle.getYSpeed() > 0) {
             yTime = particle.timeToY(wallLength);
         } else {
             yTime = particle.timeToY(0);
         }
-        if (xTime == -1 || xTime < yTime) {
+        if (xTime < yTime) {
             return xTime;
         } else {
             return yTime;
@@ -169,14 +175,14 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         double xTime;
         double yTime;
         if (p.getXSpeed() == 0) {
-            xTime = -1;
+            xTime = 100000000;
         } else if (p.getXSpeed() > 0) {
             xTime = p.timeToX(wallLength);
         } else {
             xTime = p.timeToX(0);
         }
         if (p.getXSpeed() == 0) {
-            yTime = -1;
+            yTime = 1000000000;
         } else if (p.getYSpeed() > 0) {
             yTime = p.timeToY(wallLength);
         } else {
