@@ -35,6 +35,16 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         return timeToCollision;
     }
 
+    @Override
+    public double timeToX(double xLimit) {
+        return (xLimit - this.getRadius() - this.getXCoordinate()) / this.getXSpeed();
+    }
+
+    @Override
+    public double timeToY(double yLimit) {
+        return (yLimit - this.getRadius() - this.getYCoordinate()) / this.getYSpeed();
+    }
+
     public double getXSpeed() {
         return xSpeed;
     }
