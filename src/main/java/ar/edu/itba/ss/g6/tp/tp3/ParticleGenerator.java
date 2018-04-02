@@ -14,7 +14,7 @@ public class ParticleGenerator {
     private double commonParticleMass = 0.1;
     private double vmaxmod = 0.1;
     private double papaParticulaSpeed = 0;
-    private int MAX_TRIES = 8000;
+    private int MAX_TRIES = Integer.MAX_VALUE >> 1;
 
 
     private boolean collides(Set<WeightedDynamicParticle2D> particles, WeightedDynamicParticle2D particle) {
@@ -25,7 +25,7 @@ public class ParticleGenerator {
         Set<WeightedDynamicParticle2D> particles = new HashSet<>();
         double xpos = Math.random() * (mapSize - papaParticulaRadius * 2) + papaParticulaRadius;
         double ypos = Math.random() * (mapSize - papaParticulaRadius * 2) + papaParticulaRadius;
-        WeightedDynamicParticle2D papaParticula = new OverfedDynamicParticle2D("Papá Partícula", xpos, ypos, papaParticulaSpeed, papaParticulaSpeed, commonParticleRadius, commonParticleMass);
+        WeightedDynamicParticle2D papaParticula = new WeightedDynamicParticle2D("Papá", xpos, ypos, papaParticulaSpeed, papaParticulaSpeed, papaParticulaRadius, papaParticulaMass);
 
         particles.add(papaParticula);
 

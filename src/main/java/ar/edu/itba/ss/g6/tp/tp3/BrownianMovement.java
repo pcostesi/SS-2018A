@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.joining;
+
 public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicParticle2D, SimulationFrame<WeightedDynamicParticle2D>> {
 
     private final double duration;
@@ -45,6 +47,8 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
             return null;
         }
         resolveCollition(frame);
+        System.out.println("Particles:");
+        System.out.println(particles.stream().map(p -> p.toString()).collect(joining("\n")));
         currentTime = frame.getTimestamp();
         particles = frame.getState();
         return frame;
@@ -70,7 +74,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                 }
             }
         }
-        if (wallTime < particlesTime) {
+        if (wallTime < particlesTime && particlesTime >= 0) {
             deltaTime = wallTime;
             colliders.add(closestToWall.get());
         } else {

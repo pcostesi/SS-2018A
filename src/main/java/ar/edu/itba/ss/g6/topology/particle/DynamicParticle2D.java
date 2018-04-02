@@ -45,6 +45,12 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         return (yLimit - this.getRadius() - this.getYCoordinate()) / this.getYSpeed();
     }
 
+    @Override
+    public String toString() {
+        return String.format("DynamicParticle2D <%5s> (%.3e, %.3e) -> (vx: %.3e, vy: %.3e) rad %.3e",
+         getId(), getXCoordinate(), getYCoordinate(), getXSpeed(), getYSpeed(), getRadius());
+    }
+
     public double getXSpeed() {
         return xSpeed;
     }
@@ -58,7 +64,7 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
     }
 
     public DynamicParticle2D(String id, double x, double y, double vx, double vy, double radius) {
-        super(id, x, y, radius);
+        super(id, radius, x, y);
         this.xSpeed = vx;
         this.ySpeed = vy;
     }

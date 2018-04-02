@@ -15,6 +15,8 @@ import org.kohsuke.args4j.CmdLineParser;
 import java.util.Collections;
 import java.util.Set;
 
+import static java.util.stream.Collectors.joining;
+
 public class TP3 {
 
     public static void main(String ...args) {
@@ -32,7 +34,8 @@ public class TP3 {
 
         double duration = values.getDuration();
         ParticleGenerator generator = new ParticleGenerator();
-        Set<WeightedDynamicParticle2D> particles = generator.getParticles(0);
+        Set<WeightedDynamicParticle2D> particles = generator.getParticles(1);
+        System.out.println("Using particles: " + particles.stream().map(p -> p.getId()).collect(joining(", ")));
 
         BrownianMovement simulation = new BrownianMovement(values.getDuration(), particles);
 
