@@ -26,9 +26,9 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         double DeltaVDotDeltaR = DeltaVX*DeltaRX + DeltaVY*DeltaRY;
         double delta = (DeltaVDotDeltaR*DeltaVDotDeltaR) - DeltaVDotDeltaV*(DeltaRDotDeltaR-sigma*sigma);
         if(DeltaVDotDeltaR >= 0) {
-            timeToCollision = -1;
+            timeToCollision = Integer.MAX_VALUE;
         }else if(delta < 0){
-            timeToCollision = -1;
+            timeToCollision = Integer.MAX_VALUE;
         }else {
             timeToCollision =  (-1) * ( (DeltaVDotDeltaR + Math.sqrt(delta)) / (DeltaVDotDeltaV));
         }

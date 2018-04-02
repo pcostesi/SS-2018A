@@ -15,6 +15,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     BrownianMovement movement;
     SimulationFrame<WeightedDynamicParticle2D> currentEventFrame;
     SimulationFrame<WeightedDynamicParticle2D> nextEventFrame;
+    private boolean started = false;
 
     public int getFps() {
         return fps;
@@ -58,9 +59,10 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     }
 
     private void reframe() {
-        if (currentEventFrame == null) {
+        if (!started) {
             currentEventFrame = movement.getNextStep();
             nextEventFrame = movement.getNextStep();
+            started = true;
         }
 
         while (nextEventFrame != null && currentTimeStep >= nextEventFrame.getTimestamp()) {

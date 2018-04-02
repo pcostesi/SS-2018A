@@ -21,7 +21,7 @@ public abstract class StaticExporter<T extends Particle> extends Exporter<T> {
     public abstract String serializeParticle(T particle);
 
     @Override
-    public Stream<String> exportAnimation(List<Collection<T>> timeline, double timeStep) {
+    public Stream<String> exportAnimation(List<? extends Collection<T>> timeline, double timeStep) {
         return IntStream.range(0, timeline.size())
             .mapToObj(index -> exportFrame(timeline.get(index), index * timeStep))
             .flatMap(Function.identity());

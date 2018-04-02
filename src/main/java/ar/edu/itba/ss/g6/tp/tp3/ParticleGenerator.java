@@ -25,13 +25,13 @@ public class ParticleGenerator {
         Set<WeightedDynamicParticle2D> particles = new HashSet<>();
         double xpos = Math.random() * (mapSize - papaParticulaRadius * 2) + papaParticulaRadius;
         double ypos = Math.random() * (mapSize - papaParticulaRadius * 2) + papaParticulaRadius;
-        WeightedDynamicParticle2D papaParticula = new WeightedDynamicParticle2D("Papá", xpos, ypos, papaParticulaSpeed, papaParticulaSpeed, papaParticulaRadius, papaParticulaMass);
+        WeightedDynamicParticle2D papaParticula = new WeightedDynamicParticle2D("0", xpos, ypos, papaParticulaSpeed, papaParticulaSpeed, papaParticulaRadius, papaParticulaMass);
 
         particles.add(papaParticula);
 
-        int i = 0;
+        int i = 1;
         int tries = 0;
-        while (i < numberOfParticles) {
+        while (i < numberOfParticles + 1) {
             double x = Math.random() * (mapSize - commonParticleRadius * 2) + commonParticleRadius;
             double y = Math.random() * (mapSize - commonParticleRadius * 2) + commonParticleRadius;
             double vx = ((Math.random() * 2) - 1) * vmaxmod;
