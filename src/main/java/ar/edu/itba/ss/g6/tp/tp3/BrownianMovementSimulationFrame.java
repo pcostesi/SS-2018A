@@ -18,7 +18,7 @@ public class BrownianMovementSimulationFrame implements SimulationFrame<Weighted
 
     @Override
     public double getTimestamp() {
-        return 0;
+        return timestamp;
     }
 
     @Override

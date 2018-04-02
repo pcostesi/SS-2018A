@@ -74,7 +74,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                 }
             }
         }
-        if (wallTime < particlesTime && particlesTime >= 0) {
+        if (wallTime < particlesTime || particlesTime <= 0) {
             deltaTime = wallTime;
             colliders.add(closestToWall.get());
         } else {
@@ -119,9 +119,9 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
     private static WeightedDynamicParticle2D moveParticle(WeightedDynamicParticle2D p, double deltaT) {
         double xpos = p.getXCoordinate() + p.getXSpeed() * deltaT;
         double ypos = p.getYCoordinate() + p.getYSpeed() * deltaT;
-        WeightedDynamicParticle2D pNext = new WeightedDynamicParticle2D(p.getId(), xpos,
+
+        return new WeightedDynamicParticle2D(p.getId(), xpos,
                 ypos, p.getXSpeed(), p.getYSpeed(), p.getRadius(), p.getWeight());
-        return pNext;
     }
 
     private void resolveCollition(BrownianMovementSimulationFrame frame) {
