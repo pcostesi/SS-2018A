@@ -63,7 +63,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
             nextEventFrame = movement.getNextStep();
         }
 
-        if (nextEventFrame != null && currentTimeStep >= nextEventFrame.getTimestamp()) {
+        while (nextEventFrame != null && currentTimeStep >= nextEventFrame.getTimestamp()) {
             // advance the sim by one step;
             currentEventFrame = nextEventFrame;
             nextEventFrame = movement.getNextStep();
