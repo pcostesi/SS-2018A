@@ -143,10 +143,10 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                     (sigma * (drunkard.getWeight() + sober.getWeight()));
             double JX = J * DeltaRX / sigma;
             double JY = J * DeltaRY / sigma;
-            double newDrunkardVX = drunkard.getXSpeed() + JX * drunkard.getWeight();
-            double newDrunkardVY = drunkard.getXSpeed() + JY * drunkard.getWeight();
-            double newSoberVX = sober.getXSpeed() + JX * sober.getWeight();
-            double newSoberVY = sober.getYSpeed() + JY * sober.getWeight();
+            double newDrunkardVX = drunkard.getXSpeed() + JX / drunkard.getWeight();
+            double newDrunkardVY = drunkard.getXSpeed() + JY / drunkard.getWeight();
+            double newSoberVX = sober.getXSpeed() - JX / sober.getWeight();
+            double newSoberVY = sober.getYSpeed() - JY / sober.getWeight();
 
             drunkard = new WeightedDynamicParticle2D(drunkard.getId(), drunkard.getXCoordinate(),
                     drunkard.getYCoordinate(), newDrunkardVX, newDrunkardVY, drunkard.getRadius(), drunkard.getWeight());
