@@ -15,7 +15,16 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     BrownianMovement movement;
     SimulationFrame<WeightedDynamicParticle2D> currentEventFrame;
     SimulationFrame<WeightedDynamicParticle2D> nextEventFrame;
-    static int FPS = 30;
+
+    public int getFps() {
+        return fps;
+    }
+
+    public void setFps(int fps) {
+        this.fps = fps;
+    }
+
+    int fps = 30;
     private double currentTimeStep;
 
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {
@@ -85,7 +94,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
 
         SimulationFrame<WeightedDynamicParticle2D> frame = new BrownianMovementSimulationTimedFrame(currentTimeStep,
             particles);
-        currentTimeStep += (1 / FPS);
+        currentTimeStep += (1 / fps);
         return frame;
     }
 }

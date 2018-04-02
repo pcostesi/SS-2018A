@@ -12,13 +12,13 @@ public class CommandLineOptions {
         return buckets;
     }
 
-    @Option(name = "-b", aliases = { "--buckets" }, required = true,
-     usage = "number of buckets (must be a multiple of the side)")
-    private int buckets;
-
     public String getHighlight() {
         return highlight;
     }
+
+    @Option(name = "-b", aliases = { "--buckets" }, required = true,
+     usage = "number of buckets (must be a multiple of the side)")
+    private int buckets;
 
     @Option(name = "-x", aliases = { "--highligh" }, required = false,
      usage = "highlight a particle with id")
