@@ -34,13 +34,14 @@ public class TP3 {
 
         double duration = values.getDuration();
         ParticleGenerator generator = new ParticleGenerator();
-        Set<WeightedDynamicParticle2D> particles = generator.getParticles(1);
+        Set<WeightedDynamicParticle2D> particles = generator.getParticles(5);
         System.out.println("Using particles: " + particles.stream().map(p -> p.getId()).collect(joining(", ")));
 
         BrownianMovement simulation = new BrownianMovement(values.getDuration(), particles);
 
         TimeDrivenSimulation timed = simulation.toTimeDrivenSimulation();
 
+        System.out.println("Starting time-view of simulation");
         SimulationFrame<ColoredWeightedDynamicParticle2D> simulationFrame;
         while ((simulationFrame = timed.getNextStep()) != null && simulationFrame.getTimestamp() < duration) {
             Set<ColoredWeightedDynamicParticle2D> state = simulationFrame.getState();
