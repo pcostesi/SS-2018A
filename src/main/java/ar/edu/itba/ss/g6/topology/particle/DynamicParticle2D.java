@@ -57,11 +57,6 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         return Math.atan2(getYSpeed(), getXSpeed());
     }
 
-    @Override
-    public String getId() {
-        return null;
-    }
-
     public DynamicParticle2D(String id, double x, double y, double vx, double vy, double radius) {
         super(id, x, y, radius);
         this.xSpeed = vx;

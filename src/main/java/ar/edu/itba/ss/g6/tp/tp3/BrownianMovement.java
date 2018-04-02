@@ -38,7 +38,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
     public SimulationFrame getNextStep() {
         if (isInitialStep) {
             isInitialStep = false;
-            return new BrownianMovementSimulationFrame(0, null, particles);
+            return new BrownianMovementSimulationFrame(0, Collections.EMPTY_SET, particles);
         }
         BrownianMovementSimulationFrame frame = getNextFrame();
         if (frame.getTimestamp() > duration) {

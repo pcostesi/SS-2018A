@@ -8,6 +8,7 @@ import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.tp.tp3.BrownianMovement;
 import ar.edu.itba.ss.g6.tp.tp3.BrownianMovementTimeDrivenSimulation;
 import ar.edu.itba.ss.g6.tp.tp3.CommandLineOptions;
+import ar.edu.itba.ss.g6.tp.tp3.ParticleGenerator;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -16,7 +17,7 @@ import java.util.Set;
 
 public class TP3 {
 
-    public static int main(String ...args) {
+    public static void main(String ...args) {
 
 
         CommandLineOptions values = new CommandLineOptions(args);
@@ -30,7 +31,8 @@ public class TP3 {
 
 
         double duration = values.getDuration();
-        Set<WeightedDynamicParticle2D> particles = Collections.emptySet();
+        ParticleGenerator generator = new ParticleGenerator();
+        Set<WeightedDynamicParticle2D> particles = generator.getParticles(0);
 
         BrownianMovement simulation = new BrownianMovement(values.getDuration(), particles);
 
@@ -40,6 +42,5 @@ public class TP3 {
         while ((simulationFrame = timed.getNextStep()) != null && simulationFrame.getTimestamp() < duration) {
             Set<ColoredWeightedDynamicParticle2D> state = simulationFrame.getState();
         }
-        return 0;
     }
 }

@@ -23,11 +23,11 @@ public class BrownianMovementSimulationFrame implements SimulationFrame<Weighted
 
     @Override
     public Set<WeightedDynamicParticle2D> getDelta() {
-        return null;
+        return deltas;
     }
 
     @Override
     public Set<WeightedDynamicParticle2D> getState() {
-        return null;
+        return state;
     }
 }

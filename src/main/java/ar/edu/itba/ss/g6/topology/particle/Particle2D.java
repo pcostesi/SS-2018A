@@ -53,10 +53,27 @@ public class Particle2D implements Particle {
         };
     }
 
+    @Override
+    public boolean overlapsWith(Particle p) {
+        if (!(p instanceof Particle2D)) {
+            throw new IllegalArgumentException("Wrong class :P");
+        }
+        Particle2D particle = (Particle2D) p;
+        double distanceInX = this.getXCoordinate() - particle.getXCoordinate();
+        double distanceInY = this.getYCoordinate() - particle.getYCoordinate();
+        double sumOfRadius = this.getRadius() + particle.getRadius();
+        double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
+
+        return rawDistance < sumOfRadius;
+    }
+
     public Particle2D(String id, double radius, double xCoord, double yCoord) {
         this.yCoord = yCoord;
         this.xCoord = xCoord;
         this.radius = radius;
         this.id = id;
+        if (id == null) {
+            throw new IllegalArgumentException("Id can't be null");
+        }
     }
 }

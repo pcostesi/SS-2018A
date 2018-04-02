@@ -4,4 +4,5 @@ public interface Particle {
     String getId();
     double getRadius();
     String[] values();
+    boolean overlapsWith(Particle p);
 }
