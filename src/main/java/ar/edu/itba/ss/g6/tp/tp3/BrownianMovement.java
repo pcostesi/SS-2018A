@@ -67,7 +67,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
             for (WeightedDynamicParticle2D pp : particles) {
                 if (p.equals(pp)) continue;
                 double aux = p.timeToCollision(pp);
-                if (aux < particlesTime) {
+                if (aux != -1 && aux < particlesTime) {
                     particlesTime = aux;
                     drunkard = pp;
                     sober = p;
