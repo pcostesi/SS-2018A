@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import static ar.edu.itba.ss.g6.topology.particle.ColoredWeightedDynamicParticle2D.COLOR.BLACK;
 import static java.util.stream.Collectors.joining;
@@ -91,28 +92,60 @@ public class TP3 {
             .map(world -> loadMSDMode(world, duration, worldSize))
             .collect(Collectors.toList());
 
-        double msdBigParticle = simulations.stream().mapToDouble(simulation -> computeDisplacementForId(simulation, big)).average().orElse(-1);
-        double msdSomeParticle = simulations.stream().mapToDouble(simulation -> computeDisplacementForId(simulation, some)).average().orElse(-1);
+        List<Double>[] msdBigParticle = simulations.stream()
+            .map(simulation -> computeDisplacementForId(simulation, big))
+            .toArray(a -> new List[a]);
+        List<Double> msdSomeParticle[] = simulations.stream()
+            .map(simulation -> computeDisplacementForId(simulation, some))
+            .toArray(a -> new List[a]);
 
-        System.out.printf("MSD for big particle: %f\n", msdBigParticle);
-        System.out.printf("MSD for some particle: %f\n", msdSomeParticle);
+        double avgMsdsBigParticleByT[] = IntStream.range(0, msdBigParticle[0].size())
+            .mapToDouble(elemIdx -> Arrays.stream(msdBigParticle)
+                .mapToDouble(l -> l.get(elemIdx).doubleValue())
+                .average()
+                .orElse(0))
+            .toArray();
+
+        double avgMsdsSomeParticleByT[] = IntStream.range(0, msdSomeParticle[0].size())
+            .mapToDouble(elemIdx -> Arrays.stream(msdSomeParticle)
+                .mapToDouble(l -> l.get(elemIdx).doubleValue())
+                .average()
+                .orElse(0))
+            .toArray();
+
+        double diffusionForBigParticleOverTime[] = IntStream.range(0, avgMsdsBigParticleByT.length)
+            .mapToDouble(idx -> avgMsdsBigParticleByT[idx] / idx)
+            .toArray();
+
+        double diffusionForSomeParticleOverTime[] = IntStream.range(0, avgMsdsSomeParticleByT.length)
+            .mapToDouble(idx -> avgMsdsSomeParticleByT[idx] / idx)
+            .toArray();
+
+
+        for (int idx = 30 * 10; idx < avgMsdsBigParticleByT.length; idx = idx + 30 * 10) {
+            System.out.println("Time T: " + idx / (30.0));
+            System.out.println("avg MSD for  BigParticle By T " + avgMsdsBigParticleByT[idx]);
+            System.out.println("avg MSD for SomeParticle By T " + avgMsdsSomeParticleByT[idx]);
+            System.out.println("diffusion for  BigParticle By T " + diffusionForBigParticleOverTime[idx]);
+            System.out.println("diffusion for SomeParticle By T " + diffusionForSomeParticleOverTime[idx]);
+        }
     }
 
-    static <T extends WeightedDynamicParticle2D> double computeDisplacementForId(List<Set<T>> frames, String id) {
+    static <T extends WeightedDynamicParticle2D> List<Double> computeDisplacementForId(List<Set<T>> frames, String id) {
         Set<T> firstFrame = frames.get(0);
-        Set<T> lastFrame = frames.get(frames.size() - 1);
         T p1 = firstFrame.stream().filter(p -> id.equals(p.getId())).findFirst().get();
-        T pN = lastFrame.stream().filter(p -> id.equals(p.getId())).findFirst().get();
         double initialXCoordinate = p1.getXCoordinate();
         double initialYCoordinate = p1.getYCoordinate();
-        double finalXCoordinate = pN.getXCoordinate();
-        double finalYCoordinate = pN.getYCoordinate();
 
-        double distanceInX = finalXCoordinate - initialXCoordinate;
-        double distanceInY = finalYCoordinate - initialYCoordinate;
 
-        double msd = distanceInX * distanceInX + distanceInY * distanceInY;
-        System.out.printf("msd for %s: %e\n", id, msd);
+        List msd = frames.stream().map(frame -> {
+            T pm = frame.stream().filter(p -> p.getId().equals(id)).findFirst().get();
+            double currentXCoordinate = pm.getXCoordinate();
+            double currentYCoordinate = pm.getYCoordinate();
+            double distanceInX = currentXCoordinate - initialXCoordinate;
+            double distanceInY = currentYCoordinate - initialYCoordinate;
+            return distanceInX * distanceInX + distanceInY * distanceInY;
+        }).collect(Collectors.toList());
         return msd;
     }
 
