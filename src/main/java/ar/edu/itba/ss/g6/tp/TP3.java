@@ -17,15 +17,18 @@ import ar.edu.itba.ss.g6.tp.tp3.ParticleGenerator;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import javax.annotation.processing.SupportedSourceVersion;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ar.edu.itba.ss.g6.topology.particle.ColoredWeightedDynamicParticle2D.COLOR.BLACK;
 import static java.util.stream.Collectors.joining;
@@ -44,7 +47,71 @@ public class TP3 {
             e.printStackTrace();
         }
         System.out.println("Saved.");
+    }
 
+    public static List<Set<ColoredWeightedDynamicParticle2D>> loadMSDMode(String filename, double duration, double worldSize) {
+        Set<WeightedDynamicParticle2D> particles;
+        StaticLoaderResult<WeightedDynamicParticle2D> result;
+        result = StaticDataLoader.importFromFile(Paths.get(filename), WeightedDynamicParticle2D::fromValues);
+        particles = result.getParticles();
+
+        BrownianMovement simulation = new BrownianMovement(duration, particles);
+
+        TimeDrivenSimulation timed = simulation.toTimeDrivenSimulation();
+
+        System.out.println("Starting time-view of simulation");
+        SimulationFrame<ColoredWeightedDynamicParticle2D> simulationFrame;
+
+        int i = 0;
+        List<Set<ColoredWeightedDynamicParticle2D>> frames = new LinkedList<>();
+        while ((simulationFrame = timed.getNextStep()) != null && simulationFrame.getTimestamp() < duration) {
+            Set<ColoredWeightedDynamicParticle2D> state = simulationFrame.getState();
+            ColoredWeightedDynamicParticle2D origin = new ColoredWeightedDynamicParticle2D(String.valueOf(Integer.MAX_VALUE - 2), 0 ,0, 0, 0, 0.0001, 0, BLACK);
+            ColoredWeightedDynamicParticle2D distal = new ColoredWeightedDynamicParticle2D(String.valueOf(Integer.MAX_VALUE - 1), worldSize , worldSize,0, 0, 0.0001, 0, BLACK);
+            state.add(origin);
+            state.add(distal);
+            frames.add(state);
+        }
+        return frames;
+    }
+
+    public static void msdMode(double duration, double worldSize) {
+        String[] worlds = new String[] {
+         "world-1.xyz","world-2.xyz","world-3.xyz","world-4.xyz","world-5.xyz",
+         "world-6.xyz","world-7.xyz","world-8.xyz","world-9.xyz","world-10.xyz",
+         "world-11.xyz","world-12.xyz","world-13.xyz","world-14.xyz","world-15.xyz",
+         "world-16.xyz","world-17.xyz","world-18.xyz","world-19.xyz","world-20.xyz",
+        };
+        String big = "0";
+        String some = "13";
+
+        List<List<Set<ColoredWeightedDynamicParticle2D>>> simulations = Arrays.stream(worlds)
+            .map(world -> loadMSDMode(world, duration, worldSize))
+            .collect(Collectors.toList());
+
+        double msdBigParticle = simulations.stream().mapToDouble(simulation -> computeDisplacementForId(simulation, big)).average().orElse(-1);
+        double msdSomeParticle = simulations.stream().mapToDouble(simulation -> computeDisplacementForId(simulation, some)).average().orElse(-1);
+
+        System.out.printf("MSD for big particle: %f\n", msdBigParticle);
+        System.out.printf("MSD for some particle: %f\n", msdSomeParticle);
+    }
+
+    static <T extends WeightedDynamicParticle2D> double computeDisplacementForId(List<Set<T>> frames, String id) {
+        Set<T> firstFrame = frames.get(0);
+        Set<T> lastFrame = frames.get(frames.size() - 1);
+        T p1 = firstFrame.stream().filter(p -> id.equals(p.getId())).findFirst().get();
+        T pN = lastFrame.stream().filter(p -> id.equals(p.getId())).findFirst().get();
+        double initialXCoordinate = p1.getXCoordinate();
+        double initialYCoordinate = p1.getYCoordinate();
+        double finalXCoordinate = pN.getXCoordinate();
+        double finalYCoordinate = pN.getYCoordinate();
+
+        double distanceInX = finalXCoordinate - initialXCoordinate;
+        double distanceInY = finalYCoordinate - initialYCoordinate;
+
+        double msd = distanceInX * distanceInX + distanceInY * distanceInY;
+        System.out.printf("msd for %s: %e\n", id, msd);
+        return msd;
     }
 
     public static void simulatiorMode(double duration, File inputFile, File outputFile, double worldSize) {
@@ -70,6 +137,7 @@ public class TP3 {
             state.add(distal);
             frames.add(state);
         }
+
         Exporter<ColoredWeightedDynamicParticle2D> ovitoExporter = new OvitoXYZExporter<>();
         try {
             ovitoExporter.saveAnimationToFile(outputFile.toPath(), frames, 1.0 / 30);
@@ -89,6 +157,11 @@ public class TP3 {
             System.exit(1);
         }
 
+
+        if (values.isMsd()) {
+            msdMode(values.getDuration(), values.getL());
+            System.exit(0);
+        }
 
         if (values.isGenerate()) {
             generatorMode(values.getN(), values.getOutFile(), values.getL(), values.getSpeed(), values.getWeight(), values.getRadius());

@@ -23,6 +23,10 @@ public class CommandLineOptions {
      usage = "input file for the static particles")
     private boolean generate;
 
+    @Option(name = "-9", aliases = { "--msd" }, required = false,
+     usage = "input file for the static particles")
+    private boolean msd;
+
     @Option(name = "-N", aliases = { "--particles" }, required = false,
      usage = "number of particles")
     private int N = 30;
@@ -99,5 +103,9 @@ public class CommandLineOptions {
 
     public double getDuration() {
         return duration;
+    }
+
+    public boolean isMsd() {
+        return msd;
     }
 }
