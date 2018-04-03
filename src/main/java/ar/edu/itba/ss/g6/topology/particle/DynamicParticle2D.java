@@ -14,25 +14,26 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         if (!(other instanceof DynamicParticle2D)) {
             throw new IllegalArgumentException("Wrong particle type :)");
         }
-        double timeToCollision;
         DynamicParticle2D p = (DynamicParticle2D) other;
-        double sigma = this.getRadius() + p.getRadius();
-        double DeltaRX = this.getXCoordinate() - p.getXCoordinate();
-        double DeltaRY = this.getYCoordinate() - p.getYCoordinate();
-        double DeltaVX = this.getXSpeed() - p.getXSpeed();
-        double DeltaVY = this.getYSpeed() - p.getYSpeed();
-        double DeltaRDotDeltaR = DeltaRX*DeltaRX + DeltaRY*DeltaRY;
-        double DeltaVDotDeltaV = DeltaVX*DeltaVX + DeltaVY*DeltaVY;
-        double DeltaVDotDeltaR = DeltaVX*DeltaRX + DeltaVY*DeltaRY;
-        double delta = (DeltaVDotDeltaR*DeltaVDotDeltaR) - DeltaVDotDeltaV*(DeltaRDotDeltaR-sigma*sigma);
-        if(DeltaVDotDeltaR >= 0) {
-            timeToCollision = Integer.MAX_VALUE;
-        }else if(delta < 0){
-            timeToCollision = Integer.MAX_VALUE;
-        }else {
-            timeToCollision =  (-1) * ( (DeltaVDotDeltaR + Math.sqrt(delta)) / (DeltaVDotDeltaV));
+        double deltaVX = this.getXSpeed() - p.getXSpeed();
+        double deltaVY = this.getYSpeed() - p.getYSpeed();
+        double deltaX = this.getXCoordinate() - p.getXCoordinate();
+        double deltaY = this.getYCoordinate() - p.getYCoordinate();
+        double auxVR = deltaX * deltaVX + deltaY * deltaVY;
+        double auxVV = Math.pow(deltaVX, 2) +  Math.pow(deltaVY, 2);
+        double auxRR = Math.pow(deltaX, 2) + Math.pow(deltaY, 2);
+
+        if(auxVR >= 0){
+            return Double.POSITIVE_INFINITY;
         }
-        return timeToCollision < 0 ? Integer.MAX_VALUE : timeToCollision;
+
+        double d = Math.pow((auxVR),2) - auxVV * (auxRR - Math.pow(this.getRadius() + p.getRadius(),2));
+
+        if (d < 0){
+            return Double.POSITIVE_INFINITY;
+        }
+
+        return -(auxVR + Math.sqrt(d))/auxVV;
     }
 
     @Override

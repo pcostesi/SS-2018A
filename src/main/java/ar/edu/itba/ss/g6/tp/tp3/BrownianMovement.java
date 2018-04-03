@@ -149,25 +149,19 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
             frame.getState().remove(sober);
             frame.getState().remove(drunkard);
 
-            if(sober.getWeight() > drunkard.getWeight()) {
-                WeightedDynamicParticle2D aux = sober;
-                sober = drunkard;
-                drunkard = aux;
-            }
-            double sigma = drunkard.getRadius() + sober.getRadius();
-            double DeltaRX = drunkard.getXCoordinate() - sober.getXCoordinate();
-            double DeltaRY = drunkard.getYCoordinate() - sober.getYCoordinate();
-            double DeltaVX = drunkard.getXSpeed() - sober.getXSpeed();
-            double DeltaVY = drunkard.getYSpeed() - sober.getYSpeed();
-            double DeltaVDotDeltaR = DeltaVX * DeltaRX + DeltaVY * DeltaRY;
-            double J = (2 * drunkard.getWeight() * sober.getWeight() * DeltaVDotDeltaR) /
-                    (sigma * (drunkard.getWeight() + sober.getWeight()));
-            double JX = J * DeltaRX / sigma;
-            double JY = J * DeltaRY / sigma;
-            double newDrunkardVX = drunkard.getXSpeed() + JX / drunkard.getWeight();
-            double newDrunkardVY = drunkard.getYSpeed() + JY / drunkard.getWeight();
-            double newSoberVX = sober.getXSpeed() - JX / sober.getWeight();
-            double newSoberVY = sober.getYSpeed() - JY / sober.getWeight();
+            double deltaVX = drunkard.getXSpeed() - sober.getXSpeed();
+            double deltaVY = drunkard.getYSpeed() - sober.getYSpeed();
+            double deltaX = drunkard.getXCoordinate() - sober.getXCoordinate();
+            double deltaY = drunkard.getYCoordinate() - sober.getYCoordinate();
+            double auxVR = (deltaX * deltaVX) + (deltaY * deltaVY);
+            double j = 2 * drunkard.getWeight() * sober.getWeight() * auxVR;
+            j /= (drunkard.getRadius() + sober.getRadius()) * (sober.getWeight() + drunkard.getWeight()) ;
+            double jX = j * (drunkard.getXCoordinate() - sober.getXCoordinate()) / (drunkard.getRadius() + sober.getRadius());
+            double jY = j * (drunkard.getYCoordinate() - sober.getYCoordinate()) / (drunkard.getRadius() + sober.getRadius());
+            double newDrunkardVX = (drunkard.getXSpeed() - (jX / drunkard.getWeight()));
+            double newSoberVX = (sober.getXSpeed() + (jX / sober.getWeight()));
+            double newDrunkardVY = (drunkard.getYSpeed() - (jY / drunkard.getWeight()));
+            double newSoberVY = (sober.getYSpeed() + (jY / sober.getWeight()));
 
             drunkard = new WeightedDynamicParticle2D(drunkard.getId(), drunkard.getXCoordinate(),
                     drunkard.getYCoordinate(), newDrunkardVX, newDrunkardVY, drunkard.getRadius(), drunkard.getWeight());
