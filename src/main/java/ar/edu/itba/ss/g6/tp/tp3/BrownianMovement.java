@@ -49,7 +49,6 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         resolveCollision(frame);
         currentTime = frame.getTimestamp();
         particles = frame.getState();
-        System.out.println(currentTime);
         return frame;
     }
 

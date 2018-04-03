@@ -43,7 +43,7 @@ public class TP3 {
 
         double duration = values.getDuration();
         ParticleGenerator generator = new ParticleGenerator();
-        Set<WeightedDynamicParticle2D> particles = generator.getParticles(5);
+        Set<WeightedDynamicParticle2D> particles = generator.getParticles(1000);
         System.out.println("Using particles: " + particles.stream().map(p -> p.getId()).collect(joining(", ")));
 
         BrownianMovement simulation = new BrownianMovement(values.getDuration(), particles);
