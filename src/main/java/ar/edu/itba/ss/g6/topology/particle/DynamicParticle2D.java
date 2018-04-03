@@ -32,7 +32,7 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         }else {
             timeToCollision =  (-1) * ( (DeltaVDotDeltaR + Math.sqrt(delta)) / (DeltaVDotDeltaV));
         }
-        return timeToCollision;
+        return timeToCollision < 0 ? Integer.MAX_VALUE : timeToCollision;
     }
 
     @Override

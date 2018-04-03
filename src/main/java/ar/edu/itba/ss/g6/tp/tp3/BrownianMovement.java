@@ -46,49 +46,54 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         if (frame.getTimestamp() > duration) {
             return null;
         }
-        resolveCollition(frame);
-        System.out.println("Particles:");
-        System.out.println(particles.stream().map(p -> p.toString()).collect(joining("\n")));
+        resolveCollision(frame);
         currentTime = frame.getTimestamp();
-        System.out.println(currentTime);
         particles = frame.getState();
+        System.out.println(currentTime);
         return frame;
     }
 
     private BrownianMovementSimulationFrame getNextFrame() {
         Set<WeightedDynamicParticle2D> colliders = new HashSet<>();
-        double deltaTime ;
+        double deltaTime;
         WeightedDynamicParticle2D closestToWall = null;
-        double wallTime = 10000000;
+        double wallTime = Integer.MAX_VALUE;
+
         for(WeightedDynamicParticle2D p: particles) {
             double aux = timeToClosestWall(p);
-            if(aux < wallTime ){
+            if(aux < wallTime) {
                 wallTime = aux;
                 closestToWall = p;
             }
         }
+
         double particlesTime = wallTime;
         sober = null;
         drunkard = null;
-        for (WeightedDynamicParticle2D p : particles) {
-            for (WeightedDynamicParticle2D pp : particles) {
-                if (p.equals(pp)) continue;
-                double aux = p.timeToCollision(pp);
-                if (aux != -1 && aux < particlesTime) {
+        for (WeightedDynamicParticle2D p1 : particles) {
+            for (WeightedDynamicParticle2D p2 : particles) {
+                if (p1.equals(p2)) continue;
+
+                double aux = p1.timeToCollision(p2);
+                if (aux < particlesTime) {
                     particlesTime = aux;
-                    drunkard = pp;
-                    sober = p;
+                    sober = p1;
+                    drunkard = p2;
                 }
             }
         }
-        if (wallTime <= particlesTime || particlesTime <= 0) {
+        if (wallTime <= particlesTime) {
             deltaTime = wallTime;
+            closestToWall = moveParticle(closestToWall, deltaTime);
             colliders.add(closestToWall);
         } else {
             deltaTime = particlesTime;
+            drunkard = moveParticle(drunkard, deltaTime);
+            sober = moveParticle(sober, deltaTime);
             colliders.add(drunkard);
             colliders.add(sober);
         }
+
         Set<WeightedDynamicParticle2D> newState = getNewState(deltaTime);
         return new BrownianMovementSimulationFrame(deltaTime + currentTime, colliders, newState);
     }
@@ -102,25 +107,24 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
     private double timeToClosestWall(DynamicParticle2D particle) {
         double xTime;
         double yTime;
-        if (particle.getXSpeed() == 0) {
-            xTime = 1000000000;
-        } else if (particle.getXSpeed() > 0) {
+
+        if (particle.getXSpeed() > 0) {
             xTime = particle.timeToX(wallLength);
-        } else {
+        } else if (particle.getXSpeed() < 0) {
             xTime = particle.timeToX(0);
+        } else {
+            xTime = Integer.MAX_VALUE;
         }
-        if (particle.getXSpeed() == 0) {
-            yTime = 1000000000;
-        } else if (particle.getYSpeed() > 0) {
+
+        if (particle.getYSpeed() > 0) {
             yTime = particle.timeToY(wallLength);
-        } else {
+        } else if (particle.getYSpeed() < 0) {
             yTime = particle.timeToY(0);
-        }
-        if (xTime < yTime) {
-            return xTime;
         } else {
-            return yTime;
+            yTime = Integer.MAX_VALUE;
         }
+
+        return Double.min(xTime, yTime);
     }
 
     private static WeightedDynamicParticle2D moveParticle(WeightedDynamicParticle2D p, double deltaT) {
@@ -131,21 +135,20 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                 ypos, p.getXSpeed(), p.getYSpeed(), p.getRadius(), p.getWeight());
     }
 
-    private void resolveCollition(BrownianMovementSimulationFrame frame) {
+    private void resolveCollision(BrownianMovementSimulationFrame frame) {
         if (frame.getDelta().size() == 1) {
-            System.out.println("PARED");
             frame.getDelta().forEach(x -> {
-                WeightedDynamicParticle2D b = moveParticle(x, frame.getTimestamp() - currentTime);
-                b = updateWallCollisionSpeed(x);
                 frame.getDelta().remove(x);
-                frame.getDelta().add(b);
                 frame.getState().remove(x);
+                WeightedDynamicParticle2D b = updateWallCollisionSpeed(x);
+                frame.getDelta().add(b);
                 frame.getState().add(b);
             });
         } else {
             frame.getDelta().clear();
-            drunkard = moveParticle(drunkard, frame.getTimestamp() - currentTime);
-            sober = moveParticle(sober, frame.getTimestamp() - currentTime);
+            frame.getState().remove(sober);
+            frame.getState().remove(drunkard);
+
             if(sober.getWeight() > drunkard.getWeight()) {
                 WeightedDynamicParticle2D aux = sober;
                 sober = drunkard;
@@ -173,8 +176,6 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
                     sober.getYCoordinate(), newSoberVX, newSoberVY, sober.getRadius(), sober.getWeight());
             frame.getDelta().add(sober);
             frame.getDelta().add(drunkard);
-            frame.getState().remove(sober);
-            frame.getState().remove(drunkard);
             frame.getState().add(sober);
             frame.getState().add(drunkard);
         }
@@ -183,27 +184,34 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
     private WeightedDynamicParticle2D updateWallCollisionSpeed(WeightedDynamicParticle2D p) {
         double xTime;
         double yTime;
-        if (p.getXSpeed() == 0) {
-            xTime = 100000000;
+        double vx = p.getXSpeed();
+        double vy = p.getYSpeed();
+        if (p.getXSpeed() < 0) {
+            xTime = p.timeToX(0);
         } else if (p.getXSpeed() > 0) {
             xTime = p.timeToX(wallLength);
         } else {
-            xTime = p.timeToX(0);
+            xTime = Integer.MAX_VALUE;
         }
-        if (p.getXSpeed() == 0) {
-            yTime = 1000000000;
+
+        if (p.getYSpeed() < 0) {
+            yTime = p.timeToY(0);
         } else if (p.getYSpeed() > 0) {
             yTime = p.timeToY(wallLength);
         } else {
-            yTime = p.timeToY(0);
+            yTime = Integer.MAX_VALUE;
         }
-        if (xTime == -1 || xTime < yTime) {
-            return new WeightedDynamicParticle2D(p.getId(), p.getXCoordinate(),
-                    p.getYCoordinate(), (-1) * p.getXSpeed(), p.getYSpeed(), p.getRadius(), p.getWeight());
+
+        if (xTime < yTime) {
+            vx = -vx;
+        } else if (xTime > yTime) {
+            vy = -vy;
         } else {
-            return new WeightedDynamicParticle2D(p.getId(), p.getXCoordinate(),
-                    p.getYCoordinate(), p.getXSpeed(), (-1) * p.getYSpeed(), p.getRadius(), p.getWeight());
+            vx = -vx;
+            vy = -vy;
         }
+        return new WeightedDynamicParticle2D(p.getId(), p.getXCoordinate(),
+         p.getYCoordinate(), vx, vy, p.getRadius(), p.getWeight());
     }
 }
 
