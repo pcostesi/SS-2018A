@@ -110,7 +110,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         if (particle.getXSpeed() > 0) {
             xTime = particle.timeToX(wallLength);
         } else if (particle.getXSpeed() < 0) {
-            xTime = particle.timeToX(0);
+            xTime = particle.timeToX(0 + 2 * particle.getRadius());
         } else {
             xTime = Integer.MAX_VALUE;
         }
@@ -118,7 +118,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         if (particle.getYSpeed() > 0) {
             yTime = particle.timeToY(wallLength);
         } else if (particle.getYSpeed() < 0) {
-            yTime = particle.timeToY(0);
+            yTime = particle.timeToY(0 + 2 * particle.getRadius());
         } else {
             yTime = Integer.MAX_VALUE;
         }
@@ -180,7 +180,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         double vx = p.getXSpeed();
         double vy = p.getYSpeed();
         if (p.getXSpeed() < 0) {
-            xTime = p.timeToX(0);
+            xTime = p.timeToX(0 + 2 * p.getRadius());
         } else if (p.getXSpeed() > 0) {
             xTime = p.timeToX(wallLength);
         } else {
@@ -188,7 +188,7 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
         }
 
         if (p.getYSpeed() < 0) {
-            yTime = p.timeToY(0);
+            yTime = p.timeToY(0 + 2 * p.getRadius());
         } else if (p.getYSpeed() > 0) {
             yTime = p.timeToY(wallLength);
         } else {
