@@ -16,6 +16,25 @@ public class WeightedDynamicParticle2D extends DynamicParticle2D implements Weig
     }
 
     @Override
+    public String[] values() {
+        return new String[] {
+         getId(),
+         String.valueOf(getXCoordinate()),
+         String.valueOf(getYCoordinate()),
+         String.valueOf(getXSpeed()),
+         String.valueOf(getYSpeed()),
+         String.valueOf(getRadius()),
+         String.valueOf(getWeight())
+        };
+    }
+
+    public static WeightedDynamicParticle2D fromValues(String ...values) {
+        return new WeightedDynamicParticle2D(values[0], Double.parseDouble(values[1]), Double.parseDouble(values[2]),
+            Double.parseDouble(values[3]), Double.parseDouble(values[4]), Double.parseDouble(values[5]),
+             Double.parseDouble(values[6]));
+    }
+
+    @Override
     public double getWeight() {
         return weight;
     }

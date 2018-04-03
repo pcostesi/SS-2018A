@@ -25,32 +25,27 @@ public class CommandLineOptions {
 
     @Option(name = "-N", aliases = { "--particles" }, required = false,
      usage = "number of particles")
-    private int N;
+    private int N = 30;
 
     @Option(name = "-L", aliases = { "--size" }, required = false,
      usage = "size of the world")
-    private int L;
+    private double L = 0.5;
 
     @Option(name = "-r", aliases = { "--radius" }, required = false,
      usage = "particle radius")
-    private double radius = 1;
+    private double radius = 0.005;
 
     @Option(name = "-s", aliases = { "--speed" }, required = false,
      usage = "particle speed")
-    private double speed = 1;
+    private double speed = 0.1;
 
     @Option(name = "-w", aliases = { "--weight" }, required = false,
      usage = "weight for the particles")
-    private double weight = 1;
+    private double weight = 0.1;
 
     @Option(name = "-t", aliases = { "--time" }, required = false,
      usage = "weight for the particles")
-    private double duration = 1;
-
-    @Option(name = "-W", aliases = { "--weight-multiplier" }, required = false,
-     usage = "weight multiplier for Daddy Particle")
-    private int weightMultiplier = 1;
-
+    private double duration = 60 * 5;
 
 
     public CommandLineOptions(String... args) {
@@ -86,7 +81,7 @@ public class CommandLineOptions {
         return N;
     }
 
-    public int getL() {
+    public double getL() {
         return L;
     }
 
@@ -104,9 +99,5 @@ public class CommandLineOptions {
 
     public double getDuration() {
         return duration;
-    }
-
-    public int getWeightMultiplier() {
-        return weightMultiplier;
     }
 }

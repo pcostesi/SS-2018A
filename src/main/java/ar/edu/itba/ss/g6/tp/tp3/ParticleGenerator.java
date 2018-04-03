@@ -1,12 +1,16 @@
 package ar.edu.itba.ss.g6.tp.tp3;
 
 import ar.edu.itba.ss.g6.topology.particle.OverfedDynamicParticle2D;
+import ar.edu.itba.ss.g6.topology.particle.Particle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class ParticleGenerator {
+
+    static int PAPA_PARTICULA_WEIGHT_MULTIPLIER = 1000;
+    static int PAPA_PARTICULA_SIZE_MULTIPLIER = 10;
     private double mapSize = 0.5;
     private double papaParticulaRadius = 0.05;
     private double papaParticulaMass = 100;
@@ -16,6 +20,14 @@ public class ParticleGenerator {
     private double papaParticulaSpeed = 0;
     private int MAX_TRIES = Integer.MAX_VALUE >> 1;
 
+    public ParticleGenerator(double worldSize, double maxSpeed, double weight, double radius){
+        this.mapSize = worldSize;
+        this.vmaxmod = maxSpeed;
+        this.commonParticleMass = weight;
+        this.commonParticleRadius = radius;
+        this.papaParticulaRadius = radius * PAPA_PARTICULA_SIZE_MULTIPLIER;
+        this.papaParticulaMass = weight * PAPA_PARTICULA_WEIGHT_MULTIPLIER;
+    }
 
     private boolean collides(Set<WeightedDynamicParticle2D> particles, WeightedDynamicParticle2D particle) {
         return particles.parallelStream().filter(p -> particle.overlapsWith(p)).count() > 0;
