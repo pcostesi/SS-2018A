@@ -22,6 +22,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +30,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import static ar.edu.itba.ss.g6.topology.particle.ColoredWeightedDynamicParticle2D.COLOR.BLACK;
 import static java.util.stream.Collectors.joining;
@@ -138,6 +140,38 @@ public class TP3 {
             frames.add(state);
         }
 
+        int keyframe = 2 * frames.size() / 3;
+        double eps = 0e-4;
+        double speeds[] = frames.parallelStream().skip(frames.size() - keyframe)
+            .flatMapToDouble(frameParticles -> frameParticles.parallelStream()
+                .mapToDouble(particle -> particle.getSpeed()))
+            .toArray();
+
+        double distinctSpeeds[] = Arrays.stream(speeds).distinct().sorted().toArray();
+
+        double pdf[] = Arrays.stream(distinctSpeeds)
+            .map(speed -> Arrays.stream(speeds).filter(s -> s == speed).count())
+            .map(count -> count / distinctSpeeds.length)
+            .toArray();
+
+        System.out.printf("speed\tpdf\n");
+        for (int idx = 0; idx < distinctSpeeds.length; idx++) {
+            System.out.printf("%e\t%e\n", distinctSpeeds[idx], pdf[idx]);
+        }
+
+        double speeds1[] = frames.get(0).parallelStream()
+         .mapToDouble(particle -> particle.getSpeed())
+            .toArray();
+        double distinctSpeeds1[] = Arrays.stream(speeds1).distinct().sorted().toArray();
+        double pdf1[] = Arrays.stream(distinctSpeeds1)
+         .map(speed -> Arrays.stream(speeds1).filter(s -> s == speed).count())
+         .map(count -> count / distinctSpeeds.length)
+         .toArray();
+        System.out.println("for initial state");
+        System.out.printf("speed\tpdf\n");
+        for (int idx = 0; idx < distinctSpeeds1.length; idx++) {
+            System.out.printf("%e\t%e\n", distinctSpeeds1[idx], pdf1[idx]);
+        }
         Exporter<ColoredWeightedDynamicParticle2D> ovitoExporter = new OvitoXYZExporter<>();
         try {
             ovitoExporter.saveAnimationToFile(outputFile.toPath(), frames, 1.0 / 30);
