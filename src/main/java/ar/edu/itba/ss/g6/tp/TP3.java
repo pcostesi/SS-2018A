@@ -19,13 +19,19 @@ import org.kohsuke.args4j.CmdLineParser;
 
 import javax.annotation.processing.SupportedSourceVersion;
 import java.awt.Color;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.DoubleSummaryStatistics;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -80,10 +86,15 @@ public class TP3 {
 
     public static void msdMode(double duration, double worldSize) {
         String[] worlds = new String[] {
-         "world-1.xyz","world-2.xyz","world-3.xyz","world-4.xyz","world-5.xyz",
-         "world-6.xyz","world-7.xyz","world-8.xyz","world-9.xyz","world-10.xyz",
-         "world-11.xyz","world-12.xyz","world-13.xyz","world-14.xyz","world-15.xyz",
-         "world-16.xyz","world-17.xyz","world-18.xyz","world-19.xyz","world-20.xyz",
+         "world-1.xyz","world-2.xyz","world-3.xyz",
+         "world-4.xyz","world-5.xyz","world-6.xyz",
+         "world-7.xyz","world-8.xyz","world-9.xyz",
+
+         "world-10.xyz","world-11.xyz","world-12.xyz",
+         "world-13.xyz","world-14.xyz","world-15.xyz",
+         "world-16.xyz","world-17.xyz","world-18.xyz",
+
+         "world-19.xyz","world-20.xyz",
         };
         String big = "0";
         String some = "13";
@@ -99,35 +110,79 @@ public class TP3 {
             .map(simulation -> computeDisplacementForId(simulation, some))
             .toArray(a -> new List[a]);
 
-        double avgMsdsBigParticleByT[] = IntStream.range(0, msdBigParticle[0].size())
-            .mapToDouble(elemIdx -> Arrays.stream(msdBigParticle)
+        DoubleSummaryStatistics avgMsdsBigParticleByT[] = IntStream.range(0, msdBigParticle[0].size())
+            .mapToObj(elemIdx -> Arrays.stream(msdBigParticle)
                 .mapToDouble(l -> l.get(elemIdx).doubleValue())
-                .average()
-                .orElse(0))
-            .toArray();
+                .summaryStatistics())
+             .toArray(a -> new DoubleSummaryStatistics[a]);
 
-        double avgMsdsSomeParticleByT[] = IntStream.range(0, msdSomeParticle[0].size())
-            .mapToDouble(elemIdx -> Arrays.stream(msdSomeParticle)
+        DoubleSummaryStatistics avgMsdsSomeParticleByT[] = IntStream.range(0, msdSomeParticle[0].size())
+            .mapToObj(elemIdx -> Arrays.stream(msdSomeParticle)
                 .mapToDouble(l -> l.get(elemIdx).doubleValue())
-                .average()
-                .orElse(0))
-            .toArray();
-
-        double diffusionForBigParticleOverTime[] = IntStream.range(0, avgMsdsBigParticleByT.length)
-            .mapToDouble(idx -> avgMsdsBigParticleByT[idx] / idx)
-            .toArray();
-
-        double diffusionForSomeParticleOverTime[] = IntStream.range(0, avgMsdsSomeParticleByT.length)
-            .mapToDouble(idx -> avgMsdsSomeParticleByT[idx] / idx)
-            .toArray();
+             .summaryStatistics())
+         .toArray(a -> new DoubleSummaryStatistics[a]);
 
 
-        for (int idx = 30 * 10; idx < avgMsdsBigParticleByT.length; idx = idx + 30 * 10) {
-            System.out.println("Time T: " + idx / (30.0));
-            System.out.println("avg MSD for  BigParticle By T " + avgMsdsBigParticleByT[idx]);
-            System.out.println("avg MSD for SomeParticle By T " + avgMsdsSomeParticleByT[idx]);
-            System.out.println("diffusion for  BigParticle By T " + diffusionForBigParticleOverTime[idx]);
-            System.out.println("diffusion for SomeParticle By T " + diffusionForSomeParticleOverTime[idx]);
+        double diffusionMinForBigParticleOverTime[] = IntStream.range(0, avgMsdsBigParticleByT.length)
+         .mapToDouble(idx -> avgMsdsBigParticleByT[idx].getMin() / (idx / 30))
+         .toArray();
+
+        double diffusionMinForSomeParticleOverTime[] = IntStream.range(0, avgMsdsSomeParticleByT.length)
+         .mapToDouble(idx -> avgMsdsSomeParticleByT[idx].getMin() / (idx / 30))
+         .toArray();
+
+        double diffusionMaxForBigParticleOverTime[] = IntStream.range(0, avgMsdsBigParticleByT.length)
+         .mapToDouble(idx -> avgMsdsBigParticleByT[idx].getMax() / (idx / 30))
+         .toArray();
+
+        double diffusionMaxForSomeParticleOverTime[] = IntStream.range(0, avgMsdsSomeParticleByT.length)
+         .mapToDouble(idx -> avgMsdsSomeParticleByT[idx].getMax() / (idx / 30))
+         .toArray();
+
+
+        double diffusionMeanForBigParticleOverTime[] = IntStream.range(0, avgMsdsBigParticleByT.length)
+         .mapToDouble(idx -> avgMsdsBigParticleByT[idx].getAverage() / (idx / 30))
+         .toArray();
+
+        double diffusionMeanForSomeParticleOverTime[] = IntStream.range(0, avgMsdsSomeParticleByT.length)
+         .mapToDouble(idx -> avgMsdsSomeParticleByT[idx].getAverage() / (idx / 30))
+         .toArray();
+
+
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("msd-big.dat").normalize())) {
+            System.out.println("MSD BIG");
+            writerRaw.write("time,\tmin-msd,\tmean-msd,\tmax-msd,\tmin-d,\tmean-d,\tmax-d\n");
+            for (int idx = 30; idx < avgMsdsBigParticleByT.length && idx < 30 * 60; idx += 30) {
+                writerRaw.write(String.format("%e\t%e\t%e\t%e\t%e\t%e\t%e\n",
+                 idx / (30.0),
+                     avgMsdsBigParticleByT[idx].getMin(),
+                     avgMsdsBigParticleByT[idx].getAverage(),
+                     avgMsdsBigParticleByT[idx].getMax(),
+                     diffusionMinForBigParticleOverTime[idx],
+                 diffusionMeanForBigParticleOverTime[idx],
+                 diffusionMaxForBigParticleOverTime[idx]
+                ));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("msd-small.dat").normalize())) {
+            System.out.println("MSD SMALL");
+            writerRaw.write("time,\tmin-msd,\tmean-msd,\tmax-msd,\tmin-d,\tmean-d,\tmax-d\n");
+            for (int idx = 30; idx < avgMsdsSomeParticleByT.length && idx < 30 * 60; idx += 30) {
+                writerRaw.write(String.format("%e\t%e\t%e\t%e\t%e\t%e\t%e\n",
+                 idx / (30.0),
+                 avgMsdsSomeParticleByT[idx].getMin(),
+                 avgMsdsSomeParticleByT[idx].getAverage(),
+                 avgMsdsSomeParticleByT[idx].getMax(),
+                 diffusionMinForSomeParticleOverTime[idx],
+                 diffusionMeanForSomeParticleOverTime[idx],
+                 diffusionMaxForSomeParticleOverTime[idx]
+                ));            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -149,6 +204,60 @@ public class TP3 {
         return msd;
     }
 
+    public static void step2() {
+        String[] worlds = new String[] {
+         "world-1.xyz","world-2.xyz","world-3.xyz",
+         "world-4.xyz","world-5.xyz","world-6.xyz",
+         "world-7.xyz","world-8.xyz","world-9.xyz",
+
+         "world-10.xyz","world-11.xyz","world-12.xyz",
+         "world-13.xyz","world-14.xyz","world-15.xyz",
+         "world-16.xyz","world-17.xyz","world-18.xyz",
+
+         "world-19.xyz","world-20.xyz",
+        };
+        String big = "0";
+        String some = "13";
+
+        List<List<Set<ColoredWeightedDynamicParticle2D>>> simulations = Arrays.stream(worlds)
+         .map(world -> loadMSDMode(world, 300, 0.5))
+         .collect(Collectors.toList());
+    }
+
+    public static void step1() {
+        List<Double> collisions = new LinkedList<>();
+
+
+
+            try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("collisions.dat").normalize())) {
+                System.out.println("Raw collisions");
+                for (int world = 0; world < 20; world++) {
+                    ParticleGenerator generator = new ParticleGenerator(0.5, 0.1, 0.1, 0.005);
+                    Set<WeightedDynamicParticle2D> particles = generator.getParticles(40);
+                    BrownianMovement simulation2 = new BrownianMovement(600.0, particles);
+
+                    SimulationFrame<WeightedDynamicParticle2D> frame;
+                double prevTime = 0;
+                while ((frame = simulation2.getNextStep()) != null) {
+                    double thisTime = frame.getTimestamp();
+                    double delta = thisTime - prevTime;
+                    collisions.add(delta);
+                    prevTime = thisTime;
+                }
+
+            }
+
+                double[] thelist = collisions.stream().mapToDouble(s -> s).toArray();
+                for (int idx = 0; idx < thelist.length; idx++) {
+                    writerRaw.write(String.format("%f\n", thelist[idx]));
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.exit(1);
+
+    }
+
     public static void simulatiorMode(double duration, File inputFile, File outputFile, double worldSize) {
         Set<WeightedDynamicParticle2D> particles;
         StaticLoaderResult<WeightedDynamicParticle2D> result;
@@ -156,6 +265,8 @@ public class TP3 {
         particles = result.getParticles();
 
         BrownianMovement simulation = new BrownianMovement(duration, particles);
+
+        step1();
 
         TimeDrivenSimulation timed = simulation.toTimeDrivenSimulation();
 
@@ -174,43 +285,55 @@ public class TP3 {
         }
 
         int keyframe = 2 * frames.size() / 3;
-        double eps = 0e-4;
         double speeds[] = frames.parallelStream().skip(frames.size() - keyframe)
             .flatMapToDouble(frameParticles -> frameParticles.parallelStream()
-                .mapToDouble(particle -> particle.getSpeed()))
+             .mapToDouble(particle -> particle.getSpeed()))
+            .filter(d -> d != 0)
+            .sorted()
             .toArray();
-
-        double distinctSpeeds[] = Arrays.stream(speeds).distinct().sorted().toArray();
-
-        double pdf[] = Arrays.stream(distinctSpeeds)
-            .map(speed -> Arrays.stream(speeds).filter(s -> s == speed).count())
-            .map(count -> count / distinctSpeeds.length)
-            .toArray();
-
-        System.out.printf("speed\tpdf\n");
-        for (int idx = 0; idx < distinctSpeeds.length; idx++) {
-            System.out.printf("%e\t%e\n", distinctSpeeds[idx], pdf[idx]);
-        }
 
         double speeds1[] = frames.get(0).parallelStream()
-         .mapToDouble(particle -> particle.getSpeed())
+            .mapToDouble(particle -> particle.getSpeed())
+         .filter(d -> d != 0)
+         .sorted()
             .toArray();
-        double distinctSpeeds1[] = Arrays.stream(speeds1).distinct().sorted().toArray();
-        double pdf1[] = Arrays.stream(distinctSpeeds1)
-         .map(speed -> Arrays.stream(speeds1).filter(s -> s == speed).count())
-         .map(count -> count / distinctSpeeds.length)
-         .toArray();
-        System.out.println("for initial state");
-        System.out.printf("speed\tpdf\n");
-        for (int idx = 0; idx < distinctSpeeds1.length; idx++) {
-            System.out.printf("%e\t%e\n", distinctSpeeds1[idx], pdf1[idx]);
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("pdf-thirds.dat").normalize())) {
+            System.out.println("Raw thirds");
+            for (int idx = 0; idx < speeds.length; idx++) {
+                writerRaw.write(String.format("%f\n", speeds[idx]));
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("pdf-1.dat").normalize())) {
+            System.out.println("Raw first");
+            for (int idx = 0; idx < speeds1.length; idx++) {
+                writerRaw.write(String.format("%f\n", speeds1[idx]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         Exporter<ColoredWeightedDynamicParticle2D> ovitoExporter = new OvitoXYZExporter<>();
         try {
             ovitoExporter.saveAnimationToFile(outputFile.toPath(), frames, 1.0 / 30);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("Average of particle momentum");
+        System.out.println(frames.stream()
+            .mapToDouble(frame -> frame.stream()
+                .mapToDouble(p -> p.getWeight() * p.getSpeed())
+                .sum()
+            ).average().orElse(0)
+        );
+
     }
 
     public static void main(String ...args) {
