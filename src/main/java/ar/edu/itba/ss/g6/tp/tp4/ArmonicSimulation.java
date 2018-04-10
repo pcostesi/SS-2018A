@@ -47,16 +47,31 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         double sTs = simulationTimeStep;
         WeightedDynamicParticle2D ap = armonicParticle;
         double nRx, nRy;
-        double nVx, nVy;
+        double nVx, nVy, pVx, pVy;
         double ax = getXAcceleration();
         double ay = getYAcceleration();
-        // Do for X
-        nRx = ap.getXCoordinate() + ap.getXSpeed() * sTs +
-                ( ((double)2 / 3) * ax  - ((double) 1 / 6) * prevXAcceleration ) * Math.pow(sTs, 2);
-
-        // Do for Y
-        nRy = ap.getYCoordinate() + ap.getYSpeed() * sTs +
-                ( ((double)2 / 3) * ay  - ((double) 1 / 6) * prevYAcceleration ) * Math.pow(sTs, 2);
+        // Calculate new position and predicted speed
+        nRx = ap.getXCoordinate() + ap.getXSpeed() * sTs
+                + ( (2.0 / 3.0) * ax  - (1.0 / 6.0) * prevXAcceleration ) * Math.pow(sTs, 2.0);
+        pVx = ap.getXSpeed() + (3.0 / 2.0) * ax * sTs
+                - (1.0 / 2.0) * prevXAcceleration * sTs;
+        nRy = ap.getYCoordinate() + ap.getYSpeed() * sTs
+                + ( (2.0 / 3.0) * ay  - ( 1.0 / 6.0) * prevYAcceleration ) * Math.pow(sTs, 2.0);
+        pVy = ap.getYSpeed() + (3.0 / 2.0) * ay * sTs
+                - (1.0 / 2.0) * prevYAcceleration * sTs;
+        // Update armonicParticle with new position and predicted speed
+        armonicParticle = new WeightedDynamicParticle2D( ap.getId(), nRx, nRy, pVx, pVy, ap.getRadius(), ap.getWeight());
+        // Calculate t+DT acceleration
+        double fAx = getXAcceleration();
+        double fAy = getYAcceleration();
+        nVx = ap.getXSpeed() + (1.0/3.0) * fAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * prevXAcceleration * sTs;
+        nVy = ap.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * prevYAcceleration * sTs;
+        // Update particle with aproximated speed
+        armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
+                armonicParticle.getXCoordinate(), armonicParticle.getYCoordinate(), nVx, nVy,
+                armonicParticle.getRadius(), armonicParticle.getWeight());
+        prevXAcceleration = ax;
+        prevYAcceleration = ay;
     }
 
     private void updateByGPCO5() {}
