@@ -15,14 +15,24 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private double prevYAcceleration = 0;
 
     // Constants
-    double k = 10e4;
-    double Y = 100; // Gama
+    final double k = 10e4;
+    final double Y = 100; // Gama
 
 
     public ArmonicSimulation(WeightedDynamicParticle2D particle, double step, IntegrationMethod method) {
         this.armonicParticle = particle;
         this.simulationTimeStep = step;
         this.method = method;
+        double prevRX = armonicParticle.getXCoordinate() - armonicParticle.getXSpeed() * simulationTimeStep;
+        double prevRY = armonicParticle.getYCoordinate() - armonicParticle.getYSpeed() * simulationTimeStep;
+        double prevVX = armonicParticle.getXSpeed() - getXAcceleration() * simulationTimeStep;
+        double prevVY = armonicParticle.getYSpeed() - getYAcceleration() * simulationTimeStep;
+        WeightedDynamicParticle2D temp = armonicParticle;
+        armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
+                prevRX, prevRY, prevVX, prevVY, armonicParticle.getRadius(), armonicParticle.getWeight());
+        prevXAcceleration = getXAcceleration();
+        prevYAcceleration = getYAcceleration();
+        armonicParticle = temp;
     }
 
     @Override
