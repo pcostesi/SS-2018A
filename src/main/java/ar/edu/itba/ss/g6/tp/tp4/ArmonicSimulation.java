@@ -1,6 +1,5 @@
 package ar.edu.itba.ss.g6.tp.tp4;
 
-import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
@@ -15,12 +14,14 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private double prevYAcceleration = 0;
 
     // Constants
-    final double k = 10e4;
-    final double Y = 100; // Gama
+    private final double k = 10e4;
+    private final double Y = 100; // Gama
+    private final double m = 70;
 
 
-    public ArmonicSimulation(WeightedDynamicParticle2D particle, double step, IntegrationMethod method) {
-        this.armonicParticle = particle;
+    public ArmonicSimulation(double step, IntegrationMethod method) {
+        double initialSpeed =(-1)*Y/(2*m);
+        this.armonicParticle = new WeightedDynamicParticle2D("1", 1, 0, initialSpeed, 0, 0,m);
         this.simulationTimeStep = step;
         this.method = method;
         double prevRX = armonicParticle.getXCoordinate() - armonicParticle.getXSpeed() * simulationTimeStep;
@@ -36,7 +37,7 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     }
 
     @Override
-    public SimulationFrame getNextStep() {
+    public ArmonicSimulationFrame getNextStep() {
         ArmonicSimulationFrame currentFrame =  new ArmonicSimulationFrame(simulationTime, armonicParticle);
         if( simulationTimeLimit < simulationTime) return null;
         updateArmonicParticle();
@@ -49,6 +50,7 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
             case BEEMAN: updateByBeeman(); break;
             case GPCO5: updateByGPCO5(); break;
             case VERLET: updateByVerlet(); break;
+            case ANALYTIC: updateByAnalytic(); break;
             default: throw new IllegalArgumentException("cHV0byBlbCBxdWUgbGVl");
         }
     }
@@ -88,10 +90,23 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
 
     private void updateByVerlet() {}
 
+    private void updateByAnalytic() {
+        double time = simulationTime + simulationTimeStep;
+        double A = 1;
+        double initialSpeed =(-1)*Y/(2*m);
+        double expTerm = Math.exp(initialSpeed * time);
+        double cosineTerm = Math.cos(Math.pow( (k/m) -  (Y*Y) / (4*m*m), 0.5) * time);
+        double x = A * expTerm * cosineTerm;
+        armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
+                x, armonicParticle.getYCoordinate(), 0, 0,
+                armonicParticle.getRadius(), armonicParticle.getWeight());
+    }
+
     public enum IntegrationMethod {
         BEEMAN,
         GPCO5,
-        VERLET
+        VERLET,
+        ANALYTIC
     }
 
     private double getXForce() {
