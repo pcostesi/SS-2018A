@@ -12,6 +12,8 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private IntegrationMethod method;
     private double prevXAcceleration = 0;
     private double prevYAcceleration = 0;
+    private double prevRX = 0;
+    private double prevRY = 0;
 
     // Constants
     private final double k = 10e4;
@@ -24,8 +26,8 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         this.armonicParticle = new WeightedDynamicParticle2D("1", 1, 0, initialSpeed, 0, 0,m);
         this.simulationTimeStep = step;
         this.method = method;
-        double prevRX = armonicParticle.getXCoordinate() - armonicParticle.getXSpeed() * simulationTimeStep;
-        double prevRY = armonicParticle.getYCoordinate() - armonicParticle.getYSpeed() * simulationTimeStep;
+        prevRX = armonicParticle.getXCoordinate() - armonicParticle.getXSpeed() * simulationTimeStep;
+        prevRY = armonicParticle.getYCoordinate() - armonicParticle.getYSpeed() * simulationTimeStep;
         double prevVX = armonicParticle.getXSpeed() - getXAcceleration() * simulationTimeStep;
         double prevVY = armonicParticle.getYSpeed() - getYAcceleration() * simulationTimeStep;
         WeightedDynamicParticle2D temp = armonicParticle;
@@ -72,7 +74,7 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         pVy = ap.getYSpeed() + (3.0 / 2.0) * ay * sTs
                 - (1.0 / 2.0) * prevYAcceleration * sTs;
         // Update armonicParticle with new position and predicted speed
-        armonicParticle = new WeightedDynamicParticle2D( ap.getId(), nRx, nRy, pVx, pVy, ap.getRadius(), ap.getWeight());
+            armonicParticle = new WeightedDynamicParticle2D( ap.getId(), nRx, nRy, pVx, pVy, ap.getRadius(), ap.getWeight());
         // Calculate t+DT acceleration
         double fAx = getXAcceleration();
         double fAy = getYAcceleration();
@@ -88,7 +90,21 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
 
     private void updateByGPCO5() {}
 
-    private void updateByVerlet() {}
+    private void updateByVerlet() {
+        double sTs = simulationTimeStep;
+        WeightedDynamicParticle2D ap = armonicParticle;
+        double newSpeedX, newPosX, newSpeedY, newPosY;
+        newPosX = 2 * ap.getXCoordinate() - prevRX + (Math.pow(sTs, 2) / ap.getWeight()) * getXForce();
+        newPosY = 2 * ap.getYCoordinate() - prevRY + (Math.pow(sTs, 2) / ap.getWeight()) * getYForce();
+        newSpeedX = (newPosX - ap.getXCoordinate()) / (2 * sTs);
+        newSpeedY = (newPosY - ap.getYCoordinate()) / (2 * sTs);
+        prevRX = ap.getXCoordinate();
+        prevRY = ap.getYCoordinate();
+        armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
+                newPosX, newPosY, newSpeedX, newSpeedY,
+                armonicParticle.getRadius(), armonicParticle.getWeight());
+        return;
+    }
 
     private void updateByAnalytic() {
         double time = simulationTime + simulationTimeStep;

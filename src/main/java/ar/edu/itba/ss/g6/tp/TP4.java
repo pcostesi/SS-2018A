@@ -55,8 +55,8 @@ public class TP4 {
         ArmonicSimulation analyticSim = new ArmonicSimulation(step, ArmonicSimulation.IntegrationMethod.ANALYTIC);
 
         ArmonicSimulationFrame beemanCurrent = beemanSim.getNextStep();
-        /*ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();
-        ArmonicSimulationFrame verletCurrent = verletSim.getNextStep();*/
+        /*ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();*/
+        ArmonicSimulationFrame verletCurrent = verletSim.getNextStep();
         ArmonicSimulationFrame analyticCurrent = analyticSim.getNextStep();
 
         while( beemanCurrent != null ) {
@@ -68,20 +68,20 @@ public class TP4 {
             //builder.append('\t');
            /* gpoc5Current.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
-            });
+            });*/
             builder.append('\t');
             verletCurrent.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
-            });*/
+            });
             builder.append('\t');
             analyticCurrent.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
             });
 
            builder.append('\n');
-            beemanCurrent = beemanSim.getNextStep();/*
-            gpoc5Current = gpoc5Sim.getNextStep();
-            verletCurrent = verletSim.getNextStep();*/
+            beemanCurrent = beemanSim.getNextStep();
+            //gpoc5Current = gpoc5Sim.getNextStep();
+            verletCurrent = verletSim.getNextStep();
             analyticCurrent = analyticSim.getNextStep();
         }
         try{
