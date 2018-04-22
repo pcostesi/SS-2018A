@@ -18,7 +18,6 @@ public class TP4 {
         CommandLineOptions values = new CommandLineOptions(args);
         CmdLineParser parser = new CmdLineParser(values);
 
-        System.out.println("copy pasta");
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
@@ -55,8 +54,8 @@ public class TP4 {
         ArmonicSimulation analyticSim = new ArmonicSimulation(step, ArmonicSimulation.IntegrationMethod.ANALYTIC);
 
         ArmonicSimulationFrame beemanCurrent = beemanSim.getNextStep();
-        /*ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();
-        ArmonicSimulationFrame verletCurrent = verletSim.getNextStep();*/
+        ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();
+        /*ArmonicSimulationFrame verletCurrent = verletSim.getNextStep();*/
         ArmonicSimulationFrame analyticCurrent = analyticSim.getNextStep();
 
         while( beemanCurrent != null ) {
@@ -65,10 +64,11 @@ public class TP4 {
             beemanCurrent.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
             });
-            //builder.append('\t');
-           /* gpoc5Current.getState().forEach( p -> {
+            builder.append('\t');
+           gpoc5Current.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
             });
+           /*
             builder.append('\t');
             verletCurrent.getState().forEach( p -> {
                 builder.append(p.getXCoordinate());
@@ -79,9 +79,9 @@ public class TP4 {
             });
 
            builder.append('\n');
-            beemanCurrent = beemanSim.getNextStep();/*
+            beemanCurrent = beemanSim.getNextStep();
             gpoc5Current = gpoc5Sim.getNextStep();
-            verletCurrent = verletSim.getNextStep();*/
+            //verletCurrent = verletSim.getNextStep();
             analyticCurrent = analyticSim.getNextStep();
         }
         try{

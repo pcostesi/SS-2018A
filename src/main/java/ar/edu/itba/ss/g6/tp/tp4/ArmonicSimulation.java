@@ -16,12 +16,8 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private double[] particleYCoefficients;
     private boolean particleGPCO5initialized = false;
 
-    private final double[][] GearPredictorTable = new double[][]{
-     { 0,        1,         1                               }, // order 2
-     { 1./6,     5./6,      1,     1./3                     }, // order 3
-     { 19./90,   3./4,      1,     1./2,    1./12           }, // order 4
-     { 3./16,    251./360,  1,     11./18,  1./6,   1./60   }, // order 5
-    };
+    private final double[] gearPredictorTable = new double[]
+     { 3./20,    251./260,  1.,    11./18,  1./6,   1./60   };
 
     // Constants
     private final double k = 10e4;
@@ -115,21 +111,21 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
 
     private double[] correctAxisWithGPCO5 (double deltaT, double deltaR2, double[] predicted) {
         double[] rc = {
-         predicted[0] + GearPredictorTable[3][0] * deltaR2,
-         predicted[1] + GearPredictorTable[3][0] * deltaR2 * 1 / Math.pow(deltaT, 1),
-         predicted[2] + GearPredictorTable[3][0] * deltaR2 * 2 / Math.pow(deltaT, 2),
-         predicted[3] + GearPredictorTable[3][0] * deltaR2 * 6 / Math.pow(deltaT, 3),
-         predicted[4] + GearPredictorTable[3][0] * deltaR2 * 24 / Math.pow(deltaT, 4),
-         predicted[5] + GearPredictorTable[3][0] * deltaR2 * 120 / Math.pow(deltaT, 5),
+         predicted[0] + gearPredictorTable[0] * deltaR2,
+         predicted[1] + gearPredictorTable[1] * deltaR2 * 1 / Math.pow(deltaT, 1),
+         predicted[2] + gearPredictorTable[2] * deltaR2 * 2 / Math.pow(deltaT, 2),
+         predicted[3] + gearPredictorTable[3] * deltaR2 * 6 / Math.pow(deltaT, 3),
+         predicted[4] + gearPredictorTable[4] * deltaR2 * 24 / Math.pow(deltaT, 4),
+         predicted[5] + gearPredictorTable[5] * deltaR2 * 120 / Math.pow(deltaT, 5),
         };
         return rc;
     }
 
     private double[] initializeGPCO5Axis(double mass, double r0, double r1) {
-        double r2 = (-k / mass) * (r0 - r1);
-        double r3 = (-k / mass) * (r1 - r2);
-        double r4 = (-k / mass) * (r2 - r3);
-        double r5 = (-k / mass) * (r3 - r4);
+        double r2 = (-k / mass) * r0 - (Y / mass) * r1;
+        double r3 = (-k / mass) * r1 - (Y / mass) * r2;
+        double r4 = (-k / mass) * r2 - (Y / mass) * r3;
+        double r5 = (-k / mass) * r3 - (Y / mass) * r4;
         return new double[] { r0, r1, r2, r3, r4, r5 };
     }
 
@@ -146,8 +142,8 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         double[] yAxis = predictAxisWithGPCO5(simulationTimeStep, particleYCoefficients);
 
         // eval
-        double ax = particleXCoefficients[2];
-        double ay = particleYCoefficients[2];
+        double ax = (-1 * k * xAxis[0] - Y * xAxis[1]) / ap.getWeight();
+        double ay = (-1 * k * yAxis[0] - Y * yAxis[1]) / ap.getWeight();
         double deltaR2x = (ax - xAxis[2]) * Math.pow(simulationTimeStep, 2) / 2;
         double deltaR2y = (ay - yAxis[2]) * Math.pow(simulationTimeStep, 2) / 2;
 
