@@ -10,8 +10,18 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private double simulationTimeStep;
     private double simulationTime = 0;
     private IntegrationMethod method;
-    private double prevXAcceleration = 0;
-    private double prevYAcceleration = 0;
+    double prevXAcceleration;
+    double prevYAcceleration;
+    private double[] particleXCoefficients;
+    private double[] particleYCoefficients;
+    private boolean particleGPCO5initialized = false;
+
+    private final double[][] GearPredictorTable = new double[][]{
+     { 0,        1,         1                               }, // order 2
+     { 1./6,     5./6,      1,     1./3                     }, // order 3
+     { 19./90,   3./4,      1,     1./2,    1./12           }, // order 4
+     { 3./16,    251./360,  1,     11./18,  1./6,   1./60   }, // order 5
+    };
 
     // Constants
     private final double k = 10e4;
@@ -86,7 +96,69 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         prevYAcceleration = ay;
     }
 
-    private void updateByGPCO5() {}
+    private double[] predictAxisWithGPCO5 (double deltaT, double[] r) {
+        double t1 = deltaT;
+        double t2 = Math.pow(deltaT, 2) / 2;
+        double t3 = Math.pow(deltaT, 3) / 6;
+        double t4 = Math.pow(deltaT, 4) / 24;
+        double t5 = Math.pow(deltaT, 5) / 120;
+
+        return new double[] {
+         r[0] + r[1] * t1 + r[2] * t2 + r[3] * t3 + r[4] * t4 + r[5] * t5,  // position
+         r[1] + r[2] * t1 + r[3] * t2 + r[4] * t3 + r[5] * t4,            // speed
+         r[2] + r[3] * t1 + r[4] * t2 + r[5] * t4,                      // acceleration
+         r[3] + r[4] * t1 + r[5] * t2,                                // r3
+         r[4] + r[5] * t1,                                          // r4
+         r[5],                                                    // r5
+        };
+    }
+
+    private double[] correctAxisWithGPCO5 (double deltaT, double deltaR2, double[] predicted) {
+        double[] rc = {
+         predicted[0] + GearPredictorTable[3][0] * deltaR2,
+         predicted[1] + GearPredictorTable[3][0] * deltaR2 * 1 / Math.pow(deltaT, 1),
+         predicted[2] + GearPredictorTable[3][0] * deltaR2 * 2 / Math.pow(deltaT, 2),
+         predicted[3] + GearPredictorTable[3][0] * deltaR2 * 6 / Math.pow(deltaT, 3),
+         predicted[4] + GearPredictorTable[3][0] * deltaR2 * 24 / Math.pow(deltaT, 4),
+         predicted[5] + GearPredictorTable[3][0] * deltaR2 * 120 / Math.pow(deltaT, 5),
+        };
+        return rc;
+    }
+
+    private double[] initializeGPCO5Axis(double mass, double r0, double r1) {
+        double r2 = (-k / mass) * (r0 - r1);
+        double r3 = (-k / mass) * (r1 - r2);
+        double r4 = (-k / mass) * (r2 - r3);
+        double r5 = (-k / mass) * (r3 - r4);
+        return new double[] { r0, r1, r2, r3, r4, r5 };
+    }
+
+    private void updateByGPCO5() {
+        WeightedDynamicParticle2D ap = armonicParticle;
+        if (!particleGPCO5initialized) {
+            particleGPCO5initialized = true;
+            particleXCoefficients = initializeGPCO5Axis(ap.getWeight(), ap.getXCoordinate(), ap.getXSpeed());
+            particleYCoefficients = initializeGPCO5Axis(ap.getWeight(), ap.getYCoordinate(), ap.getYSpeed());
+        }
+
+        // predict
+        double[] xAxis = predictAxisWithGPCO5(simulationTimeStep, particleXCoefficients);
+        double[] yAxis = predictAxisWithGPCO5(simulationTimeStep, particleYCoefficients);
+
+        // eval
+        double ax = particleXCoefficients[2];
+        double ay = particleYCoefficients[2];
+        double deltaR2x = (ax - xAxis[2]) * Math.pow(simulationTimeStep, 2) / 2;
+        double deltaR2y = (ay - yAxis[2]) * Math.pow(simulationTimeStep, 2) / 2;
+
+        // correct
+        double[] rcx = correctAxisWithGPCO5(simulationTimeStep, deltaR2x, xAxis);
+        double[] rcy = correctAxisWithGPCO5(simulationTimeStep, deltaR2y, yAxis);
+
+        particleXCoefficients = rcx;
+        particleYCoefficients = rcy;
+        armonicParticle = new WeightedDynamicParticle2D("0", rcx[0], rcy[0], rcx[1], rcy[1], ap.getRadius(), ap.getWeight());
+    }
 
     private void updateByVerlet() {}
 
