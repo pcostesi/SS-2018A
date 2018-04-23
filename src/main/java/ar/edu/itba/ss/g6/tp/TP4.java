@@ -9,16 +9,19 @@ import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class TP4 {
+    static CommandLineOptions values;
+
     public static void main(String ...args) {
 
-        CommandLineOptions values = new CommandLineOptions(args);
+        values = new CommandLineOptions(args);
         CmdLineParser parser = new CmdLineParser(values);
 
-        System.out.println("copy pasta");
         try {
             parser.parseArgument(args);
         } catch (CmdLineException e) {
@@ -36,18 +39,16 @@ public class TP4 {
             System.exit(0);
         }
 
-        armonicSimulationMode(values.getOutFile());
+        armonicSimulationMode(values.getOutFile(), values.getTimeStep());
 
     }
 
     private static void msdMode(double duration, double l) {
     }
 
-    private static void armonicSimulationMode(File outFile) {
-        double step = 0.01;
+    private static void armonicSimulationMode(File outFile, double step) {
         WeightedDynamicParticle2D particle =
                 new WeightedDynamicParticle2D("1", 1, 0, 0, 0, 0,70000);
-        StringBuilder builder = new StringBuilder();
 
         ArmonicSimulation beemanSim = new ArmonicSimulation(step, ArmonicSimulation.IntegrationMethod.BEEMAN);
         ArmonicSimulation gpoc5Sim = new ArmonicSimulation(step, ArmonicSimulation.IntegrationMethod.GPCO5 );
@@ -55,38 +56,38 @@ public class TP4 {
         ArmonicSimulation analyticSim = new ArmonicSimulation(step, ArmonicSimulation.IntegrationMethod.ANALYTIC);
 
         ArmonicSimulationFrame beemanCurrent = beemanSim.getNextStep();
-        /*ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();*/
+        ArmonicSimulationFrame gpoc5Current = gpoc5Sim.getNextStep();
         ArmonicSimulationFrame verletCurrent = verletSim.getNextStep();
         ArmonicSimulationFrame analyticCurrent = analyticSim.getNextStep();
-
+        try {
+        BufferedWriter writerRaw = new BufferedWriter(new FileWriter(values.getOutFile()));
+        List<String> out = new ArrayList<String>((int)(100)+1);
         while( beemanCurrent != null ) {
-            builder.append(beemanCurrent.getTimestamp());
-            builder.append('\t');
+            out.add(String.valueOf(beemanCurrent.getTimestamp()));
+            out.add(String.valueOf('\t'));
             beemanCurrent.getState().forEach( p -> {
-                builder.append(p.getXCoordinate());
+                out.add(String.valueOf(p.getXCoordinate()));
             });
-            //builder.append('\t');
-           /* gpoc5Current.getState().forEach( p -> {
-                builder.append(p.getXCoordinate());
-            });*/
-            builder.append('\t');
+            out.add(String.valueOf('\t'));
+           gpoc5Current.getState().forEach( p -> {
+               out.add(String.valueOf(p.getXCoordinate()));
+            });
+            out.add(String.valueOf('\t'));
             verletCurrent.getState().forEach( p -> {
-                builder.append(p.getXCoordinate());
+                out.add(String.valueOf(p.getXCoordinate()));
             });
-            builder.append('\t');
+            out.add(String.valueOf('\t'));
             analyticCurrent.getState().forEach( p -> {
-                builder.append(p.getXCoordinate());
+                out.add(String.valueOf(p.getXCoordinate()));
             });
-
-           builder.append('\n');
+            out.add(String.valueOf('\n'));
             beemanCurrent = beemanSim.getNextStep();
-            //gpoc5Current = gpoc5Sim.getNextStep();
+            gpoc5Current = gpoc5Sim.getNextStep();
             verletCurrent = verletSim.getNextStep();
             analyticCurrent = analyticSim.getNextStep();
+            writerRaw.write(out.stream().collect(Collectors.joining()));
+            out.clear();
         }
-        try{
-            BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("armonicout.dat").normalize());
-            writerRaw.write(builder.toString());
         }catch (Exception e) {
             e.printStackTrace();
         }

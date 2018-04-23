@@ -51,6 +51,10 @@ public class CommandLineOptions {
      usage = "weight for the particles")
     private double duration = 60 * 5;
 
+    @Option(name = "-ts", aliases = { "--time-step" }, required = false,
+            usage = "weight for the particles")
+    private double timeStep = 0.1;
+
 
     public CommandLineOptions(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
@@ -107,5 +111,9 @@ public class CommandLineOptions {
 
     public boolean isMsd() {
         return msd;
+    }
+
+    public double getTimeStep() {
+        return timeStep;
     }
 }
