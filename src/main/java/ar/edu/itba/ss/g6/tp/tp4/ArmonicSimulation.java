@@ -15,13 +15,14 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private double prevYAcceleration = 0;
     private double prevRX = 0;
     private double prevRY = 0;
+    private double prevInterSpeed = 0;
 
     private double[] particleXCoefficients;
     private double[] particleYCoefficients;
     private boolean particleGPCO5initialized = false;
 
     private final double[] gearPredictorTable = new double[]
-     { 3./20,    251./260,  1.,    11./18,  1./6,   1./60   };
+     { 3./16,    251./360,  1.,    11./18,  1./6,   1./60   };
 
     // Constants
     private final double k = 10e4;
@@ -38,6 +39,7 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         prevRY = armonicParticle.getYCoordinate() - armonicParticle.getYSpeed() * simulationTimeStep;
         double prevVX = armonicParticle.getXSpeed() - getXAcceleration() * simulationTimeStep;
         double prevVY = armonicParticle.getYSpeed() - getYAcceleration() * simulationTimeStep;
+        prevInterSpeed = armonicParticle.getXSpeed() - getXAcceleration() * (simulationTimeStep/2);
         WeightedDynamicParticle2D temp = armonicParticle;
         armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
                 prevRX, prevRY, prevVX, prevVY, armonicParticle.getRadius(), armonicParticle.getWeight());
@@ -163,16 +165,21 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
     private void updateByVerlet() {
         double sTs = simulationTimeStep;
         WeightedDynamicParticle2D ap = armonicParticle;
-        double newSpeedX, newPosX, newSpeedY, newPosY;
+        double newSpeedX, newPosX, interSpeed;
+        interSpeed = prevInterSpeed + (sTs/ap.getWeight()*getXForce());
+        newPosX = ap.getXCoordinate() + sTs*interSpeed;
+        newSpeedX = (prevInterSpeed + interSpeed)/2;
+        /*double newSpeedX, newPosX, newSpeedY, newPosY;
         newPosX = 2 * ap.getXCoordinate() - prevRX + (Math.pow(sTs, 2) / ap.getWeight()) * getXForce();
         newPosY = 2 * ap.getYCoordinate() - prevRY + (Math.pow(sTs, 2) / ap.getWeight()) * getYForce();
         newSpeedX = (newPosX - ap.getXCoordinate()) / (2 * sTs);
         newSpeedY = (newPosY - ap.getYCoordinate()) / (2 * sTs);
         prevRX = ap.getXCoordinate();
-        prevRY = ap.getYCoordinate();
+        prevRY = ap.getYCoordinate();*/
         armonicParticle = new WeightedDynamicParticle2D( armonicParticle.getId(),
-                newPosX, newPosY, newSpeedX, newSpeedY,
+                newPosX, 0, newSpeedX, 0,
                 armonicParticle.getRadius(), armonicParticle.getWeight());
+        prevInterSpeed = interSpeed;
         return;
     }
 
