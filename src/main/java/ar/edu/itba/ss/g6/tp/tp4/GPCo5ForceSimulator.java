@@ -82,13 +82,13 @@ public class GPCo5ForceSimulator implements ForceSimulator {
     private double derivativeOfForce(double ra, double rb, double ma, double mb, int order) {
         double eij = (ra - rb) / Math.abs(ra - rb);
         if (order == 2) {
-            return       G * (ma * mb) * Math.pow(ra - rb, -2) * eij;
+            return       G * (ma * mb) / Math.pow(ra - rb, 2) * eij;
         } else if (order == 3) {
-            return  -2 * G * (ma * mb) * Math.pow(ra - rb, -3) * eij;
+            return  -2 * G * (ma * mb) / Math.pow(ra - rb, 3) * eij;
         } else if (order == 4) {
-            return   6 * G * (ma * mb) * Math.pow(ra - rb, -4) * eij;
+            return   6 * G * (ma * mb) / Math.pow(ra - rb, 4) * eij;
         } else if (order == 5) {
-            return -24 * G * (ma * mb) * Math.pow(ra - rb, -5) * eij;
+            return -24 * G * (ma * mb) / Math.pow(ra - rb, 5) * eij;
         }
         throw new IllegalArgumentException("didn't expect that");
     }

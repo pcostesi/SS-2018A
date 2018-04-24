@@ -49,18 +49,32 @@ public class TP4b {
     private static void simulate (Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator, double deltaT, int days, CelestialBody2D[] bodies) {
         Exporter<CelestialBody2D> exporter = new OvitoXYZExporter<>();
         List<Collection<CelestialBody2D>> frames = new LinkedList<>();
-        long stop = Math.round(Math.ceil(days * 24 * 60 / deltaT));
+        long stop = Math.round(Math.ceil(days * 24 * 60 * 60 / deltaT));
         List<Double> speedList = new ArrayList<>();
-        while (stop --> 0) {
-            VoyagerSimulationFrame frame = simulator.getNextStep();
-            frames.add(frame.getState());
-            double speed = frame.getState().stream()
-                .filter(p -> p.getId().equals("100"))
-                .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);
-            speedList.add(speed);
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("tp4b-out.xyz").toFile()))) {
+            while (stop --> 0) {
+                VoyagerSimulationFrame frame = simulator.getNextStep();
+                exporter.addFrameToFile(w, frame.getState(), 0);
+                frames.add(frame.getState());
+
+                double speed = frame.getState().stream()
+                    .filter(p -> p.getId().equals("100"))
+                    .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);
+                speedList.add(speed);
+
+                if (stop % 1000 == 0) {
+                    System.out.println(stop);
+                    double earth = frame.getState().stream()
+                     .filter(p -> p.getId().equals("3"))
+                     .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);
+                    System.out.println(earth);
+                }
+            }
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
         try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("velocity.out").toFile()))){
-            exporter.saveAnimationToFile("tp4b-out.xyz", frames, 1);
             for (int i = 0; i < speedList.size(); i++) {
                 double speed = speedList.get(i);
                 w.write(String.format("%d \t %e\n", i * 100, speed));
@@ -106,8 +120,8 @@ public class TP4b {
         double km = 1500;
         double v1rx = earth.getXCoordinate() + Math.cos(angle) * km;
         double v1ry = earth.getYCoordinate() + Math.sin(angle) * km;
-        double v1vx = earth.getXSpeed() + v1.getSpeed() * Math.cos(angle + Math.PI / 2 + v1.getAngle());
-        double v1vy = earth.getYSpeed() + v1.getSpeed() * Math.sin(angle + Math.PI / 2 + v1.getAngle());
+        double v1vx = v1.getSpeed() * Math.cos(angle - Math.PI / 2 + v1.getAngle());
+        double v1vy = v1.getSpeed() * Math.sin(angle - Math.PI / 2 + v1.getAngle());
         double v1m = v1.getWeight();
         bodies[bodies.length - 1] = new CelestialBody2D(v1.getId(), v1rx, v1ry, v1vx, v1vy, 10000, v1m);
         return bodies;
