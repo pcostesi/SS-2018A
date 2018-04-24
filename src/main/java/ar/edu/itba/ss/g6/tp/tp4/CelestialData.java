@@ -5,6 +5,7 @@ public class CelestialData {
     Ephemeris[] planets = new Ephemeris[0];
     VoyagerData voyager1;
     double deltaT;
+    double fpd;
     int days;
 
     public Ephemeris[] getPlanets() {
@@ -13,6 +14,15 @@ public class CelestialData {
 
     public CelestialData setPlanets(Ephemeris[] planets) {
         this.planets = planets;
+        return this;
+    }
+
+    public double getFpd() {
+        return fpd;
+    }
+
+    public CelestialData setFpd(double fpd) {
+        this.fpd = fpd;
         return this;
     }
 

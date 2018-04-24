@@ -67,6 +67,12 @@ public class Particle2D implements Particle {
         return rawDistance < sumOfRadius;
     }
 
+    public double distanceTo(Particle2D particle) {
+        double distanceX = this.getXCoordinate() - particle.getXCoordinate();
+        double distanceY = this.getYCoordinate() - particle.getYCoordinate();
+        return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+    }
+
     public Particle2D(String id, double radius, double xCoord, double yCoord) {
         this.yCoord = yCoord;
         this.xCoord = xCoord;
