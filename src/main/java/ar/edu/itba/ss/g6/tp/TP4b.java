@@ -56,10 +56,10 @@ public class TP4b {
             frames.add(frame.getState());
             double speed = frame.getState().stream()
                 .filter(p -> p.getId().equals("100"))
-                .mapToDouble(p -> p.getSpeed()).sum();
+                .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);
             speedList.add(speed);
         }
-        try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("mod.mod").toFile()))){
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("velocity.out").toFile()))){
             exporter.saveAnimationToFile("tp4b-out.xyz", frames, 1);
             for (int i = 0; i < speedList.size(); i++) {
                 double speed = speedList.get(i);
@@ -100,14 +100,14 @@ public class TP4b {
             throw new IllegalArgumentException("You're missing sun or earth");
         }
         VoyagerData v1 = data.getVoyager1();
-        double distanceX = Math.sqrt(Math.pow(sun.getXCoordinate(), 2) + Math.pow(earth.getXCoordinate(), 2));
-        double distanceY = Math.sqrt(Math.pow(sun.getYCoordinate(), 2) + Math.pow(earth.getYCoordinate(), 2));
-        double angle = Math.atan2(distanceY, distanceX) + v1.getAngle();
+        double distanceX = (sun.getXCoordinate() - earth.getXCoordinate());
+        double distanceY = (sun.getYCoordinate() - earth.getYCoordinate());
+        double angle = Math.atan2(distanceY, distanceX);
         double km = 1500;
-        double v1rx = sun.getXCoordinate() + earth.getXCoordinate() + Math.cos(angle) * km;
-        double v1ry = sun.getYCoordinate() + earth.getYCoordinate() + Math.sin(angle) * km;
-        double v1vx = earth.getXSpeed() + v1.getSpeed() * Math.cos(angle);
-        double v1vy = earth.getYSpeed() + v1.getSpeed() * Math.sin(angle);
+        double v1rx = earth.getXCoordinate() + Math.cos(angle) * km;
+        double v1ry = earth.getYCoordinate() + Math.sin(angle) * km;
+        double v1vx = earth.getXSpeed() + v1.getSpeed() * Math.cos(angle + Math.PI / 2 + v1.getAngle());
+        double v1vy = earth.getYSpeed() + v1.getSpeed() * Math.sin(angle + Math.PI / 2 + v1.getAngle());
         double v1m = v1.getWeight();
         bodies[bodies.length - 1] = new CelestialBody2D(v1.getId(), v1rx, v1ry, v1vx, v1vy, 10000, v1m);
         return bodies;

@@ -37,6 +37,11 @@ public class BeemanForceSimulator implements ForceSimulator {
         pVy = vy + (3.0 / 2.0) * ay * sTs
          - (1.0 / 2.0) * pay * sTs;
 
+        target.getRx()[0] = nRx;
+        target.getRy()[0] = nRy;
+        target.getRx()[1] = pVx;
+        target.getRy()[1] = pVy;
+
         // Calculate t+DT acceleration
         double nAx = computeEffectiveForceInAxis(Axis.X, target, system) / target.getMass();
         double nAy = computeEffectiveForceInAxis(Axis.Y, target, system) / target.getMass();
@@ -45,7 +50,7 @@ public class BeemanForceSimulator implements ForceSimulator {
         nVx = pVx + (1.0/3.0) * nAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * pax * sTs;
         nVy = pVy + (1.0/3.0) * nAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay* sTs;
 
-        // Update particle with aproximated speed
+        // Update particle with approximated speed
         double[] rcx = new double[]{nRx, nVx, nAx, ax};
         double[] rcy = new double[]{nRy, nVy, nAy, ay};
         return new TrajectoryData(rcx, rcy, target.getId(), target.getMass(), target.getRadius());
@@ -115,6 +120,7 @@ public class BeemanForceSimulator implements ForceSimulator {
             return 0;
         }
         double distance = body1.getAxis(axis)[0] - body2.getAxis(axis)[0];
-        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2);
+        double eij = distance / Math.abs(distance);
+        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2) * eij;
     }
 }

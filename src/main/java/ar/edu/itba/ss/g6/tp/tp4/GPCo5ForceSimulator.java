@@ -63,7 +63,7 @@ public class GPCo5ForceSimulator implements ForceSimulator {
             return 0;
         }
         double distance = body1.getAxis(axis)[0] - body2.getAxis(axis)[0];
-        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2);
+        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2) * Math.signum(distance);
     }
 
     private double sumOfDerivativeOfForceInAxis(Axis axis, int order, TrajectoryData target, TrajectoryData[] data) {
