@@ -47,12 +47,13 @@ public class GPCo5ForceSimulator implements ForceSimulator {
         }
 
         // compute the accelerations and derivatives using the whole system
-        for (int der = 2; der < 6; der++) {
+        for (int der = 2; der < TrajectoryData.ORDER + 1; der++) {
             for (int particleIdx = 0; particleIdx < data.length; particleIdx++) {
                 double[] rx = data[particleIdx].getRx();
                 double[] ry = data[particleIdx].getRy();
-                rx[der] = sumOfDerivativeOfForceInAxis(Axis.X, der, data[particleIdx], data);
-                ry[der] = sumOfDerivativeOfForceInAxis(Axis.Y, der, data[particleIdx], data);
+                double mass = data[particleIdx].getMass();
+                rx[der] = sumOfDerivativeOfForceInAxis(Axis.X, der, data[particleIdx], data) / mass;
+                ry[der] = sumOfDerivativeOfForceInAxis(Axis.Y, der, data[particleIdx], data) / mass;
             }
         }
     }
@@ -63,24 +64,33 @@ public class GPCo5ForceSimulator implements ForceSimulator {
             return 0;
         }
         double distance = body1.getAxis(axis)[0] - body2.getAxis(axis)[0];
-        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2) * Math.signum(distance);
+        double eij = distance / Math.abs(distance);
+        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2) * eij;
     }
 
     private double sumOfDerivativeOfForceInAxis(Axis axis, int order, TrajectoryData target, TrajectoryData[] data) {
         // sum the derivative of the forces between target and the other particles
         return Arrays.stream(data)
          .filter(d -> !target.equals(d))
-         // to compute the next order, we simply slide the window through previously
-         // computed values, as the derivative doesn't change.
          .mapToDouble(d -> {
-             double ra = target.getAxis(axis)[order - 2];
-             double rb = d.getAxis(axis)[order - 2];
-             return derivativeOfForce(ra, rb, target.getMass(), d.getMass());
+             double ra = target.getAxis(axis)[0];
+             double rb = d.getAxis(axis)[0];
+             return derivativeOfForce(ra, rb, target.getMass(), d.getMass(), order);
          }).sum();
     }
 
-    private double derivativeOfForce(double ra, double rb, double ma, double mb) {
-        return -2 * G * (ma * mb) * Math.pow(ra - rb, -3);
+    private double derivativeOfForce(double ra, double rb, double ma, double mb, int order) {
+        double eij = (ra - rb) / Math.abs(ra - rb);
+        if (order == 2) {
+            return       G * (ma * mb) * Math.pow(ra - rb, -2) * eij;
+        } else if (order == 3) {
+            return  -2 * G * (ma * mb) * Math.pow(ra - rb, -3) * eij;
+        } else if (order == 4) {
+            return   6 * G * (ma * mb) * Math.pow(ra - rb, -4) * eij;
+        } else if (order == 5) {
+            return -24 * G * (ma * mb) * Math.pow(ra - rb, -5) * eij;
+        }
+        throw new IllegalArgumentException("didn't expect that");
     }
 
 

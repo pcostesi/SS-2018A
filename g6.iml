@@ -12,17 +12,26 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Maven: args4j:args4j:2.33" level="project" />
-    <orderEntry type="library" exported="" name="log4j:log4j:Release" level="project" />
     <orderEntry type="module-library" exported="">
-      <library name="args4j:args4j:2.33" type="repository">
-        <properties maven-id="args4j:args4j:2.33" />
+      <library name="log4j" type="repository">
+        <properties maven-id="log4j:log4j:RELEASE" />
         <CLASSES>
-          <root url="jar://$MAVEN_REPOSITORY$/args4j/args4j/2.33/args4j-2.33.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/log4j-1.2.17.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="com.fasterxml.jackson.core:jackson-databind:2.9.4" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library name="args4j" type="repository">
+        <properties maven-id="args4j:args4j:2.33" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/args4j-2.331.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="jackson-databind" level="project" />
   </component>
 </module>

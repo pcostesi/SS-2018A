@@ -43,6 +43,6 @@
         "speed": 14,
         "weight": 721.9
     },
-    "deltaT": 1000,
+    "deltaT": 100,
     "days": 1800
 }
