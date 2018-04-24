@@ -58,7 +58,7 @@ public class TrajectoryData {
 
         TrajectoryData that = (TrajectoryData) o;
 
-        return id == that.id;
+        return id.equals(that.id);
     }
 
     @Override

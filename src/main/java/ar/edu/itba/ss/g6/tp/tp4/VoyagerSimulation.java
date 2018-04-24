@@ -17,8 +17,8 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
         this.deltaT = deltaT;
         this.firmament = firmament;
 
-        forceSimulator = new GPCo5ForceSimulator(deltaT);
-        //forceSimulator = new BeemanForceSimulator(deltaT);
+        // forceSimulator = new GPCo5ForceSimulator(deltaT);
+        forceSimulator = new BeemanForceSimulator(deltaT);
     }
 
     @Override
