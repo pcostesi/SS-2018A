@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 public class BeemanForceSimulator implements ForceSimulator {
     private double deltaT;
-    private final double G = 6.67384E-20;
+    private final double G = 6.67408E-20;
 
     public BeemanForceSimulator(double deltaT) {
         this.deltaT = deltaT;
@@ -32,7 +32,7 @@ public class BeemanForceSimulator implements ForceSimulator {
         target.getRx()[0] = nRx;
 
         nRy = ry + vy * sTs + 2./3 * ay * sTs2 - 1./6 * pay * sTs2;
-        target.getRx()[0] = nRy;
+        target.getRy()[0] = nRy;
 
         // Compute new acceleration
         double nAx = computeEffectiveForceInAxis(Axis.X, target, system) / target.getMass();
@@ -82,6 +82,7 @@ public class BeemanForceSimulator implements ForceSimulator {
 
             double[] rx = new double[] {p.getXCoordinate(), p.getXSpeed(), ax, pax};
             double[] ry = new double[] {p.getYCoordinate(), p.getYSpeed(), ay, pay};
+
             data[particleIdx] = new TrajectoryData(rx, ry, p.getId(), p.getWeight(), p.getRadius());
         }
 
@@ -94,8 +95,15 @@ public class BeemanForceSimulator implements ForceSimulator {
         if (body1.equals(body2)) {
             return 0;
         }
-        double distance = body2.getAxis(axis)[0] - body1.getAxis(axis)[0];
-        double eij = distance / Math.abs(distance);
-        return G * body1.getMass() * body2.getMass() / Math.pow(distance, 2) * eij;
+        //double distance = body1.getAxis(axis)[0] - body2.getAxis(axis)[0];
+        //return Math.signum(distance) * G * body1.getMass() * body2.getMass() / Math.pow(distance, 2);
+
+        double distanceX = body1.getRx()[0] - body2.getRx()[0];
+        double distanceY = body1.getRy()[0] - body2.getRy()[0];
+        double angle = Math.atan2(distanceY, distanceX);
+        double distance2 = (Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+        double factor = -G * body1.getMass() * body2.getMass();
+        double force = factor / distance2;
+        return Axis.X.equals(axis) ? force * Math.cos(angle) : force * Math.sin(angle);
     }
 }
