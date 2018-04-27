@@ -18,7 +18,6 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     private final CellProvider<T, G> cellProvider;
     private final Map<T, Set<T>> neighborhoods = new HashMap<>();
     private final Map<T, Set<T>> neighborhoodsBF = new HashMap<>();
-    private final boolean useCellIndexMethod = true;
 
     private void addBothWays(T particle, T neighbor) {
         Set<T> theirNeighborhood = neighborhoods.getOrDefault(neighbor, new HashSet<>());
@@ -30,27 +29,25 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
         neighborhoods.put(particle, myNeighborhood);
     }
 
+//    private void addBothWaysBF(T particle, T neighbor) {
+//        Set<T> theirNeighborhood = neighborhoodsBF.getOrDefault(neighbor, new HashSet<>());
+//        theirNeighborhood.add(particle);
+//        neighborhoodsBF.put(neighbor, theirNeighborhood);
+//
+//        Set<T> myNeighborhood = neighborhoodsBF.getOrDefault(particle, new HashSet<>());
+//        myNeighborhood.add(neighbor);
+//        neighborhoodsBF.put(particle, myNeighborhood);
+//    }
 
-    private void addBothWaysBF(T particle, T neighbor) {
-        Set<T> theirNeighborhood = neighborhoodsBF.getOrDefault(neighbor, new HashSet<>());
-        theirNeighborhood.add(particle);
-        neighborhoodsBF.put(neighbor, theirNeighborhood);
-
-        Set<T> myNeighborhood = neighborhoodsBF.getOrDefault(particle, new HashSet<>());
-        myNeighborhood.add(neighbor);
-        neighborhoodsBF.put(particle, myNeighborhood);
-    }
-
-    private void bruteForceSet(Collection<T> particles) {
-        for (T particle : particles) {
-            for (T other : particles) {
-                if (areWithinDistance(particle, other, radius)) {
-                    addBothWaysBF(particle, other);
-                }
-            }
-        }
-    }
-
+//    private void bruteForceSet(Collection<T> particles) {
+//        for (T particle : particles) {
+//            for (T other : particles) {
+//                if (areWithinDistance(particle, other, radius)) {
+//                    addBothWaysBF(particle, other);
+//                }
+//            }
+//        }
+//    }
 
     abstract boolean areWithinDistance(T p1, T p2, double distance);
 
@@ -90,20 +87,20 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
 
     public Grid<T> set(Collection<T> particles) {
         cellIndexMethod(particles);
-        bruteForceSet(particles);
+        //bruteForceSet(particles);
         return this;
     }
 
     public Set<T> getNeighbors(T particle) {
-        Set<T> usingBF = neighborhoodsBF.get(particle);
+        //Set<T> usingBF = neighborhoodsBF.get(particle);
         Set<T> usingCIM = neighborhoods.get(particle);
-        assert usingBF.size() == usingCIM.size();
-        for (T p : usingBF) {
-            assert usingCIM.contains(p);
-        }
-        for (T p : usingCIM) {
-            assert usingBF.contains(p);
-        }
+//        assert usingBF.size() == usingCIM.size();
+//        for (T p : usingBF) {
+//            assert usingCIM.contains(p);
+//        }
+//        for (T p : usingCIM) {
+//            assert usingBF.contains(p);
+//        }
         return usingCIM;
     }
 
@@ -139,7 +136,6 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     public int countParticles() {
         return neighborhoods.size();
     }
-
 
     @Override
     public Set<T> getParticles() {

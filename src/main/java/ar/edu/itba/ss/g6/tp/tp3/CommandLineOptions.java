@@ -41,18 +41,18 @@ public class CommandLineOptions {
 
     @Option(name = "-s", aliases = { "--speed" }, required = false,
      usage = "particle speed")
-    private double speed = 0.1;
+    private double speed = 0.3;
 
     @Option(name = "-w", aliases = { "--weight" }, required = false,
      usage = "weight for the particles")
-    private double weight = 0.1;
+    private double weight = 0.0;
 
     @Option(name = "-t", aliases = { "--time" }, required = false,
-     usage = "weight for the particles")
+     usage = "simulation duration")
     private double duration = 60 * 5;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
-            usage = "weight for the particles")
+            usage = "time step for simulation")
     private double timeStep = 0.1;
 
 
