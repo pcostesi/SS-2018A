@@ -45,4 +45,8 @@ public class WeightedDynamicParticle2D extends DynamicParticle2D implements Weig
     public double getWeight() {
         return weight;
     }
+
+    public double getKineticEnergy() {
+        return (0.5) * this.weight * this.getXSpeed() * this.getXSpeed() * this.getYSpeed() * this.getYSpeed();
+    }
 }
