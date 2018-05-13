@@ -6,6 +6,7 @@ import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GranularSimulation implements TimeDrivenSimulation<TheParticle, GranularSimulationFrame> {
     private final static double G = 9.8;
@@ -17,7 +18,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private double timestamp;
 
-    private TheParticle beeman(TheParticle particle) {
+    private TheParticle move(TheParticle particle) {
         double sTs = deltaT;
         double nRx, nRy;
         double nVx, nVy, pVx, pVy;
@@ -80,6 +81,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     @Override
     public GranularSimulationFrame getNextStep() {
-        return new GranularSimulationFrame(++timestamp, null);
+        Set<TheParticle> state = particles.stream().map(this::move).collect(Collectors.toSet());
+        return new GranularSimulationFrame(++timestamp, state);
     }
 }

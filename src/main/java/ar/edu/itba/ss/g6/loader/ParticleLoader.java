@@ -1,6 +1,8 @@
 package ar.edu.itba.ss.g6.loader;
 
+import ar.edu.itba.ss.g6.exporter.ovito.Exporter;
 import ar.edu.itba.ss.g6.topology.particle.Particle;
+import jdk.jshell.spi.ExecutionControlProvider;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,6 +24,8 @@ public interface ParticleLoader<T extends Particle> {
              .skip(2)
              .map(l -> fromStringValues(l.split("\t")))
              .collect(Collectors.toList());
+        } catch (Exception e) {
+            return null;
         }
     }
 }

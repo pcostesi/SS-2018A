@@ -28,4 +28,36 @@ public class TheParticle extends WeightedDynamicParticle2D {
         return pay;
     }
 
+
+    @Override
+    public String[] values() {
+        return new String[] {
+         getId(),
+         String.valueOf(getXCoordinate()),
+         String.valueOf(getYCoordinate()),
+         String.valueOf(getXSpeed()),
+         String.valueOf(getYSpeed()),
+         String.valueOf(getxAcceleration()),
+         String.valueOf(getyAcceleration()),
+         String.valueOf(getPreviousAccelerationX()),
+         String.valueOf(getPreviousAccelerationY()),
+         String.valueOf(getRadius()),
+         String.valueOf(getWeight())
+        };
+    }
+
+    public static TheParticle fromValues(String ...values) {
+        return new TheParticle(values[0],
+         Double.parseDouble(values[1]),
+         Double.parseDouble(values[2]),
+         Double.parseDouble(values[3]),
+         Double.parseDouble(values[4]),
+         Double.parseDouble(values[5]),
+         Double.parseDouble(values[6]),
+         Double.parseDouble(values[7]),
+         Double.parseDouble(values[8]),
+         Double.parseDouble(values[9]),
+         Double.parseDouble(values[10]));
+    }
+
 }
