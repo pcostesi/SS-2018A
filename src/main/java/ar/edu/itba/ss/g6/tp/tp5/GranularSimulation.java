@@ -2,6 +2,9 @@ package ar.edu.itba.ss.g6.tp.tp5;
 
 import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
+import ar.edu.itba.ss.g6.topology.force.Force;
+import ar.edu.itba.ss.g6.topology.force.GranularForce;
+import ar.edu.itba.ss.g6.topology.geometry.Vessel;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.topology.vector.V2d;
@@ -9,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class GranularSimulation implements TimeDrivenSimulation<TheParticle, GranularSimulationFrame> {
     private final static double G = -9.8;
@@ -17,12 +21,14 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     private final double D;
     private final double deltaT;
     private Set<TheParticle> particles;
+    private final Force force;
+    private final Vessel vessel;
 
     private double timestamp;
 
     private TheParticle warp(@NotNull TheParticle particle) {
-        if (particle.getPosition().getY() < (L / -10.)) {
-            V2d position = new V2d(particle.getPosition().getX(), L - particle.getRadius());
+        if (particle.getPosition().getY() <= (L * -0.1)) {
+            V2d position = new V2d(particle.getPosition().getX(), L - particle.getRadius() * 1.1);
             V2d resting = new V2d(0, 0);
             return new TheParticle(particle.getId(), position, resting, resting, resting,
              particle.getRadius(), particle.getMass());
@@ -63,28 +69,41 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             particle.getRadius(), particle.getMass());
 
         return result;
-
     }
 
-    private Set<TheParticle> getNeighbors(@NotNull TheParticle particle) {
-        return particles.parallelStream().filter(particle::overlapsWith).collect(Collectors.toSet());
+    private Stream<TheParticle> getNeighbors(@NotNull TheParticle particle) {
+        return particles.parallelStream().filter(p -> !p.equals(p)).filter(particle::overlapsWith);
+    }
+
+    private V2d getForce(@NotNull TheParticle particle) {
+        V2d p2pForce = getNeighbors(particle)
+            .map(neighbor -> force.getForce(particle, neighbor))
+            .peek(p -> System.out.println(p))
+            .reduce(new V2d(0, 0), (v1, v2) -> v1.add(v2));
+
+        V2d p2wForce = vessel.getWalls().parallelStream()
+            .map(wall -> force.getForce(particle, wall))
+            .reduce(new V2d(0, 0), (v1, v2) -> v1.add(v2));
+        return p2pForce.add(p2wForce);
     }
 
     private double getXAcceleration(@NotNull TheParticle particle) {
-        return 0;
+        return getForce(particle).getX() / particle.getMass();
     }
 
     private double getYAcceleration(@NotNull TheParticle particle) {
-        return G;
+        return G + getForce(particle).getY() / particle.getMass();
     }
 
-    public GranularSimulation(double deltaT, double width, double height, double aperture, Set<TheParticle> particles) {
+    public GranularSimulation(double kn, double kt, double deltaT, double width, double height, double aperture, Set<TheParticle> particles) {
         this.deltaT = deltaT;
         this.W = width;
         this.L = height;
         this.D = aperture;
         this.particles = particles;
+        this.vessel = new Vessel(height, width, aperture);
 
+        force = new GranularForce(kn, kt);
         if (W > L || D > W) {
             throw new IllegalArgumentException("L > W > D");
         }

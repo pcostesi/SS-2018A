@@ -65,7 +65,7 @@ public class TP5 {
         try {
             exporter.saveFrameToFile(output, particles, 0);
         } catch (IOException e) {
-            System.err.println("Oh shi...");
+            System.err.println("Can't write 🤷🏻‍♂️");
             System.exit(1);
         }
     }
@@ -80,13 +80,13 @@ public class TP5 {
         int framesCaptured = 0;
         double FPS = values.getFps();
         double deltaT = values.getTimeStep();
-        Set<TheParticle> boundaries = Set.of(new TheParticle("-1", 0, values.getLenght() / -10, 0, 0, 0.001, 0),
+        Set<TheParticle> boundaries = Set.of(new TheParticle("-1", 0, values.getLenght() * -0.1, 0, 0, 0.001, 0),
          new TheParticle("-2", values.getWidth(), values.getLenght(), 0, 0, 0.001, 0));
 
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
                 double ts = frame.getTimestamp();
-                if (ts >= framesCaptured * FPS * deltaT && ts < framesCaptured * FPS * deltaT + deltaT) {
+                if (ts >= framesCaptured / FPS && ts < framesCaptured / FPS + deltaT) {
                     Set<TheParticle> particles = new HashSet<>();
                     particles.addAll(boundaries);
                     particles.addAll(frame.getState());
@@ -96,7 +96,7 @@ public class TP5 {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Oh f...");
+            System.err.println("Can't write sim 🤷🏻‍♂️");
             System.exit(4);
         }
     }
@@ -107,8 +107,10 @@ public class TP5 {
         double aperture = values.getAperture();
         double deltaT = values.getTimeStep();
         Set<TheParticle> particles = loadParticles(values);
+        double kn = values.getElasticConstantN();
+        double kt = values.getElasticConstantT();
 
-        Simulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(deltaT, width, height, aperture, particles);
+        Simulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(kn, kt, deltaT, width, height, aperture, particles);
         return simulation;
     }
 

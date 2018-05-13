@@ -46,10 +46,10 @@ public class CommandLineOptions {
     private double maxDiameter = 0.03;
 
     @Option(name = "--ect", usage = "elastic constant t", depends = {"-s"})
-    private double elasticConstantT = 2;
+    private double elasticConstantT = 200000;
 
     @Option(name = "--ecn", usage = "elastic constant n", depends = {"-s"})
-    private double elasticConstantN = 10;
+    private double elasticConstantN = 100000;
 
     @Option(name = "-m", aliases = {"--mass", "-M"}, usage = "The mass of the particles", depends = {"-s"})
     private double particleMass = 0.01;
@@ -60,7 +60,7 @@ public class CommandLineOptions {
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .001;
+    private double timeStep = .0001;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")
