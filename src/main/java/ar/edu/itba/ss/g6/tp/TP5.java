@@ -5,8 +5,8 @@ import ar.edu.itba.ss.g6.exporter.ovito.OvitoXYZExporter;
 import ar.edu.itba.ss.g6.loader.DynamicDataLoader;
 import ar.edu.itba.ss.g6.loader.ParticleLoader;
 import ar.edu.itba.ss.g6.simulation.Simulation;
-import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.topology.particle.ParticleDyn2DWeigGenerator;
+import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.tp.tp5.CommandLineOptions;
 import ar.edu.itba.ss.g6.tp.tp5.GranularSimulation;
@@ -56,9 +56,9 @@ public class TP5 {
 
         ParticleDyn2DWeigGenerator generator = new ParticleDyn2DWeigGenerator(weight, w, l, n, minRad, maxRad);
 
-        Set<WeightedDynamicParticle2D> particles = generator.generate();
+        Set<TheParticle> particles = generator.generate();
 
-        Exporter<WeightedDynamicParticle2D> exporter = new OvitoXYZExporter<>();
+        Exporter<TheParticle> exporter = new OvitoXYZExporter<>();
 
         try {
             exporter.saveFrameToFile(output, particles, 0);
@@ -69,30 +69,29 @@ public class TP5 {
     }
 
     private static void simulate(CommandLineOptions values) {
-        Simulation<WeightedDynamicParticle2D, GranularSimulationFrame> simulation = granularSimulation(values);
+        Simulation<TheParticle, GranularSimulationFrame> simulation = granularSimulation(values);
         GranularSimulationFrame frame;
         double stopTime = values.getDuration();
 
         while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() < stopTime) {
             System.out.println(frame.getTimestamp());
-            System.out.println(frame.getState());
         }
     }
 
-    private static Simulation<WeightedDynamicParticle2D, GranularSimulationFrame> granularSimulation(CommandLineOptions values) {
+    private static Simulation<TheParticle, GranularSimulationFrame> granularSimulation(CommandLineOptions values) {
         double width = values.getWidth();
         double height = values.getLenght();
         double aperture = values.getAperture();
         double deltaT = values.getTimeStep();
-        Set<WeightedDynamicParticle2D> particles = loadParticles(values);
+        Set<TheParticle> particles = loadParticles(values);
 
-        Simulation<WeightedDynamicParticle2D, GranularSimulationFrame> simulation = new GranularSimulation(deltaT, width, height, aperture, particles);
+        Simulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(deltaT, width, height, aperture, particles);
         return simulation;
     }
 
-    private static Set<WeightedDynamicParticle2D> loadParticles(CommandLineOptions values) {
-        ParticleLoader<WeightedDynamicParticle2D> loader = new DynamicDataLoader<>(WeightedDynamicParticle2D.class);
-        List<WeightedDynamicParticle2D> listOfParticles;
+    private static Set<TheParticle> loadParticles(CommandLineOptions values) {
+        ParticleLoader<TheParticle> loader = new DynamicDataLoader<>(TheParticle.class);
+        List<TheParticle> listOfParticles;
         try {
             listOfParticles = loader.loadFromFile(values.getInFile());
             return new HashSet<>(listOfParticles);

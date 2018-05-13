@@ -21,7 +21,7 @@ public class DynamicDataLoader<T extends DynamicParticle> implements ParticleLoa
             // Now only God knows.
             Class<?>[] argtypes = { String[].class };
             Object[] parameters = { values };
-            Method fromValues = cls.getDeclaredMethod("fromValues", argtypes);
+            Method fromValues = cls.getMethod("fromValues", argtypes);
             return (T) fromValues.invoke(null, parameters);
 
         } catch (NoSuchMethodException e) {
