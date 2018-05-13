@@ -4,6 +4,7 @@ import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
+import ar.edu.itba.ss.g6.topology.vector.V2d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
@@ -20,9 +21,11 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     private double timestamp;
 
     private TheParticle warp(@NotNull TheParticle particle) {
-        if (particle.getYCoordinate() < (L / -10.)) {
-            return new TheParticle(particle.getId(), particle.getXCoordinate(), L, 0, 0, 0, 0, 0, 0,
-             particle.getRadius(), particle.getWeight());
+        if (particle.getPosition().getY() < (L / -10.)) {
+            V2d position = new V2d(particle.getPosition().getX(), L - particle.getRadius());
+            V2d resting = new V2d(0, 0);
+            return new TheParticle(particle.getId(), position, resting, resting, resting,
+             particle.getRadius(), particle.getMass());
         }
         return particle;
     }
@@ -33,31 +36,31 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         double nVx, nVy, pVx, pVy;
         double ax = getXAcceleration(particle);
         double ay = getYAcceleration(particle);
-        double pax = particle.getPreviousAccelerationX();
-        double pay = particle.getPreviousAccelerationY();
+        double pax = particle.getPrevAcceleration().getX();
+        double pay = particle.getPrevAcceleration().getY();
 
         // Calculate new position and predicted speed
-        nRx = particle.getXCoordinate() + particle.getXSpeed() * sTs
+        nRx = particle.getPosition().getX() + particle.getVelocity().getX() * sTs
          + ( (2.0 / 3.0) * ax  - (1.0 / 6.0) * pax ) * Math.pow(sTs, 2.0);
-        pVx = particle.getXSpeed() + (3.0 / 2.0) * ax * sTs
+        pVx = particle.getVelocity().getX() + (3.0 / 2.0) * ax * sTs
          - (1.0 / 2.0) * pax * sTs;
 
-        nRy = particle.getYCoordinate() + particle.getYSpeed() * sTs
+        nRy = particle.getPosition().getY() + particle.getVelocity().getY() * sTs
          + ( (2.0 / 3.0) * ay  - ( 1.0 / 6.0) * pay ) * Math.pow(sTs, 2.0);
-        pVy = particle.getYSpeed() + (3.0 / 2.0) * ay * sTs
+        pVy = particle.getVelocity().getY() + (3.0 / 2.0) * ay * sTs
          - (1.0 / 2.0) * pay * sTs;
 
         // Update particle with new position and predicted speed
-        TheParticle predictedParticle = new TheParticle(particle.getId(), nRx, nRy, pVx, pVy, particle.getRadius(), particle.getWeight());
+        TheParticle predictedParticle = new TheParticle(particle.getId(), nRx, nRy, pVx, pVy, particle.getRadius(), particle.getMass());
         // Calculate t+DT acceleration
         double fAx = getXAcceleration(predictedParticle);
         double fAy = getYAcceleration(predictedParticle);
-        nVx = particle.getXSpeed() + (1.0/3.0) * fAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * pax * sTs;
-        nVy = particle.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay * sTs;
+        nVx = particle.getVelocity().getX() + (1.0/3.0) * fAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * pax * sTs;
+        nVy = particle.getVelocity().getY() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay * sTs;
 
         // Update particle with approximated speed
         TheParticle result = new TheParticle(particle.getId(), nRx, nRy, nVx, nVy, fAx, fAy, ax, ay,
-            particle.getRadius(), particle.getWeight());
+            particle.getRadius(), particle.getMass());
 
         return result;
 

@@ -38,7 +38,7 @@ public class V2d {
     public double distance(final V2d v2) {
         double distX = v2.x - x;
         double distY = v2.y - y;
-        return Math.sqrt(distX * distX + distY * distY);
+        return Math.sqrt(Math.pow(distX, 2) + Math.pow(distY, 2));
     }
 
     @Override
@@ -57,4 +57,11 @@ public class V2d {
         return new V2d(x * cos - y * sin, x * sin + y * cos);
     }
 
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 }

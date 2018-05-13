@@ -1,13 +1,14 @@
 package ar.edu.itba.ss.g6.loader;
 
 import ar.edu.itba.ss.g6.topology.particle.DynamicParticle;
+import ar.edu.itba.ss.g6.topology.particle.Particle;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class DynamicDataLoader<T extends DynamicParticle> implements ParticleLoader<T> {
+public class DynamicDataLoader<T extends Particle> implements ParticleLoader<T> {
     Class<T> cls;
 
     public DynamicDataLoader(Class<T> cls) {
