@@ -57,11 +57,15 @@ public class CommandLineOptions {
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 60 * 5;
+    private double duration = 10;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
-            usage = "time step for simulation")
-    private double timeStep = 0.1;
+     usage = "time step for simulation")
+    private double timeStep = .001;
+
+    @Option(name = "-f", aliases = { "--fps" }, required = false,
+     usage = "frames per second")
+    private double fps = 30;
 
 
     public CommandLineOptions(String... args) {
@@ -139,5 +143,9 @@ public class CommandLineOptions {
 
     public double getParticleMass() {
         return particleMass;
+    }
+
+    public double getFps() {
+        return fps;
     }
 }

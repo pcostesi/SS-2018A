@@ -4,21 +4,22 @@ import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GranularSimulation implements TimeDrivenSimulation<TheParticle, GranularSimulationFrame> {
-    private final static double G = 9.8;
+    private final static double G = -9.8;
     private final double W;
     private final double L;
     private final double D;
     private final double deltaT;
-    private final Set<TheParticle> particles;
+    private Set<TheParticle> particles;
 
     private double timestamp;
 
-    private TheParticle move(TheParticle particle) {
+    private TheParticle move(@NotNull TheParticle particle) {
         double sTs = deltaT;
         double nRx, nRy;
         double nVx, nVy, pVx, pVy;
@@ -47,24 +48,19 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         nVy = particle.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay * sTs;
 
         // Update particle with approximated speed
-        TheParticle result = null;// = new TheParticle();
-        // = new WeightedDynamicParticle2D( armonicParticle.getId(),
-        // armonicParticle.getXCoordinate(), armonicParticle.getYCoordinate(), nVx, nVy,
-        // armonicParticle.getRadius(), armonicParticle.getWeight());
-        // prevXAcceleration = ax;
-        // prevYAcceleration = ay;
+        TheParticle result =  new TheParticle(particle.getId(), nRx, nRy, nVx, nVy, fAx, fAy, ax, ay,
+            particle.getRadius(), particle.getWeight());
 
         return result;
 
     }
 
-    private double getXAcceleration(TheParticle particle) {
+    private double getXAcceleration(@NotNull TheParticle particle) {
         return 0;
     }
 
-    private double getYAcceleration(TheParticle particle) {
-        double forceDueToGravity = G * particle.getWeight();
-        return forceDueToGravity;
+    private double getYAcceleration(@NotNull TheParticle particle) {
+        return G;
     }
 
     public GranularSimulation(double deltaT, double width, double height, double aperture, Set<TheParticle> particles) {
@@ -72,7 +68,9 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.W = width;
         this.L = height;
         this.D = aperture;
-        this.particles = particles;
+        // this.particles = particles;
+
+        this.particles = Set.of(new TheParticle("0", width / 2, height, 0, 0, 10, 1));
 
         if (W > L || D > W) {
             throw new IllegalArgumentException("L > W > D");
@@ -81,7 +79,13 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     @Override
     public GranularSimulationFrame getNextStep() {
+        if (timestamp == 0) {
+            timestamp += deltaT;
+            return new GranularSimulationFrame(0, particles);
+        }
+        timestamp += deltaT;
         Set<TheParticle> state = particles.stream().map(this::move).collect(Collectors.toSet());
-        return new GranularSimulationFrame(++timestamp, state);
+        this.particles = state;
+        return new GranularSimulationFrame(timestamp, state);
     }
 }
