@@ -19,6 +19,14 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private double timestamp;
 
+    private TheParticle warp(@NotNull TheParticle particle) {
+        if (particle.getYCoordinate() < (L / -10.)) {
+            return new TheParticle(particle.getId(), particle.getXCoordinate(), L, 0, 0, 0, 0, 0, 0,
+             particle.getRadius(), particle.getWeight());
+        }
+        return particle;
+    }
+
     private TheParticle move(@NotNull TheParticle particle) {
         double sTs = deltaT;
         double nRx, nRy;
@@ -48,11 +56,15 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         nVy = particle.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay * sTs;
 
         // Update particle with approximated speed
-        TheParticle result =  new TheParticle(particle.getId(), nRx, nRy, nVx, nVy, fAx, fAy, ax, ay,
+        TheParticle result = new TheParticle(particle.getId(), nRx, nRy, nVx, nVy, fAx, fAy, ax, ay,
             particle.getRadius(), particle.getWeight());
 
         return result;
 
+    }
+
+    private Set<TheParticle> getNeighbors(@NotNull TheParticle particle) {
+        return particles.parallelStream().filter(particle::overlapsWith).collect(Collectors.toSet());
     }
 
     private double getXAcceleration(@NotNull TheParticle particle) {
@@ -84,7 +96,10 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             return new GranularSimulationFrame(0, particles);
         }
         timestamp += deltaT;
-        Set<TheParticle> state = particles.stream().map(this::move).collect(Collectors.toSet());
+        Set<TheParticle> state = particles.parallelStream()
+            .map(this::move)
+            .map(this::warp)
+            .collect(Collectors.toSet());
         this.particles = state;
         return new GranularSimulationFrame(timestamp, state);
     }
