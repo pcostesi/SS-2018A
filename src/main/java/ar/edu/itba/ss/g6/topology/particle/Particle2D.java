@@ -67,11 +67,18 @@ public class Particle2D implements Particle {
         return rawDistance < sumOfRadius;
     }
 
+    public boolean collides(Particle2D particle) {
+        return overlapsWith(particle);
+    }
+
     public double distanceTo(Particle2D particle) {
         double distanceX = this.getXCoordinate() - particle.getXCoordinate();
         double distanceY = this.getYCoordinate() - particle.getYCoordinate();
-        return Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+        double radiusDistance = this.getRadius() + particle.getRadius();
+        double rawDistance =  Math.sqrt(Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+        return rawDistance - radiusDistance;
     }
+
 
     public Particle2D(String id, double radius, double xCoord, double yCoord) {
         this.yCoord = yCoord;
