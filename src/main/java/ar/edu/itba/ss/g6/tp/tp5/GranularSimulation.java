@@ -80,9 +80,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.W = width;
         this.L = height;
         this.D = aperture;
-        // this.particles = particles;
-
-        this.particles = Set.of(new TheParticle("0", width / 2, height, 0, 0, 10, 1));
+        this.particles = particles;
 
         if (W > L || D > W) {
             throw new IllegalArgumentException("L > W > D");

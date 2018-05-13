@@ -7,7 +7,6 @@ import ar.edu.itba.ss.g6.loader.ParticleLoader;
 import ar.edu.itba.ss.g6.simulation.Simulation;
 import ar.edu.itba.ss.g6.topology.particle.ParticleDyn2DWeigGenerator;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
-import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.tp.tp5.CommandLineOptions;
 import ar.edu.itba.ss.g6.tp.tp5.GranularSimulation;
 import ar.edu.itba.ss.g6.tp.tp5.GranularSimulationFrame;
@@ -53,11 +52,11 @@ public class TP5 {
         double w = values.getWidth();
         double l = values.getLenght();
         int n = values.getParticles();
-        double minRad = values.getMinRadius();
-        double maxRad = values.getMaxRadius();
+        double minD = values.getMinDiameter();
+        double maxD = values.getMaxDiameter();
         Path output = values.getOutFile();
 
-        ParticleDyn2DWeigGenerator generator = new ParticleDyn2DWeigGenerator(weight, w, l, n, minRad, maxRad);
+        ParticleDyn2DWeigGenerator generator = new ParticleDyn2DWeigGenerator(weight, w, l, n, minD, maxD);
 
         Set<TheParticle> particles = generator.generate();
 
@@ -81,13 +80,18 @@ public class TP5 {
         int framesCaptured = 0;
         double FPS = values.getFps();
         double deltaT = values.getTimeStep();
+        Set<TheParticle> boundaries = Set.of(new TheParticle("-1", 0, values.getLenght() / -10, 0, 0, 0.001, 0),
+         new TheParticle("-2", values.getWidth(), values.getLenght(), 0, 0, 0.001, 0));
 
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
                 double ts = frame.getTimestamp();
                 if (ts >= framesCaptured * FPS * deltaT && ts < framesCaptured * FPS * deltaT + deltaT) {
+                    Set<TheParticle> particles = new HashSet<>();
+                    particles.addAll(boundaries);
+                    particles.addAll(frame.getState());
                     System.out.printf("%d - %f\n", framesCaptured, frame.getTimestamp());
-                    exporter.addFrameToFile(out, frame.getState(), frame.getTimestamp());
+                    exporter.addFrameToFile(out, particles, frame.getTimestamp());
                     framesCaptured += 1;
                 }
             }

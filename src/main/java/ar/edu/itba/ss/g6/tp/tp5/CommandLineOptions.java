@@ -4,7 +4,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
 import java.nio.file.Path;
 
 public class CommandLineOptions {
@@ -40,11 +39,11 @@ public class CommandLineOptions {
     @Option(name = "-p", aliases = {"--particles", "-P"}, usage = "The number of particles to generate", depends = {"-g"})
     private int particles = 100;
 
-    @Option(name = "-r", aliases = {"--minRadius"}, depends = {"-g"})
-    private double minRadius = 0.02;
+    @Option(name = "-r", aliases = {"--minDiameter"}, depends = {"-g"})
+    private double minDiameter = 0.02;
 
-    @Option(name = "-R", aliases = {"--maxRadius"}, depends = {"-g"})
-    private double maxRadius = 0.03;
+    @Option(name = "-R", aliases = {"--maxDiameter"}, depends = {"-g"})
+    private double maxDiameter = 0.03;
 
     @Option(name = "--ect", usage = "elastic constant t", depends = {"-s"})
     private double elasticConstantT = 2;
@@ -125,12 +124,12 @@ public class CommandLineOptions {
         return particles;
     }
 
-    public double getMinRadius() {
-        return minRadius;
+    public double getMinDiameter() {
+        return minDiameter;
     }
 
-    public double getMaxRadius() {
-        return maxRadius;
+    public double getMaxDiameter() {
+        return maxDiameter;
     }
 
     public double getElasticConstantT() {
