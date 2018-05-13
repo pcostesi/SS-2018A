@@ -13,11 +13,13 @@ public class ParticleDyn2DWeigGenerator implements ParticleGenerator<WeightedDyn
     double MIN_DIAMETER =  0.02; // m
     
 
-    public ParticleDyn2DWeigGenerator(double weight, double w, double l, int n) {
+    public ParticleDyn2DWeigGenerator(double weight, double w, double l, int n, double minRad, double maxRad) {
         this.weight = weight;
         this.W = w;
         this.L = l;
         this.N = n;
+        this.MAX_DIAMETER = maxRad;
+        this.MIN_DIAMETER = minRad;
     }
 
     @Override

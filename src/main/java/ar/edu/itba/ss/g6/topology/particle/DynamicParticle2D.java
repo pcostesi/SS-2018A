@@ -93,21 +93,4 @@ public class DynamicParticle2D extends Particle2D implements DynamicParticle {
         this.yAcceleration = ay;
     }
 
-    public boolean collides(DynamicParticle2D p2) {
-        return distance(p2) <= 0;
-    }
-
-    public double distance(final DynamicParticle2D p2) {
-        double thisX = this.getXCoordinate();
-        double thisY = this.getYCoordinate();
-        double otherX = p2.getXCoordinate();
-        double otherY = p2.getYCoordinate();
-
-        double distanceInX = thisX - otherX;
-        double distanceInY = thisY - otherY;
-        double sumOfRadius = this.getRadius() + p2.getRadius();
-        double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
-
-        return rawDistance - sumOfRadius;
-    }
 }
