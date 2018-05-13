@@ -1,0 +1,11 @@
+data = dlmread("caudal.out", "'\t'");
+t = data(:,1);
+kinetic1 = data(:,2);
+kinetic2 = data(:,3);
+kinetic3 = data(:,4);
+kinetic4 = data(:,5);
+plot(t, kinetic1, "D=INSERT", t, kinetic2, "D=INSERT", t, kinetic3, "D=INSERT", t, kinetic4, "D=INSERT");
+title ("Evolucion Energia Cinetica");
+xlabel ("Tiempo (s)");
+ylabel ("Energia Cinetica(J)");
+set(gca, "linewidth", 1, "fontsize", 12);
