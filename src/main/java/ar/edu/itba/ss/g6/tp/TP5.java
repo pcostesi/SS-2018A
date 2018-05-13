@@ -14,7 +14,10 @@ import ar.edu.itba.ss.g6.tp.tp5.GranularSimulationFrame;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
@@ -72,9 +75,25 @@ public class TP5 {
         Simulation<TheParticle, GranularSimulationFrame> simulation = granularSimulation(values);
         GranularSimulationFrame frame;
         double stopTime = values.getDuration();
+        Path output = values.getOutFile();
+        Exporter<TheParticle> exporter = new OvitoXYZExporter<>();
 
-        while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() < stopTime) {
-            System.out.println(frame.getTimestamp());
+        int framesCaptured = 0;
+        double FPS = values.getFps();
+        double deltaT = values.getTimeStep();
+
+        try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
+            while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
+                double ts = frame.getTimestamp();
+                if (ts >= framesCaptured * FPS * deltaT && ts < framesCaptured * FPS * deltaT + deltaT) {
+                    System.out.printf("%d - %f\n", framesCaptured, frame.getTimestamp());
+                    exporter.addFrameToFile(out, frame.getState(), frame.getTimestamp());
+                    framesCaptured += 1;
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Oh f...");
+            System.exit(4);
         }
     }
 
