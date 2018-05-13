@@ -42,11 +42,11 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         // Calculate t+DT acceleration
         double fAx = getXAcceleration(predictedParticle);
         double fAy = getYAcceleration(predictedParticle);
-        nVx = particle.getXSpeed() + (1.0/3.0) * fAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * prevXAcceleration * sTs;
-        nVy = particle.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * prevYAcceleration * sTs;
+        nVx = particle.getXSpeed() + (1.0/3.0) * fAx * sTs + (5.0/6.0) * ax * sTs - (1.0/6.0) * pax * sTs;
+        nVy = particle.getYSpeed() + (1.0/3.0) * fAy * sTs + (5.0/6.0) * ay * sTs - (1.0/6.0) * pay * sTs;
 
         // Update particle with approximated speed
-        TheParticle result = new TheParticle();
+        TheParticle result = null;// = new TheParticle();
         // = new WeightedDynamicParticle2D( armonicParticle.getId(),
         // armonicParticle.getXCoordinate(), armonicParticle.getYCoordinate(), nVx, nVy,
         // armonicParticle.getRadius(), armonicParticle.getWeight());
