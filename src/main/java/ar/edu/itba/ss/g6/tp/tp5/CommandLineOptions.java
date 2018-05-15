@@ -5,6 +5,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class CommandLineOptions {
     private boolean errorFree;
@@ -19,6 +20,10 @@ public class CommandLineOptions {
      usage = "output file for the particles")
     private Path outFile;
 
+    @Option(name = "-ñ", aliases = { "--fstats" }, required = false,
+     usage = "output file for stats")
+    private Path statsFile = Paths.get("stats.tsv");
+
     @Option(name = "-g", aliases = { "--generate" }, required = false, forbids = {"-s"},
      usage = "input file for the particles")
     private boolean generate;
@@ -28,16 +33,16 @@ public class CommandLineOptions {
     private boolean simulate;
 
     @Option(name = "-l", aliases = {"--length", "-L"}, usage = "The height of the container")
-    private double lenght = 10;
+    private double lenght = 1;
 
     @Option(name = "-d", aliases = {"--aperture", "-D"}, usage = "The diameter of the aperture in the base")
-    private double aperture = 0.25;
+    private double aperture = 0.1;
 
     @Option(name = "-w", aliases = {"-W", "--width"}, usage = "The width of the container")
-    private double width = 5;
+    private double width = 0.4;
 
     @Option(name = "-p", aliases = {"--particles", "-P"}, usage = "The number of particles to generate", depends = {"-g"})
-    private int particles = 100;
+    private int particles = 200;
 
     @Option(name = "-r", aliases = {"--minDiameter"}, depends = {"-g"})
     private double minDiameter = 0.02;
@@ -46,10 +51,10 @@ public class CommandLineOptions {
     private double maxDiameter = 0.03;
 
     @Option(name = "--ect", usage = "elastic constant t", depends = {"-s"})
-    private double elasticConstantT = 200000;
+    private double elasticConstantT = 20000;
 
     @Option(name = "--ecn", usage = "elastic constant n", depends = {"-s"})
-    private double elasticConstantN = 100000;
+    private double elasticConstantN = 10000;
 
     @Option(name = "-m", aliases = {"--mass", "-M"}, usage = "The mass of the particles", depends = {"-s"})
     private double particleMass = 0.01;
@@ -60,7 +65,7 @@ public class CommandLineOptions {
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .0001;
+    private double timeStep = .00005;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")
@@ -146,5 +151,9 @@ public class CommandLineOptions {
 
     public double getFps() {
         return fps;
+    }
+
+    public Path getStatsFile() {
+        return statsFile;
     }
 }

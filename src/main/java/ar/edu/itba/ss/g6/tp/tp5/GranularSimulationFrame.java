@@ -10,11 +10,12 @@ public class GranularSimulationFrame implements SimulationFrame<TheParticle> {
 
     private final double timestamp;
     private final Set<TheParticle> state;
+    private final int flowed;
 
-
-    public GranularSimulationFrame(double timestamp, Set<TheParticle> state) {
+    public GranularSimulationFrame(double timestamp, Set<TheParticle> state, int flowed) {
         this.timestamp = timestamp;
         this.state = state;
+        this.flowed = flowed;
     }
 
     @Override
@@ -30,5 +31,9 @@ public class GranularSimulationFrame implements SimulationFrame<TheParticle> {
     @Override
     public Set<TheParticle> getState() {
         return state;
+    }
+
+    public int getFlowed() {
+        return flowed;
     }
 }

@@ -17,7 +17,7 @@ public class GranularForce implements Force {
     }
 
     public V2d getForce(final TheParticle particle, final TheParticle otherParticle) {
-        if (particle.collides(otherParticle)) {
+        if (particle.collides(otherParticle) && !particle.equals(otherParticle)) {
             final double distance = particle.getPosition().distance(otherParticle.getPosition());
             final double totalRadius = particle.getRadius() + otherParticle.getRadius();
             final V2d normalDirection = particle.getPosition().substract(otherParticle.getPosition()).normalize();
@@ -26,9 +26,9 @@ public class GranularForce implements Force {
             final double deltaVelocity = otherParticle.getVelocity().substract(particle.getVelocity()).dot(tangentialDirection);
             final V2d tangentialForce = tangentialDirection.scale(KT * (totalRadius - distance) * deltaVelocity);
             return tangentialForce.add(normalForce);
-        } else {
-            return new V2d(0, 0);
         }
+        return new V2d(0, 0);
+
     }
 
     public V2d getForce(final TheParticle particle, final Wall wall) {
@@ -41,8 +41,7 @@ public class GranularForce implements Force {
             final double deltaVelocity = particle.getVelocity().dot(tangentialDirection);
             final V2d tangentialForce = tangentialDirection.scale(-KT * (particle.getRadius() - distance) * deltaVelocity);
             return normalForce.add(tangentialForce);
-        } else {
-            return new V2d(0, 0);
         }
+        return new V2d(0, 0);
     }
 }

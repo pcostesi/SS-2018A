@@ -76,16 +76,19 @@ public class TP5 {
         double stopTime = values.getDuration();
         Path output = values.getOutFile();
         Exporter<TheParticle> exporter = new OvitoXYZExporter<>();
+        double flow[] = new double[(int) Math.round(Math.ceil(stopTime)) + 1];
+        double totalKE[] = new double[(int) Math.round(Math.ceil(stopTime)) + 1];
 
         int framesCaptured = 0;
         double FPS = values.getFps();
         double deltaT = values.getTimeStep();
         Set<TheParticle> boundaries = Set.of(new TheParticle("-1", 0, values.getLenght() * -0.1, 0, 0, 0.001, 0),
          new TheParticle("-2", values.getWidth(), values.getLenght(), 0, 0, 0.001, 0));
-
+        double prevTimestamp = -1;
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
                 double ts = frame.getTimestamp();
+                flow[(int) Math.round(Math.ceil(ts))] += frame.getFlowed();
                 if (ts >= framesCaptured / FPS && ts < framesCaptured / FPS + deltaT) {
                     Set<TheParticle> particles = new HashSet<>();
                     particles.addAll(boundaries);
@@ -94,10 +97,31 @@ public class TP5 {
                     exporter.addFrameToFile(out, particles, frame.getTimestamp());
                     framesCaptured += 1;
                 }
+                if (Math.ceil(prevTimestamp) < Math.ceil(ts)) {
+                    totalKE[(int) Math.round(Math.ceil(ts))] = frame.getState().parallelStream()
+                     .mapToDouble(TheParticle::getKineticEnergy)
+                     .sum();
+                }
+                prevTimestamp = ts;
             }
         } catch (IOException e) {
             System.err.println("Can't write sim 🤷🏻‍♂️");
             System.exit(4);
+        }
+
+        writeStatsToFile(values, flow, totalKE);
+    }
+
+
+    private static void writeStatsToFile(CommandLineOptions values, double flow[], double totalKE[]) {
+        Path output = values.getStatsFile();
+        try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
+            for (int i = 0; i < Math.min(flow.length, totalKE.length); i++) {
+                out.write(String.format("%d\t%e\t%e\n", i, flow[i], totalKE[i]));
+            }
+        } catch (IOException e) {
+            System.err.println("Can't write stats 🤷🏻‍♂️");
+            System.exit(8);
         }
     }
 
