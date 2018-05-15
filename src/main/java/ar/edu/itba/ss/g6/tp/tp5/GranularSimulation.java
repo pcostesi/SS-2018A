@@ -33,12 +33,11 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private double timestamp;
     private Map<TheParticle, TheParticle> flowed = new ConcurrentHashMap<>();
-    private Grid<TheParticle> map;
 
     private TheParticle warp(@NotNull TheParticle particle) {
         if (particle.getPosition().getY() <= (L * -0.1)) {
             double x = Math.random() * W * 0.8 + W * 0.1;
-            double y = L - particle.getRadius() * 1.1;
+            double y = L - Math.random() * 0.25 * L - particle.getRadius() * 2;
             V2d position = new V2d(x, y);
             V2d resting = new V2d(0, 0);
             return new TheParticle(particle.getId(), position, resting, resting, resting,
@@ -105,7 +104,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     }
 
     private V2d getForce(@NotNull TheParticle particle) {
-        V2d p2pForce = map.getNeighbors(particle).parallelStream()
+        V2d p2pForce = particles.parallelStream()
             .map(neighbor -> force.getForce(particle, neighbor))
             .reduce(new V2d(0, 0), (v1, v2) -> v1.add(v2));
 
@@ -130,7 +129,6 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.D = aperture;
         this.particles = particles;
         this.vessel = new Vessel(height, width, aperture);
-        this.map = new MapGridV2d<>(Math.round(Math.ceil(Math.max(W, L))), 5, 0.04, false);
 
         force = new GranularForce(kn, kt);
         if (W > L || D > W) {
@@ -146,7 +144,6 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         }
         timestamp += deltaT;
         flowed.clear();
-        map.set(particles);
         Set<TheParticle> state = particles.parallelStream()
             .map(this::move)
             .map(this::warp)
