@@ -1,22 +1,16 @@
 package ar.edu.itba.ss.g6.topology.grid;
 
-import ar.edu.itba.ss.g6.topology.particle.Particle2D;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 
 
-public class MapGridV2d<T extends TheParticle> extends MapGrid<T, Cell2D> {
+public class MapGridV2d<T extends TheParticle> extends MapGrid<T, CellV2d> {
     public MapGridV2d(long side, int buckets, double radius, boolean isPeriodic) {
-        super(side, buckets, radius, isPeriodic, Cell2D::new);
+        super(side, buckets, radius, isPeriodic, CellV2d::new);
     }
 
 
-    public boolean isWithinRadius(double radius, Particle2D p1, Particle2D p2) {
-        double distanceInX = p1.getXCoordinate() - p2.getXCoordinate();
-        double distanceInY = p1.getYCoordinate() - p2.getYCoordinate();
-        double sumOfRadius = p1.getRadius() + p2.getRadius();
-        double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
-
-        return rawDistance - sumOfRadius <= radius;
+    public boolean isWithinRadius(double radius, TheParticle p1, TheParticle p2) {
+        return p1.distanceTo(p2) <= radius;
     }
 
 
@@ -26,10 +20,10 @@ public class MapGridV2d<T extends TheParticle> extends MapGrid<T, Cell2D> {
         boolean withinPeriodicDistance = false;
         if (isPeriodic()) {
             long maxDist = this.getSideLength();
-            double thisX = p1.getXCoordinate();
-            double thisY = p1.getYCoordinate();
-            double otherX = p2.getXCoordinate();
-            double otherY = p2.getYCoordinate();
+            double thisX = p1.getPosition().getX();
+            double thisY = p1.getPosition().getY();
+            double otherX = p2.getPosition().getX();
+            double otherY = p2.getPosition().getY();
 
 
             if( thisX - radius < 0 && otherX + radius > maxDist) {
