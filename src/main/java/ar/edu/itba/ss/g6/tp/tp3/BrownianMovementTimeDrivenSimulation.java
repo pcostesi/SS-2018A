@@ -17,15 +17,7 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     SimulationFrame<WeightedDynamicParticle2D> nextEventFrame;
     private boolean started = false;
 
-    public int getFps() {
-        return fps;
-    }
-
-    public void setFps(int fps) {
-        this.fps = fps;
-    }
-
-    int fps = 30;
+    private int fps = 30;
     private double currentTimeStep;
 
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {

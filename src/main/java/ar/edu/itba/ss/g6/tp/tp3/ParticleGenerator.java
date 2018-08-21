@@ -1,7 +1,5 @@
 package ar.edu.itba.ss.g6.tp.tp3;
 
-import ar.edu.itba.ss.g6.topology.particle.OverfedDynamicParticle2D;
-import ar.edu.itba.ss.g6.topology.particle.Particle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
 import java.util.HashSet;
@@ -31,8 +29,8 @@ public class ParticleGenerator {
         this.vmaxmod = maxSpeed;
         this.commonParticleMass = weight;
         this.commonParticleRadius = radius;
-        this.papaParticulaRadius = radius * PAPA_PARTICULA_SIZE_MULTIPLIER;
-        this.papaParticulaMass = weight * PAPA_PARTICULA_WEIGHT_MULTIPLIER;
+        this.papaParticulaRadius = radius * PAPA_PARTICULA_SIZE_MULTIPLIER; //TODO check this
+        this.papaParticulaMass = weight * PAPA_PARTICULA_WEIGHT_MULTIPLIER; //TODO check this
         this.generator = new Random(seed);
     }
 

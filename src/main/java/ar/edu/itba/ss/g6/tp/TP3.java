@@ -2,45 +2,29 @@ package ar.edu.itba.ss.g6.tp;
 
 import ar.edu.itba.ss.g6.exporter.ovito.Exporter;
 import ar.edu.itba.ss.g6.exporter.ovito.OvitoXYZExporter;
-import ar.edu.itba.ss.g6.loader.ParticleLoader;
 import ar.edu.itba.ss.g6.loader.StaticDataLoader;
 import ar.edu.itba.ss.g6.loader.StaticLoaderResult;
-import ar.edu.itba.ss.g6.simulation.Simulation;
 import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.ColoredWeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.tp.tp3.BrownianMovement;
-import ar.edu.itba.ss.g6.tp.tp3.BrownianMovementTimeDrivenSimulation;
 import ar.edu.itba.ss.g6.tp.tp3.CommandLineOptions;
+import ar.edu.itba.ss.g6.tp.tp3.ConfigTp3;
 import ar.edu.itba.ss.g6.tp.tp3.ParticleGenerator;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
-import javax.annotation.processing.SupportedSourceVersion;
-import java.awt.Color;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.DoubleSummaryStatistics;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import static ar.edu.itba.ss.g6.topology.particle.ColoredWeightedDynamicParticle2D.COLOR.BLACK;
-import static java.util.stream.Collectors.joining;
 
 public class TP3 {
 
@@ -71,7 +55,6 @@ public class TP3 {
         System.out.println("Starting time-view of simulation");
         SimulationFrame<ColoredWeightedDynamicParticle2D> simulationFrame;
 
-        int i = 0;
         List<Set<ColoredWeightedDynamicParticle2D>> frames = new LinkedList<>();
         while ((simulationFrame = timed.getNextStep()) != null && simulationFrame.getTimestamp() < duration) {
             Set<ColoredWeightedDynamicParticle2D> state = simulationFrame.getState();
@@ -227,8 +210,6 @@ public class TP3 {
     public static void step1() {
         List<Double> collisions = new LinkedList<>();
 
-
-
             try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("collisions.dat").normalize())) {
                 System.out.println("Raw collisions");
                 for (int world = 0; world < 20; world++) {
@@ -237,16 +218,14 @@ public class TP3 {
                     BrownianMovement simulation2 = new BrownianMovement(600.0, particles);
 
                     SimulationFrame<WeightedDynamicParticle2D> frame;
-                double prevTime = 0;
-                while ((frame = simulation2.getNextStep()) != null) {
-                    double thisTime = frame.getTimestamp();
-                    double delta = thisTime - prevTime;
-                    collisions.add(delta);
-                    prevTime = thisTime;
+                    double prevTime = 0;
+                    while ((frame = simulation2.getNextStep()) != null) {
+                        double thisTime = frame.getTimestamp();
+                        double delta = thisTime - prevTime;
+                        collisions.add(delta);
+                        prevTime = thisTime;
+                    }
                 }
-
-            }
-
                 double[] thelist = collisions.stream().mapToDouble(s -> s).toArray();
                 for (int idx = 0; idx < thelist.length; idx++) {
                     writerRaw.write(String.format("%f\n", thelist[idx]));
@@ -255,7 +234,6 @@ public class TP3 {
                 e.printStackTrace();
             }
             System.exit(1);
-
     }
 
     public static void simulatiorMode(double duration, File inputFile, File outputFile, double worldSize) {
@@ -273,7 +251,6 @@ public class TP3 {
         System.out.println("Starting time-view of simulation");
         SimulationFrame<ColoredWeightedDynamicParticle2D> simulationFrame;
 
-        int i = 0;
         List<Set<ColoredWeightedDynamicParticle2D>> frames = new LinkedList<>();
         while ((simulationFrame = timed.getNextStep()) != null && simulationFrame.getTimestamp() < duration) {
             Set<ColoredWeightedDynamicParticle2D> state = simulationFrame.getState();
@@ -308,7 +285,6 @@ public class TP3 {
             e.printStackTrace();
         }
 
-
         try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("pdf-1.dat").normalize())) {
             System.out.println("Raw first");
             for (int idx = 0; idx < speeds1.length; idx++) {
@@ -333,10 +309,11 @@ public class TP3 {
                 .sum()
             ).average().orElse(0)
         );
-
     }
 
     public static void main(String ...args) {
+
+        ConfigTp3 config = ConfigTp3.loadConfig();
 
         CommandLineOptions values = new CommandLineOptions(args);
         CmdLineParser parser = new CmdLineParser(values);
@@ -347,18 +324,16 @@ public class TP3 {
             System.exit(1);
         }
 
-
         if (values.isMsd()) {
-            msdMode(values.getDuration(), values.getL());
+            msdMode(config.getDuration(), config.getLength());
             System.exit(0);
         }
 
         if (values.isGenerate()) {
-            generatorMode(values.getN(), values.getOutFile(), values.getL(), values.getSpeed(), values.getWeight(), values.getRadius());
+            generatorMode(config.getParticles(), values.getOutFile(), config.getLength(), config.getSpeed(), config.getWeight(), config.getRadius());
             System.exit(0);
         }
 
-        simulatiorMode(values.getDuration(), values.getInFile(), values.getOutFile(), values.getL());
-
+        simulatiorMode(config.getDuration(), values.getInFile(), values.getOutFile(), config.getLength());
     }
 }

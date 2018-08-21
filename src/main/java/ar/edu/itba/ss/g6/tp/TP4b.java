@@ -6,12 +6,10 @@ import ar.edu.itba.ss.g6.simulation.Simulation;
 import ar.edu.itba.ss.g6.topology.particle.CelestialBody2D;
 import ar.edu.itba.ss.g6.tp.tp4.CelestialData;
 import ar.edu.itba.ss.g6.tp.tp4.Ephemeris;
-import ar.edu.itba.ss.g6.tp.tp4.TrajectoryData;
 import ar.edu.itba.ss.g6.tp.tp4.VoyagerData;
 import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulation;
 import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulationFrame;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.codehaus.jackson.map.ObjectMapper;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -59,9 +57,7 @@ public class TP4b {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-
     }
-
 
     private static double simulate (Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator, CelestialData data, CelestialBody2D[] bodies, boolean findBestAngle) {
         int days = data.getDays();
@@ -99,16 +95,11 @@ public class TP4b {
                         exporter.addFrameToFile(w, frame.getState(), 0);
                     }
                     frames.add(frame.getState());
-
-
                 double speed = frame.getState().stream()
                     .filter(p -> p.getId().equals("100"))
                     .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);
                 speedList.add(speed);
-
-
                 }
-
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -123,7 +114,6 @@ public class TP4b {
         }
         return 0;
     }
-
 
     private static CelestialBody2D[] loadBodies(CelestialData data) {
         Ephemeris[] planets = data.getPlanets();
@@ -149,7 +139,6 @@ public class TP4b {
                 earth = bodies[idx];
             }
         }
-
         if (earth == null || sun == null) {
             throw new IllegalArgumentException("You're missing sun or earth");
         }

@@ -1,14 +1,12 @@
 package ar.edu.itba.ss.g6.exporter.ovito;
 
 import ar.edu.itba.ss.g6.topology.particle.Particle;
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,7 +29,6 @@ public abstract class Exporter<T extends Particle> {
         saveAnimationToFile(Paths.get(path), timeline, timeStep);
     }
 
-
     public void saveFrameToFile(Path path, Collection<T> particles, double time) throws IOException {
         Stream<String> stream = exportFrame(particles, time);
         Files.write(path, (Iterable<String>)stream::iterator);
@@ -49,7 +46,6 @@ public abstract class Exporter<T extends Particle> {
     }
 
     public abstract String serializeParticle(T particle);
-
 
     public Stream<String> exportAnimation(List<? extends Collection<T>> timeline, double timeStep) {
         return IntStream.range(0, timeline.size())

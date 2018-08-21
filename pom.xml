@@ -32,6 +32,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.json.bind</groupId>
+            <artifactId>javax.json.bind-api</artifactId>
+            <version>1.0</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/args4j/args4j -->
         <dependency>
             <groupId>args4j</groupId>
