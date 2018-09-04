@@ -5,35 +5,30 @@ import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.DynamicParticle2D;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
-
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.joining;
 
 public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicParticle2D, SimulationFrame<WeightedDynamicParticle2D>> {
 
     private final double duration;
     private Set<WeightedDynamicParticle2D> particles;
-    double wallLength = 0.5;
+    private double wallLength;
     private double currentTime;
     private boolean isInitialStep = true;
     private WeightedDynamicParticle2D drunkard;
     private WeightedDynamicParticle2D sober;
 
-    //TODO UPDATE SPEED
-
-    public BrownianMovement(double duration, Set<WeightedDynamicParticle2D> particles) {
+    public BrownianMovement(double duration, Set<WeightedDynamicParticle2D> particles, double wallLength) {
         this.duration = duration;
         this.particles = particles;
+        this.wallLength = wallLength;
     }
 
     @Override
     public TimeDrivenSimulation toTimeDrivenSimulation() {
-        return new BrownianMovementTimeDrivenSimulation(new BrownianMovement(duration, Collections.unmodifiableSet(particles)));
+        return new BrownianMovementTimeDrivenSimulation(new BrownianMovement(duration, Collections.unmodifiableSet(particles), wallLength));
     }
 
     @Override

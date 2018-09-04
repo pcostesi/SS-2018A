@@ -1,4 +1,4 @@
-# SS-2018A
+# SS-2018B
 Simulación de Sistemas (SS)
 
-Grupo: 6
+Grupo: 10

@@ -4,9 +4,9 @@ import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.tp.tp3.CommandLineOptions;
 import ar.edu.itba.ss.g6.tp.tp4.ArmonicSimulation;
 import ar.edu.itba.ss.g6.tp.tp4.ArmonicSimulationFrame;
+import ar.edu.itba.ss.g6.tp.tp4.ConfigTp4;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -19,6 +19,9 @@ public class TP4 {
 
     public static void main(String ...args) {
 
+        ConfigTp4 config = ConfigTp4.loadConfig();
+
+
         values = new CommandLineOptions(args);
         CmdLineParser parser = new CmdLineParser(values);
 
@@ -30,17 +33,17 @@ public class TP4 {
 
 
         if (values.isMsd()) {
-            msdMode(values.getDuration(), values.getL());
+            msdMode(config.getDuration(), config.getLength());
             System.exit(0);
         }
 
         if (values.isGenerate()) {
-            generatorMode(values.getN(), values.getOutFile(), values.getL(), values.getSpeed(), values.getWeight(), values.getRadius());
+            generatorMode(config.getParticles(), values.getOutFile(), config.getLength(), config.getSpeed(), config.getWeight(), config.getRadius());
             System.exit(0);
         }
 
         //severalHarmonicSims();
-        armonicSimulationMode(values.getOutFile(), values.getTimeStep());
+        armonicSimulationMode(values.getOutFile(), config.getTimeStep());
 
     }
 

@@ -9,8 +9,6 @@ import java.io.File;
 public class CommandLineOptions {
     private boolean errorFree;
 
-
-
     @Option(name = "-i", aliases = { "--in" }, required = false,
      usage = "input file for the particles")
     private File inFile;
@@ -27,34 +25,17 @@ public class CommandLineOptions {
      usage = "input file for the static particles")
     private boolean msd;
 
-    @Option(name = "-N", aliases = { "--particles" }, required = false,
-     usage = "number of particles")
-    private int N = 30;
+    @Option(name = "-c", aliases = { "--collision-interval" }, required = false,
+            usage = "Outputs collision intervals to files")
+    private boolean ci;
 
-    @Option(name = "-L", aliases = { "--size" }, required = false,
-     usage = "size of the world")
-    private double L = 0.5;
+    @Option(name = "-s", aliases = { "--rand-seed" }, required = false,
+            usage = "sets seed for random")
+    private long seed = System.currentTimeMillis();
 
-    @Option(name = "-r", aliases = { "--radius" }, required = false,
-     usage = "particle radius")
-    private double radius = 0.005;
-
-    @Option(name = "-s", aliases = { "--speed" }, required = false,
-     usage = "particle speed")
-    private double speed = 0.3;
-
-    @Option(name = "-w", aliases = { "--weight" }, required = false,
-     usage = "weight for the particles")
-    private double weight = 0.0;
-
-    @Option(name = "-t", aliases = { "--time" }, required = false,
-     usage = "simulation duration")
-    private double duration = 60 * 5;
-
-    @Option(name = "-ts", aliases = { "--time-step" }, required = false,
-            usage = "time step for simulation")
-    private double timeStep = 0.1;
-
+    @Option(name = "-v", aliases = { "--velocity" }, required = false,
+            usage = "Outputs initial and last third velocities")
+    private boolean vel = false;
 
     public CommandLineOptions(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
@@ -67,7 +48,6 @@ public class CommandLineOptions {
             parser.printUsage(System.err);
         }
     }
-
 
     public boolean isErrorFree() {
         return errorFree;
@@ -85,35 +65,31 @@ public class CommandLineOptions {
         return generate;
     }
 
-    public int getN() {
-        return N;
-    }
-
-    public double getL() {
-        return L;
-    }
-
-    public double getRadius() {
-        return radius;
-    }
-
-    public double getSpeed() {
-        return speed;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public double getDuration() {
-        return duration;
-    }
-
     public boolean isMsd() {
         return msd;
     }
 
-    public double getTimeStep() {
-        return timeStep;
+    public boolean isCi() {
+        return ci;
+    }
+
+    public void setCi(boolean ci) {
+        this.ci = ci;
+    }
+
+    public long getSeed() {
+        return seed;
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
+    public boolean isVel() {
+        return vel;
+    }
+
+    public void setVel(boolean vel) {
+        this.vel = vel;
     }
 }

@@ -1,7 +1,5 @@
 package ar.edu.itba.ss.g6.tp.tp3;
 
-import ar.edu.itba.ss.g6.topology.particle.OverfedDynamicParticle2D;
-import ar.edu.itba.ss.g6.topology.particle.Particle;
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
 import java.util.HashSet;
@@ -10,14 +8,14 @@ import java.util.Set;
 
 public class ParticleGenerator {
 
-    static int PAPA_PARTICULA_WEIGHT_MULTIPLIER = 1000;
-    static int PAPA_PARTICULA_SIZE_MULTIPLIER = 10;
-    private double mapSize = 0.5;
-    private double papaParticulaRadius = 0.05;
-    private double papaParticulaMass = 100;
-    private double commonParticleRadius = 0.005;
-    private double commonParticleMass = 0.1;
-    private double vmaxmod = 0.1;
+    private static int PAPA_PARTICULA_WEIGHT_MULTIPLIER = 1000;
+    private int PAPA_PARTICULA_SIZE_MULTIPLIER = 10;
+    private double mapSize;
+    private double papaParticulaRadius;
+    private double papaParticulaMass;
+    private double commonParticleRadius;
+    private double commonParticleMass;
+    private double vmaxmod;
     private double papaParticulaSpeed = 0;
     private int MAX_TRIES = Integer.MAX_VALUE >> 1;
     private Random generator;
@@ -31,8 +29,8 @@ public class ParticleGenerator {
         this.vmaxmod = maxSpeed;
         this.commonParticleMass = weight;
         this.commonParticleRadius = radius;
-        this.papaParticulaRadius = radius * PAPA_PARTICULA_SIZE_MULTIPLIER;
-        this.papaParticulaMass = weight * PAPA_PARTICULA_WEIGHT_MULTIPLIER;
+        this.papaParticulaRadius = radius * PAPA_PARTICULA_SIZE_MULTIPLIER; //TODO check this
+        this.papaParticulaMass = weight * PAPA_PARTICULA_WEIGHT_MULTIPLIER; //TODO check this
         this.generator = new Random(seed);
     }
 
