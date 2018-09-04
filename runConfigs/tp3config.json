@@ -1,10 +1,10 @@
 {
   "radius": 0.005,
-  "speed": 0.3,
-  "weight": 0.0,
+  "speed": 0.1,
+  "weight": 0.1,
   "duration": 300,
   "timeStep": 0.1,
-  "particles": 30,
+  "particles": 50,
   "length": 0.5
 }
 

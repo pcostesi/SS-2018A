@@ -14,20 +14,21 @@ public class BrownianMovement implements EventDrivenSimulation<WeightedDynamicPa
 
     private final double duration;
     private Set<WeightedDynamicParticle2D> particles;
-    private double wallLength = 0.5;
+    private double wallLength;
     private double currentTime;
     private boolean isInitialStep = true;
     private WeightedDynamicParticle2D drunkard;
     private WeightedDynamicParticle2D sober;
 
-    public BrownianMovement(double duration, Set<WeightedDynamicParticle2D> particles) {
+    public BrownianMovement(double duration, Set<WeightedDynamicParticle2D> particles, double wallLength) {
         this.duration = duration;
         this.particles = particles;
+        this.wallLength = wallLength;
     }
 
     @Override
     public TimeDrivenSimulation toTimeDrivenSimulation() {
-        return new BrownianMovementTimeDrivenSimulation(new BrownianMovement(duration, Collections.unmodifiableSet(particles)));
+        return new BrownianMovementTimeDrivenSimulation(new BrownianMovement(duration, Collections.unmodifiableSet(particles), wallLength));
     }
 
     @Override

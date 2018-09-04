@@ -18,6 +18,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -48,7 +49,7 @@ public class TP3 {
         result = StaticDataLoader.importFromFile(Paths.get(filename), WeightedDynamicParticle2D::fromValues);
         particles = result.getParticles();
 
-        BrownianMovement simulation = new BrownianMovement(duration, particles);
+        BrownianMovement simulation = new BrownianMovement(duration, particles, 0.5);
 
         TimeDrivenSimulation timed = simulation.toTimeDrivenSimulation();
 
@@ -187,26 +188,6 @@ public class TP3 {
         return msd;
     }
 
-    public static void step2() {
-        String[] worlds = new String[] {
-         "world-1.xyz","world-2.xyz","world-3.xyz",
-         "world-4.xyz","world-5.xyz","world-6.xyz",
-         "world-7.xyz","world-8.xyz","world-9.xyz",
-
-         "world-10.xyz","world-11.xyz","world-12.xyz",
-         "world-13.xyz","world-14.xyz","world-15.xyz",
-         "world-16.xyz","world-17.xyz","world-18.xyz",
-
-         "world-19.xyz","world-20.xyz",
-        };
-        String big = "0";
-        String some = "13";
-
-        List<List<Set<ColoredWeightedDynamicParticle2D>>> simulations = Arrays.stream(worlds)
-         .map(world -> loadMSDMode(world, 300, 0.5))
-         .collect(Collectors.toList());
-    }
-
     public static void step1() {
         List<Double> collisions = new LinkedList<>();
 
@@ -215,7 +196,7 @@ public class TP3 {
                 for (int world = 0; world < 20; world++) {
                     ParticleGenerator generator = new ParticleGenerator(0.5, 0.1, 0.1, 0.005);
                     Set<WeightedDynamicParticle2D> particles = generator.getParticles(40);
-                    BrownianMovement simulation2 = new BrownianMovement(600.0, particles);
+                    BrownianMovement simulation2 = new BrownianMovement(600.0, particles, 0.5);
 
                     SimulationFrame<WeightedDynamicParticle2D> frame;
                     double prevTime = 0;
@@ -242,9 +223,7 @@ public class TP3 {
         result = StaticDataLoader.importFromFile(inputFile.toPath(), WeightedDynamicParticle2D::fromValues);
         particles = result.getParticles();
 
-        BrownianMovement simulation = new BrownianMovement(duration, particles);
-
-        step1();
+        BrownianMovement simulation = new BrownianMovement(duration, particles, 0.5);
 
         TimeDrivenSimulation timed = simulation.toTimeDrivenSimulation();
 
@@ -334,6 +313,108 @@ public class TP3 {
             System.exit(0);
         }
 
+        if(values.isCi()){
+            simulateAndGetCollisionsIntervals(config, values.getOutFile().getPath());
+            System.exit(0);
+        }
+
+        if(values.isVel()){
+            simulteAndGetSpeeds(config);
+            System.exit(0);
+        }
+
         simulatiorMode(config.getDuration(), values.getInFile(), values.getOutFile(), config.getLength());
+    }
+
+    static private List<SimulationFrame> getSimulationFromRand(ConfigTp3 config) {
+        List<SimulationFrame> frames = new ArrayList<>();
+        System.out.println("Simulating!");
+        ParticleGenerator generator = new ParticleGenerator(config.getLength(), config.getSpeed(), config.getWeight(), config.getRadius());
+        Set<WeightedDynamicParticle2D> particles = generator.getParticles(config.getParticles());
+        BrownianMovement simulation = new BrownianMovement(config.getDuration(), particles, config.getLength());
+
+        SimulationFrame<WeightedDynamicParticle2D> frame;
+        while ((frame = simulation.getNextStep()) != null) {
+            frames.add(frame);
+        }
+        System.out.println("Simulation finished!");
+        Set<WeightedDynamicParticle2D> parts = frames.get(frames.size()-1).getState();
+        return frames;
+    }
+
+    private static Double[] getCollisionIntervals(List<SimulationFrame> frames){
+        int length = frames.size();
+        Double[] result = frames.stream().map(SimulationFrame::getTimestamp).toArray(Double[]::new);
+        result[0] = frames.get(0).getTimestamp();
+        for(int i = length-1; i >1; i--){
+            if(result[i] - result[i-1] < 0){
+                continue;
+            }
+            result[i] -= result[i-1];
+        }
+        return result;
+    }
+
+    public Double[] getCollisionTimestamps(List<SimulationFrame> frames){
+        return frames.stream().map(SimulationFrame::getTimestamp).toArray(Double[]::new);
+    }
+
+    private static void writeCollisionIntervals(String outputPath, Double[] intervals){
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get(outputPath).normalize())) {
+            for (int idx = 0; idx < intervals.length; idx++) {
+                writerRaw.write(String.format("%f\n", intervals[idx]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void simulateAndGetCollisionsIntervals(ConfigTp3 config, String outputPath){
+        List<SimulationFrame> frames = getSimulationFromRand(config);
+        for (int i = 0; i < 4 ; i++) {
+            frames.addAll(getSimulationFromRand(config));
+        }
+        Double[] collisions = getCollisionIntervals(frames);
+        writeCollisionIntervals(outputPath, collisions);
+    }
+
+    @SuppressWarnings("Duplicates")
+    public static void simulteAndGetSpeeds(ConfigTp3 config){
+        List<SimulationFrame> frames = getSimulationFromRand(config);
+        List<Set<WeightedDynamicParticle2D>> states = new LinkedList<>();
+        for (SimulationFrame frame:frames) {
+            states.add(frame.getState());
+        }
+        int keyframe = 2 * states.size() / 3;
+        double speeds[] = states.parallelStream().skip(states.size() - keyframe)
+                .flatMapToDouble(frameParticles -> frameParticles.parallelStream()
+                        .mapToDouble(particle -> particle.getSpeed()))
+                .filter(d -> d != 0)
+                .sorted()
+                .toArray();
+
+        double initialSpeeds[] = states.get(0).parallelStream()
+                .mapToDouble(particle -> particle.getSpeed())
+                .filter(d -> d != 0)
+                .sorted()
+                .toArray();
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocitythirds50.dat").normalize())) {
+            System.out.println("Raw thirds");
+            for (int idx = 0; idx < speeds.length; idx++) {
+                writerRaw.write(String.format("%f\n", speeds[idx]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocityfirst50.dat").normalize())) {
+            System.out.println("Raw first");
+            for (int idx = 0; idx < initialSpeeds.length; idx++) {
+                writerRaw.write(String.format("%f\n", initialSpeeds[idx]));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

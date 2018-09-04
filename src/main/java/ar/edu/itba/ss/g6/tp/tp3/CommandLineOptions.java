@@ -25,6 +25,18 @@ public class CommandLineOptions {
      usage = "input file for the static particles")
     private boolean msd;
 
+    @Option(name = "-c", aliases = { "--collision-interval" }, required = false,
+            usage = "Outputs collision intervals to files")
+    private boolean ci;
+
+    @Option(name = "-s", aliases = { "--rand-seed" }, required = false,
+            usage = "sets seed for random")
+    private long seed = System.currentTimeMillis();
+
+    @Option(name = "-v", aliases = { "--velocity" }, required = false,
+            usage = "Outputs initial and last third velocities")
+    private boolean vel = false;
+
     public CommandLineOptions(String... args) {
         CmdLineParser parser = new CmdLineParser(this);
         try {
@@ -57,4 +69,27 @@ public class CommandLineOptions {
         return msd;
     }
 
+    public boolean isCi() {
+        return ci;
+    }
+
+    public void setCi(boolean ci) {
+        this.ci = ci;
+    }
+
+    public long getSeed() {
+        return seed;
+    }
+
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
+    public boolean isVel() {
+        return vel;
+    }
+
+    public void setVel(boolean vel) {
+        this.vel = vel;
+    }
 }
