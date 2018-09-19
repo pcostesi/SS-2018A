@@ -59,8 +59,8 @@ def main():
 		Qobi = Qob[i]
 		for x in xrange(1,cmax):
 			c = x * 0.01
-	 		Qi.append(abs(Qobi - B * math.sqrt((d[i] - c*r) ** 3)))
-	 	Q.append(Qi)
+			Qi.append(abs(Qobi - B * math.sqrt((d[i] - c*r) ** 3)))
+		Q.append(Qi)
 
 	legends = ['D = 0.15','D = 0.20','D = 0.25','D = 0.30', 'Total']
 	labels = {"x": "c [s]","y": "Error"}
