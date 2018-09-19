@@ -2,9 +2,9 @@
   "radius": 0.005,
   "speed": 0.1,
   "weight": 0.1,
-  "duration": 300,
+  "duration": 250,
   "timeStep": 0.1,
-  "particles": 50,
+  "particles": 250,
   "length": 0.5
 }
 

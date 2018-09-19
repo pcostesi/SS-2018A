@@ -399,7 +399,7 @@ public class TP3 {
                 .sorted()
                 .toArray();
 
-        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocitythirds50.dat").normalize())) {
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocitythirds250.dat").normalize())) {
             System.out.println("Raw thirds");
             for (int idx = 0; idx < speeds.length; idx++) {
                 writerRaw.write(String.format("%f\n", speeds[idx]));
@@ -408,7 +408,7 @@ public class TP3 {
             e.printStackTrace();
         }
 
-        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocityfirst50.dat").normalize())) {
+        try (BufferedWriter writerRaw = Files.newBufferedWriter(Paths.get("velocityfirst250.dat").normalize())) {
             System.out.println("Raw first");
             for (int idx = 0; idx < initialSpeeds.length; idx++) {
                 writerRaw.write(String.format("%f\n", initialSpeeds[idx]));

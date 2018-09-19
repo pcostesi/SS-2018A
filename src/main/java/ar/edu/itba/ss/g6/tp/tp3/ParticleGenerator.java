@@ -55,8 +55,10 @@ public class ParticleGenerator {
         while (i < numberOfParticles + 1) {
             double x = getDoubleFromRange(commonParticleRadius, mapSize - commonParticleRadius);
             double y = getDoubleFromRange(commonParticleRadius, mapSize - commonParticleRadius);
-            double vx = getDoubleFromRange(-vmaxmod, vmaxmod);
-            double vy = getDoubleFromRange(-vmaxmod, vmaxmod);
+            double modV = getDoubleFromRange(-vmaxmod, vmaxmod);
+            double angle = getDoubleFromRange(0, 2 * Math.PI);
+            double vx = Math.cos(angle) * modV;
+            double vy = Math.sin(angle) * modV;
             WeightedDynamicParticle2D p = new WeightedDynamicParticle2D(String.valueOf(i), x, y, vx, vy, commonParticleRadius, commonParticleMass);
 
             if (!collides(particles, p)) {
@@ -73,4 +75,13 @@ public class ParticleGenerator {
         }
         return particles;
     }
+
+    /*
+        x = random.random() * (L - 2 * r) + r
+        y = random.random() * (L - 2 * r) + r
+        v_rand = v#random.random() * 2 * v - v
+        angle = random.random() * 2 * pi
+        vx = cos(angle) * v_rand
+        vy = sin(angle) * v_rand
+    */
 }
