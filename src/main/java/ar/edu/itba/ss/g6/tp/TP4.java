@@ -42,7 +42,7 @@ public class TP4 {
             System.exit(0);
         }
 
-        //severalHarmonicSims();
+        severalHarmonicSims();
         armonicSimulationMode(values.getOutFile(), config.getTimeStep());
 
     }
@@ -50,7 +50,7 @@ public class TP4 {
     private static void severalHarmonicSims() {
         double time = 0.006;
         for(int i = 0; i < 5; i++) {
-            armonicSimulationMode(new File("mse"+String.valueOf(i)), time - i*time/50);
+            armonicSimulationMode(new File("mse"+String.valueOf(i)+".tsv"), time - i*time/50);
         }
     }
 
@@ -72,7 +72,9 @@ public class TP4 {
         ArmonicSimulationFrame analyticCurrent = analyticSim.getNextStep();
         try {
         BufferedWriter writerRaw = new BufferedWriter(new FileWriter(outFile));
-        List<String> out = new ArrayList<String>((int)(100)+1);
+        List<String> out = new ArrayList<>();
+
+        out.add("timestamp\tbeeman\tgpco5\tverlet\tanalytic\n");
         while( beemanCurrent != null ) {
             out.add(String.valueOf(beemanCurrent.getTimestamp()));
             out.add(String.valueOf('\t'));

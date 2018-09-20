@@ -46,7 +46,7 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
             String id = b.getId();
             double mass = b.getMass() / scaler;
             double radius = 1000; //b.getRadius();
-            return new CelestialBody2D(id, rx, ry, vx, vy, mass, radius);
+            return new CelestialBody2D(id, rx, ry, vx, vy, radius, mass);
         }).toArray(n -> new CelestialBody2D[n]);
         return new VoyagerSimulationFrame(timestamp, bodies);
     }
