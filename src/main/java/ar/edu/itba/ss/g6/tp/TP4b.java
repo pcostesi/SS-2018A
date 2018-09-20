@@ -13,10 +13,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import ar.edu.itba.ss.g6.tp.tp4.*;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,8 +57,7 @@ public class TP4b {
             mapper.readValue(ephemerisFile, CelestialData.class);
             List<Integer> lInfo = List.of(0, maxHeigh, kms);
             List<Integer> vInfo = List.of(0, maxSpeed, 1);
-            String out = mapper.writer().writeValueAsString(List.of(lInfo, vInfo, distances));
-            System.out.println(out);
+            mapper.writer().writeValue(Paths.get("out.json").toFile(), List.of(lInfo, vInfo, distances));
 
             Stream<MinDistanceTrajectory> trajStream = trajectories.stream().flatMap(l -> l.stream());
             MinDistanceTrajectory bestTrajectory = trajStream
