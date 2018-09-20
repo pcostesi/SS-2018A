@@ -34,6 +34,7 @@ public class TP4b {
 
             int kms = 100;
             Stream<MinDistanceTrajectory> trajectories = IntStream.range(0, 10000 / kms)
+                    .parallel()
                     .mapToObj(height ->
                         IntStream.range(0, 20).mapToObj(speed -> {
                             CelestialBody2D[] bodies;
