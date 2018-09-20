@@ -41,7 +41,7 @@ public class TP4 {
             generatorMode(config.getParticles(), values.getOutFile(), config.getLength(), config.getSpeed(), config.getWeight(), config.getRadius());
             System.exit(0);
         }
-        
+
         severalHarmonicSims();
         armonicSimulationMode(values.getOutFile(), config.getTimeStep());
 

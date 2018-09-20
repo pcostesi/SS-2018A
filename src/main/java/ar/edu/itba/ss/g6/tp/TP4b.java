@@ -33,20 +33,38 @@ public class TP4b {
             final double deltaT = data.getDeltaT();
 
             int kms = 100;
-            Stream<MinDistanceTrajectory> trajectories = IntStream.range(0, 10000 / kms)
-                    .parallel()
+            int maxSpeed = 20;
+            int maxHeigh = 10000;
+            List<List<MinDistanceTrajectory>> trajectories = IntStream.range(0, maxHeigh / kms)
                     .mapToObj(height ->
-                        IntStream.range(0, 20).mapToObj(speed -> {
-                            CelestialBody2D[] bodies;
-                            bodies = loadBodies(data, height * kms, speed, 0);
-                            Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
-                            simulator = new VoyagerSimulation(deltaT, bodies);
-                            double distance = sim(simulator, data, bodies);
-                            return new MinDistanceTrajectory(distance, height, speed);
-                        }))
-                    .flatMap(i -> i);
+                        IntStream.range(0, maxSpeed)
+                                .parallel()
+                                .mapToObj(speed -> {
+                                    System.out.println(String.format("s=%d, h=%d", speed, height * kms));
+                                    CelestialBody2D[] bodies;
+                                    bodies = loadBodies(data, height * kms, speed, 0);
+                                    Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
+                                    simulator = new VoyagerSimulation(deltaT, bodies);
+                                    double distance = sim(simulator, data, bodies);
+                                    return new MinDistanceTrajectory(distance, height * kms, speed);
+                                })
+                                .sorted(Comparator.comparingDouble(MinDistanceTrajectory::getBestSpeed))
+                                .collect(Collectors.toList())
+                    ).collect(Collectors.toList());
 
-            MinDistanceTrajectory bestTrajectory = trajectories
+            List<List<Double>> distances = trajectories.stream()
+                    .map(l -> l.stream().map(v -> v.getBestDistance()).collect(Collectors.toList())
+                    ).collect(Collectors.toList());
+
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.readValue(ephemerisFile, CelestialData.class);
+            List<Integer> lInfo = List.of(0, maxHeigh, kms);
+            List<Integer> vInfo = List.of(0, maxSpeed, 1);
+            String out = mapper.writer().writeValueAsString(List.of(lInfo, vInfo, distances));
+            System.out.println(out);
+
+            Stream<MinDistanceTrajectory> trajStream = trajectories.stream().flatMap(l -> l.stream());
+            MinDistanceTrajectory bestTrajectory = trajStream
                     .min(Comparator.comparingDouble(MinDistanceTrajectory::getBestDistance))
                     .orElse(null);
 
@@ -55,6 +73,11 @@ public class TP4b {
             System.out.println(" - height: " + bestTrajectory.getBestHeight());
             System.out.println(" - speed: " + bestTrajectory.getBestSpeed());
 
+            CelestialBody2D[] bodies;
+            bodies = loadBodies(data, bestTrajectory.getBestHeight(), bestTrajectory.getBestSpeed(), 0);
+            Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
+            simulator = new VoyagerSimulation(deltaT, bodies);
+            simulate(simulator, data, bodies);
 
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -71,25 +94,24 @@ public class TP4b {
         long stop = Math.round(Math.ceil(days * SECONDS_IN_A_DAY / deltaT));
         double[] bestDistance = new double[] {Double.MAX_VALUE, Double.MAX_VALUE};
 
+        while (stop-- > 0) {
+            VoyagerSimulationFrame frame = simulator.getNextStep();
 
-            while (stop-- > 0) {
-                VoyagerSimulationFrame frame = simulator.getNextStep();
+            CelestialBody2D voyager = frame.getState().stream()
+                    .filter(p -> p.getId().equals("100")).findFirst().get();
 
-                CelestialBody2D voyager = frame.getState().stream()
-                        .filter(p -> p.getId().equals("100")).findFirst().get();
+            CelestialBody2D jupiter = frame.getState().stream()
+                    .filter(p -> p.getId().equals("5")).findFirst().get();
 
-                CelestialBody2D jupiter = frame.getState().stream()
-                        .filter(p -> p.getId().equals("5")).findFirst().get();
+            CelestialBody2D saturn = frame.getState().stream()
+                    .filter(p -> p.getId().equals("6")).findFirst().get();
 
-                CelestialBody2D saturn = frame.getState().stream()
-                        .filter(p -> p.getId().equals("6")).findFirst().get();
+            double distanceToJupiter = voyager.distanceTo(jupiter);
+            double distanceToSaturn = voyager.distanceTo(saturn);
 
-                double distanceToJupiter = jupiter.distanceTo(voyager);
-                double distanceToSaturn = saturn.distanceTo(voyager);
-
-                bestDistance[0] = Math.min(distanceToJupiter, bestDistance[0]);
-                bestDistance[1] = Math.min(distanceToSaturn, bestDistance[1]);
-            }
+            bestDistance[0] = Math.min(distanceToJupiter, bestDistance[0]);
+            bestDistance[1] = Math.min(distanceToSaturn, bestDistance[1]);
+        }
         return bestDistance[0] + bestDistance[1];
     }
 
@@ -165,17 +187,19 @@ public class TP4b {
             throw new IllegalArgumentException("You're missing sun or earth");
         }
         VoyagerData v1 = data.getVoyager1();
-        double distanceX = (sun.getXCoordinate() - earth.getXCoordinate());
-        double distanceY = (sun.getYCoordinate() - earth.getYCoordinate());
+        double distanceX = (earth.getXCoordinate() - sun.getXCoordinate());
+        double distanceY = (earth.getYCoordinate() - sun.getYCoordinate());
         double angle = Math.atan2(distanceY, distanceX);
         double km = voyagerDistance + earth.getRadius();
         double v1rx = earth.getXCoordinate() + Math.cos(angle) * km;
         double v1ry = earth.getYCoordinate() + Math.sin(angle) * km;
-        double v1angle = angle - Math.toRadians(90) + Math.toRadians(voyagerAngle);
+        double v1angle = angle + Math.toRadians(90) - Math.toRadians(voyagerAngle);
         double v1vx = earth.getXSpeed() + voyagerSpeed * Math.cos(v1angle);
         double v1vy = earth.getYSpeed() + voyagerSpeed * Math.sin(v1angle);
         double v1m = v1.getWeight();
-        bodies[bodies.length - 1] = new CelestialBody2D(v1.getId(), v1rx, v1ry, v1vx, v1vy, 10000, v1m);
+        voyager = new CelestialBody2D(v1.getId(), v1rx, v1ry, v1vx, v1vy, 1000, v1m);
+
+        bodies[bodies.length - 1] = voyager;
         return bodies;
     }
 
