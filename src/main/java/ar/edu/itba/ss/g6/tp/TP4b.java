@@ -41,7 +41,7 @@ public class TP4b {
                             bodies = loadBodies(data, height * kms, speed, 0);
                             Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
                             simulator = new VoyagerSimulation(deltaT, bodies);
-                            double distance = simulate(simulator, data, bodies);
+                            double distance = sim(simulator, data, bodies);
                             return new MinDistanceTrajectory(distance, height, speed);
                         }))
                     .flatMap(i -> i);
@@ -54,10 +54,45 @@ public class TP4b {
             System.out.println(" - distance: " + bestTrajectory.getBestDistance());
             System.out.println(" - height: " + bestTrajectory.getBestHeight());
             System.out.println(" - speed: " + bestTrajectory.getBestSpeed());
+
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
+
+
+
+    private static double sim (Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator, CelestialData data, CelestialBody2D[] bodies) {
+        int days = data.getDays();
+        double deltaT = data.getDeltaT();
+        int SECONDS_IN_A_DAY = 60 * 60 * 24;
+
+        long stop = Math.round(Math.ceil(days * SECONDS_IN_A_DAY / deltaT));
+        double[] bestDistance = new double[] {Double.MAX_VALUE, Double.MAX_VALUE};
+
+
+            while (stop-- > 0) {
+                VoyagerSimulationFrame frame = simulator.getNextStep();
+
+                CelestialBody2D voyager = frame.getState().stream()
+                        .filter(p -> p.getId().equals("100")).findFirst().get();
+
+                CelestialBody2D jupiter = frame.getState().stream()
+                        .filter(p -> p.getId().equals("5")).findFirst().get();
+
+                CelestialBody2D saturn = frame.getState().stream()
+                        .filter(p -> p.getId().equals("6")).findFirst().get();
+
+                double distanceToJupiter = jupiter.distanceTo(voyager);
+                double distanceToSaturn = saturn.distanceTo(voyager);
+
+                bestDistance[0] = Math.min(distanceToJupiter, bestDistance[0]);
+                bestDistance[1] = Math.min(distanceToSaturn, bestDistance[1]);
+            }
+        return bestDistance[0] + bestDistance[1];
+    }
+
 
 
     private static double simulate (Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator, CelestialData data, CelestialBody2D[] bodies) {
