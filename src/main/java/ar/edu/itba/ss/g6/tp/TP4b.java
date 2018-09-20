@@ -57,7 +57,7 @@ public class TP4b {
             mapper.readValue(ephemerisFile, CelestialData.class);
             List<Integer> lInfo = List.of(0, maxHeigh, kms);
             List<Integer> vInfo = List.of(0, maxSpeed, 1);
-            mapper.writer().writeValue(Paths.get("out.json").toFile(), List.of(lInfo, vInfo, distances));
+            mapper.writer().writeValue(Paths.get("planet_distance_data.json").toFile(), List.of(lInfo, vInfo, distances));
 
             Stream<MinDistanceTrajectory> trajStream = trajectories.stream().flatMap(l -> l.stream());
             MinDistanceTrajectory bestTrajectory = trajStream
