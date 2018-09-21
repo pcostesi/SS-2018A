@@ -2,11 +2,11 @@ package ar.edu.itba.ss.g6.tp.tp4;
 
 public class MinDistanceTrajectory {
     private final double[] bestDistance;
-    private final int bestHeight;
+    private final double bestHeight;
     private final double bestSpeed;
     private final double angle;
 
-    public MinDistanceTrajectory(double[] bestDistance, int bestHeight, double bestSpeed, double angle) {
+    public MinDistanceTrajectory(double[] bestDistance, double bestHeight, double bestSpeed, double angle) {
         this.bestDistance = bestDistance;
         this.bestHeight = bestHeight;
         this.bestSpeed = bestSpeed;
@@ -17,7 +17,7 @@ public class MinDistanceTrajectory {
         return bestDistance;
     }
 
-    public int getBestHeight() {
+    public double getBestHeight() {
         return bestHeight;
     }
 

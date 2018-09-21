@@ -11,14 +11,13 @@ import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulation;
 import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulationFrame;
 import org.codehaus.jackson.map.ObjectMapper;
 import ar.edu.itba.ss.g6.tp.tp4.*;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -111,21 +110,48 @@ public class TP4b {
     private static MinDistanceTrajectory exerciseThreePointOne(File ephemerisFile) {
         try {
             CelestialData data = loadEphemeris(ephemerisFile);
-            System.out.println("Building simulation grid");
+            System.out.println("Coarse - Building simulation grid");
             int kms = 1000;
+            int speedIncrement = 1;
+            int minSpeed = EARTH_ESCAPE_VELOCITY;
+            int minHeight = 0;
             int maxSpeed = 20;
             int maxHeigh = 10000;
-            List<List<MinDistanceTrajectory>> trajectories = trajectoryParametricHeatmap(data, kms, maxSpeed, maxHeigh);
 
-            System.out.println("Exporting heatmaps");
-            exportToHeatmap(ephemerisFile, kms, maxSpeed, maxHeigh, trajectories, 0, "planet_distance_data_jupiter.json");
-            exportToHeatmap(ephemerisFile, kms, maxSpeed, maxHeigh, trajectories, 1, "planet_distance_data_saturn.json");
+            // coarse
+            List<List<MinDistanceTrajectory>> trajectories = trajectoryParametricHeatmap(data, kms, speedIncrement, minSpeed, maxSpeed, minHeight, maxHeigh);
 
-            System.out.println("Analyzing launch info for optimum trajectory");
+            System.out.println("Coarse - Exporting heatmaps");
+            exportToHeatmap(ephemerisFile, kms, 1, minSpeed, maxSpeed, minHeight, maxHeigh, trajectories, 0, "planet_distance_data_jupiter_initial.json");
+            exportToHeatmap(ephemerisFile, kms, 1, minSpeed, maxSpeed, minHeight, maxHeigh, trajectories, 1, "planet_distance_data_saturn_initial.json");
+
+            System.out.println("Coarse - Analyzing launch info for optimum trajectory");
             MinDistanceTrajectory bestTrajectory = findMinDistance(trajectories);
 
-            System.out.println("Plotting trajectory");
-            simulateAndSave(data, bestTrajectory, "3.1");
+            System.out.println("Coarse - Plotting trajectory");
+            simulateAndSave(data, bestTrajectory, "3.1-initial");
+
+            // fine
+            System.out.println("Fine - Building simulation grid");
+
+            double scale = 0.1;
+            double kmsFine = kms * scale;
+            double speedIncrementFine = speedIncrement * scale;
+            double minSpeedFine = bestTrajectory.getBestSpeed() * (1 - scale);
+            double minHeightFine = bestTrajectory.getBestHeight() * (1 - scale);
+            double maxSpeedFine = bestTrajectory.getBestSpeed() * (1 + scale);
+            double maxHeighFine = bestTrajectory.getBestHeight() * (1 + scale);
+            trajectories = trajectoryParametricHeatmap(data, kmsFine, speedIncrementFine, minSpeedFine, maxSpeedFine, minHeightFine, maxHeighFine);
+
+            System.out.println("Fine - Exporting heatmaps");
+            exportToHeatmap(ephemerisFile, kms, 1, minSpeed, maxSpeed, minHeight, maxHeigh, trajectories, 0, "planet_distance_data_jupiter_fine.json");
+            exportToHeatmap(ephemerisFile, kms, 1, minSpeed, maxSpeed, minHeight, maxHeigh, trajectories, 1, "planet_distance_data_saturn_fine.json");
+
+            System.out.println("Fine - Analyzing launch info for optimum trajectory");
+            bestTrajectory = findMinDistance(trajectories);
+
+            System.out.println("Fine - Plotting trajectory");
+            simulateAndSave(data, bestTrajectory, "3.1-fine");
 
             return bestTrajectory;
 
@@ -135,14 +161,15 @@ public class TP4b {
         return null;
     }
 
-    private static List<List<MinDistanceTrajectory>> trajectoryParametricHeatmap(CelestialData data, int kms, int maxSpeed, int maxHeigh) {
+    private static List<List<MinDistanceTrajectory>> trajectoryParametricHeatmap(CelestialData data, double kms, double speedIncrement, double minSpeed, double maxSpeed, double minHeight, double maxHeigh) {
         System.out.println("This will perform " + (maxSpeed - EARTH_ESCAPE_VELOCITY) * (maxHeigh / kms) + " simulations.");
-        return IntStream.range(0, maxHeigh / kms)
+        return DoubleStream.iterate(minHeight / kms, d -> d < maxHeigh / kms, d -> d + kms)
                         .mapToObj(height ->
-                            IntStream.range(EARTH_ESCAPE_VELOCITY, maxSpeed)
+                            DoubleStream.iterate(minSpeed / speedIncrement, d -> d + speedIncrement)
                                     .parallel()
+                                    .takeWhile(d -> d < maxSpeed / speedIncrement)
                                     .mapToObj(speed -> {
-                                        System.out.println(String.format("s=%d, h=%d", speed, height * kms));
+                                        System.out.println(String.format("s=%f, h=%f", speed, height * kms));
                                         CelestialBody2D[] bodies;
                                         bodies = loadBodies(data, height * kms, speed, 0);
                                         Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
@@ -180,7 +207,7 @@ public class TP4b {
         return bestTrajectory;
     }
 
-    private static void exportToHeatmap(File ephemerisFile, int kms, int maxSpeed, int maxHeigh, List<List<MinDistanceTrajectory>> trajectories, int idx, String name) throws IOException {
+    private static void exportToHeatmap(File ephemerisFile, double kms, double speedIncrement, double minSpeed, double maxSpeed, double minHeight, double maxHeigh, List<List<MinDistanceTrajectory>> trajectories, int idx, String name) throws IOException {
         List<List<Double>> distancesToSaturn = trajectories.stream()
                 .map(l -> l.stream().map(v -> v.getBestDistance()[idx]).collect(Collectors.toList())
                 ).collect(Collectors.toList());
@@ -188,8 +215,8 @@ public class TP4b {
         ObjectMapper mapper = new ObjectMapper();
 
         mapper.readValue(ephemerisFile, CelestialData.class);
-        List<Integer> lInfo = List.of(0, maxHeigh, kms);
-        List<Integer> vInfo = List.of(EARTH_ESCAPE_VELOCITY, maxSpeed, 1);
+        List<Double> lInfo = List.of(minHeight, maxHeigh, kms);
+        List<Double> vInfo = List.of(minSpeed, maxSpeed, speedIncrement);
         mapper.writer().writeValue(Paths.get(name).toFile(), List.of(lInfo, vInfo, distancesToSaturn));
     }
 
@@ -332,7 +359,7 @@ public class TP4b {
     }
 
 
-    private static CelestialBody2D[] loadBodies(CelestialData data, int voyagerDistance, double voyagerSpeed, double voyagerAngle) {
+    private static CelestialBody2D[] loadBodies(CelestialData data, double voyagerDistance, double voyagerSpeed, double voyagerAngle) {
         Ephemeris[] planets = data.getPlanets();
         CelestialBody2D voyager;
         CelestialBody2D sun = null;
@@ -376,7 +403,7 @@ public class TP4b {
     }
 
     @NotNull
-    private static CelestialBody2D loadVoyager(CelestialData data, int voyagerDistance, double voyagerSpeed, double voyagerAngle, CelestialBody2D sun, CelestialBody2D earth) {
+    private static CelestialBody2D loadVoyager(CelestialData data, double voyagerDistance, double voyagerSpeed, double voyagerAngle, CelestialBody2D sun, CelestialBody2D earth) {
         CelestialBody2D voyager;VoyagerData v1 = data.getVoyager1();
         double distanceX = (earth.getXCoordinate() - sun.getXCoordinate());
         double distanceY = (earth.getYCoordinate() - sun.getYCoordinate());
