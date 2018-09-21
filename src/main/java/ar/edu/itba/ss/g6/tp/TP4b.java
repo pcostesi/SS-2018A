@@ -137,10 +137,10 @@ public class TP4b {
             double scale = 0.1;
             double kmsFine = kms * scale;
             double speedIncrementFine = speedIncrement * scale;
-            double minSpeedFine = bestTrajectory.getBestSpeed() * (1 - scale);
-            double minHeightFine = bestTrajectory.getBestHeight() * (1 - scale);
-            double maxSpeedFine = bestTrajectory.getBestSpeed() * (1 + scale);
-            double maxHeighFine = bestTrajectory.getBestHeight() * (1 + scale);
+            double minSpeedFine = bestTrajectory.getBestSpeed() * (1 - scale / 2);
+            double minHeightFine = bestTrajectory.getBestHeight() * (1 - scale / 2);
+            double maxSpeedFine = bestTrajectory.getBestSpeed() * (1 + scale / 2);
+            double maxHeighFine = bestTrajectory.getBestHeight() * (1 + scale / 2);
             trajectories = trajectoryParametricHeatmap(data, kmsFine, speedIncrementFine, minSpeedFine, maxSpeedFine, minHeightFine, maxHeighFine);
 
             System.out.println("Fine - Exporting heatmaps");
