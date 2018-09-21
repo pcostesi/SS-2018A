@@ -112,7 +112,7 @@ public class TP4b {
         try {
             CelestialData data = loadEphemeris(ephemerisFile);
             System.out.println("Building simulation grid");
-            int kms = 500;
+            int kms = 1000;
             int maxSpeed = 20;
             int maxHeigh = 10000;
             List<List<MinDistanceTrajectory>> trajectories = trajectoryParametricHeatmap(data, kms, maxSpeed, maxHeigh);
