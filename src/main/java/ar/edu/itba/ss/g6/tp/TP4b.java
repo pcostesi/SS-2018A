@@ -260,7 +260,7 @@ public class TP4b {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("velocity.out").toFile()))) {
+        try (BufferedWriter w = new BufferedWriter(new FileWriter(Paths.get("velocity-" + name + ".out").toFile()))) {
             for (int i = 0; i < speedList.size(); i++) {
                 double speed = speedList.get(i);
                 w.write(String.format("%d \t %e\n", i * 100, speed));
