@@ -142,10 +142,6 @@ public class TP4b {
             double maxSpeedFine = Math.min(bestTrajectory.getBestSpeed() + speedIncrement, maxSpeed);
             double maxHeighFine = Math.min(bestTrajectory.getBestHeight() + kms, maxHeigh);
 
-            System.out.println(minSpeedFine);
-            System.out.println(maxSpeedFine);
-            System.out.println(minHeightFine);
-            System.out.println(maxHeighFine);
             trajectories = trajectoryParametricHeatmap(data, kmsFine, speedIncrementFine, minSpeedFine, maxSpeedFine, minHeightFine, maxHeighFine);
 
             System.out.println("Fine - Exporting heatmaps");
@@ -199,7 +195,10 @@ public class TP4b {
     private static MinDistanceTrajectory findMinDistance(List<List<MinDistanceTrajectory>> trajectories) {
         Stream<MinDistanceTrajectory> trajStream = trajectories.stream().flatMap(l -> l.stream());
         MinDistanceTrajectory bestTrajectory = trajStream
-                .min(Comparator.comparingDouble(t -> Arrays.stream(t.getBestDistance()).sum()))
+                .min(Comparator.comparingDouble(o -> {
+                    double t[] = o.getBestDistance();
+                    return t[0] + t[1];
+                }))
                 .orElse(null);
 
         System.out.println("Best trajectory:");
