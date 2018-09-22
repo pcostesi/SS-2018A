@@ -135,12 +135,13 @@ public class TP4b {
             System.out.println("Fine - Building simulation grid");
 
             double scale = 0.1;
-            double kmsFine = kms * scale;
-            double speedIncrementFine = speedIncrement * scale;
-            double minSpeedFine = bestTrajectory.getBestSpeed() * (1 - scale / 2);
-            double minHeightFine = bestTrajectory.getBestHeight() * (1 - scale / 2);
-            double maxSpeedFine = bestTrajectory.getBestSpeed() * (1 + scale / 2);
-            double maxHeighFine = bestTrajectory.getBestHeight() * (1 + scale / 2);
+            double kmsFine = kms * scale * 2;
+            double speedIncrementFine = speedIncrement * scale * 2;
+            double minSpeedFine = Math.max(minSpeed, bestTrajectory.getBestSpeed() - speedIncrement);
+            double minHeightFine = Math.max(minHeight, bestTrajectory.getBestHeight() - kms);
+            double maxSpeedFine = Math.min(bestTrajectory.getBestSpeed() + speedIncrement, maxSpeed);
+            double maxHeighFine = Math.min(bestTrajectory.getBestHeight() + kms, maxHeigh);
+
             trajectories = trajectoryParametricHeatmap(data, kmsFine, speedIncrementFine, minSpeedFine, maxSpeedFine, minHeightFine, maxHeighFine);
 
             System.out.println("Fine - Exporting heatmaps");
@@ -161,21 +162,21 @@ public class TP4b {
         return null;
     }
 
-    private static List<List<MinDistanceTrajectory>> trajectoryParametricHeatmap(CelestialData data, double kms, double speedIncrement, double minSpeed, double maxSpeed, double minHeight, double maxHeigh) {
-        System.out.println("This will perform " + (maxSpeed - EARTH_ESCAPE_VELOCITY) * (maxHeigh / kms) + " simulations.");
-        return DoubleStream.iterate(minHeight / kms, d -> d < maxHeigh / kms, d -> d + kms)
+    private static List<List<MinDistanceTrajectory>> trajectoryParametricHeatmap(CelestialData data, double kms, double speedIncrement, double minSpeed, double maxSpeed, double minHeight, double maxHeight) {
+        System.out.println("This will perform " + ((maxSpeed - minSpeed) / speedIncrement) * ((maxHeight - minHeight) / kms) + " simulations.");
+        return DoubleStream.iterate(minHeight, d -> d < maxHeight, d -> d + kms)
                         .mapToObj(height ->
-                            DoubleStream.iterate(minSpeed / speedIncrement, d -> d + speedIncrement)
+                            DoubleStream.iterate(minSpeed, d -> d + speedIncrement)
                                     .parallel()
-                                    .takeWhile(d -> d < maxSpeed / speedIncrement)
+                                    .takeWhile(d -> d < maxSpeed)
                                     .mapToObj(speed -> {
-                                        System.out.println(String.format("s=%f, h=%f", speed, height * kms));
+                                        System.out.println(String.format("s=%f, h=%f", speed, height));
                                         CelestialBody2D[] bodies;
-                                        bodies = loadBodies(data, height * kms, speed, 0);
+                                        bodies = loadBodies(data, height, speed, 0);
                                         Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
                                         simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
                                         double[] distance = sim(simulator, data, bodies);
-                                        return new MinDistanceTrajectory(distance, height * kms, speed, 0);
+                                        return new MinDistanceTrajectory(distance, height, speed, 0);
                                     })
                                     .sorted(Comparator.comparingDouble(MinDistanceTrajectory::getBestSpeed))
                                     .collect(Collectors.toList())
@@ -194,7 +195,10 @@ public class TP4b {
     private static MinDistanceTrajectory findMinDistance(List<List<MinDistanceTrajectory>> trajectories) {
         Stream<MinDistanceTrajectory> trajStream = trajectories.stream().flatMap(l -> l.stream());
         MinDistanceTrajectory bestTrajectory = trajStream
-                .min(Comparator.comparingDouble(t -> Arrays.stream(t.getBestDistance()).sum()))
+                .min(Comparator.comparingDouble(o -> {
+                    double t[] = o.getBestDistance();
+                    return t[0] + t[1];
+                }))
                 .orElse(null);
 
         System.out.println("Best trajectory:");
