@@ -45,6 +45,9 @@ public class TP4b {
             VoyagerSimulation simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
             double[] distance = sim(simulator, data, bodies);
             return new double[]{angle, distance[0], distance[1]};
+        }).filter(o -> {
+            double[] t = o;
+            return t[1] > 0 && t[2] > 0 && t[1] < Double.MAX_VALUE && t[2] < Double.MAX_VALUE;
         }).min(Comparator.comparingDouble(o -> {
             double[] t = o;
             return t[1] + t[2];
@@ -70,6 +73,9 @@ public class TP4b {
             VoyagerSimulation simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
             double[] distance = sim(simulator, data, bodies);
             return new double[]{year, distance[0], distance[1]};
+        }).filter(o -> {
+            double[] t = o;
+            return t[1] > 0 && t[2] > 0 && t[1] < Double.MAX_VALUE && t[2] < Double.MAX_VALUE;
         }).min(Comparator.comparingDouble(o -> {
             double[] t = o;
             return t[1] + t[2];
@@ -94,6 +100,9 @@ public class TP4b {
             VoyagerSimulation simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
             double[] distance = sim(simulator, data, bodies);
             return new double[]{day, distance[0], distance[1]};
+        }).filter(o -> {
+            double[] t = o;
+            return t[1] > 0 && t[2] > 0 && t[1] < Double.MAX_VALUE && t[2] < Double.MAX_VALUE;
         }).min(Comparator.comparingDouble(o -> {
             double[] t = o;
             return t[1] + t[2];
@@ -255,6 +264,10 @@ public class TP4b {
             if (distanceToSaturn < bestDistance[1]) {
                 bestDistance[1] = distanceToSaturn;
                 bestDistance[3] = frame.getTimestamp();
+            }
+
+            if (distanceToJupiter <= 0 || distanceToSaturn <= 0) {
+                return new double[] {Double.MAX_VALUE, Double.MAX_VALUE, 0, 0};
             }
         }
         return bestDistance;
