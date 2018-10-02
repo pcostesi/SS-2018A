@@ -25,8 +25,14 @@ def plot_map(L_info, v_info, mapp):
     vmin = v_info[0]
     vmax = v_info[1]
     dv = v_info[2]
-    data = pd.DataFrame(mapp, columns=np.arange(vmin,vmax+dv,dv), index=np.arange(Lmin,Lmax+dL,dL))
-    ax = sns.heatmap(data)
+    cc = np.arange(vmin, vmax, dv)
+
+    ii = np.arange(Lmin, Lmax, dL)
+
+    data = pd.DataFrame(mapp, columns=cc, index=ii)
+    ax = sns.heatmap(data, cmap= "BuPu_r")
+    for ww in ax.get_yticklabels():
+        ww.set_rotation(0)
     plt.xlabel("v0 (km/s)")
     plt.ylabel("L (km)")
     plt.savefig('output/heatmap.png')
