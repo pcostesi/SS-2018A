@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 public class Cell2D<T extends Particle2D> implements Cell {
-    private long side;
+    private double side;
     private int buckets;
     private double xStart;
     private double yStart;
@@ -20,38 +20,20 @@ public class Cell2D<T extends Particle2D> implements Cell {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        Cell2D cell2D = (Cell2D) o;
-
-        if (side != cell2D.side) {
-            return false;
-        }
-        if (buckets != cell2D.buckets) {
-            return false;
-        }
-        if (Double.compare(cell2D.xStart, xStart) != 0) {
-            return false;
-        }
-        return Double.compare(cell2D.yStart, yStart) == 0;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cell2D<?> cell2D = (Cell2D<?>) o;
+        return Double.compare(cell2D.side, side) == 0 &&
+                buckets == cell2D.buckets &&
+                Double.compare(cell2D.xStart, xStart) == 0 &&
+                Double.compare(cell2D.yStart, yStart) == 0 &&
+                Objects.equals(grid, cell2D.grid);
     }
 
     @Override
     public int hashCode() {
-        int result;
-        long temp;
-        result = (int) (side ^ (side >>> 32));
-        result = 31 * result + buckets;
-        temp = Double.doubleToLongBits(xStart);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        temp = Double.doubleToLongBits(yStart);
-        result = 31 * result + (int) (temp ^ (temp >>> 32));
-        return result;
+
+        return Objects.hash(side, buckets, xStart, yStart, grid);
     }
 
     public Cell2D(Grid grid, Particle2D particle) {
@@ -76,7 +58,7 @@ public class Cell2D<T extends Particle2D> implements Cell {
     }
 
     public Cell2D getNeighbor(int x, int y) {
-        long delta = side / buckets;
+        double delta = side / buckets;
         Cell2D newCell = new Cell2D(this.grid, xStart + delta * x, yStart + delta * y);
         return newCell;
     }
