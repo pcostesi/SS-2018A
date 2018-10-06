@@ -24,7 +24,7 @@ public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
         boolean withinDistance = isWithinRadius(radius, p1, p2);
         boolean withinPeriodicDistance = false;
         if (isPeriodic()) {
-            long maxDist = this.getSideLength();
+            double maxDist = this.getSideLength();
             double thisX = p1.getXCoordinate();
             double thisY = p1.getYCoordinate();
             double otherX = p2.getXCoordinate();
@@ -47,9 +47,9 @@ public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
             double distanceInX = thisX - otherX;
             double distanceInY = thisY - otherY;
             double sumOfRadius = p1.getRadius() + p2.getRadius();
-            double rawDistance = Math.sqrt(distanceInX * distanceInX + distanceInY * distanceInY);
+            double rawDistance2 = distanceInX * distanceInX + distanceInY * distanceInY;
 
-            withinPeriodicDistance = rawDistance - sumOfRadius <= radius;
+            withinPeriodicDistance = rawDistance2 - sumOfRadius * sumOfRadius <= radius * radius;
         }
         return withinDistance || withinPeriodicDistance;
     }

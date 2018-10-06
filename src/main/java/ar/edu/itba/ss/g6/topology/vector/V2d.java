@@ -36,9 +36,13 @@ public class V2d {
     }
 
     public double distance(final V2d v2) {
+        return Math.sqrt(distance2(v2));
+    }
+
+    public double distance2(final V2d v2) {
         double distX = v2.x - x;
         double distY = v2.y - y;
-        return Math.sqrt(Math.pow(distX, 2) + Math.pow(distY, 2));
+        return distX * distX + distY * distY;
     }
 
     @Override

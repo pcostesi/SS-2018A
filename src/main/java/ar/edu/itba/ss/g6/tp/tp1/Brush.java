@@ -3,6 +3,7 @@ package ar.edu.itba.ss.g6.tp.tp1;
 import ar.edu.itba.ss.g6.topology.particle.ColoredParticle2D;
 import ar.edu.itba.ss.g6.topology.particle.Particle2D;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class Brush {
         return this;
     }
 
-    public Brush paint(Set<Particle2D> selected, int r, int g, int b) {
+    public Brush paint(Collection<Particle2D> selected, int r, int g, int b) {
         particles.parallelStream()
          .filter(selected::contains)
          .forEach(particle -> particle.colorize(String.format("%d\t%d\t%d", r, g, b)));

@@ -16,6 +16,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -71,7 +72,7 @@ public class TP1 {
              .findFirst();
         }
 
-        Set<Particle2D> neighbors = target
+        Collection<Particle2D> neighbors = target
             .map(targetParticle -> grid.getNeighbors(targetParticle))
             .orElse(Collections.emptySet());
 

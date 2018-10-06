@@ -1,6 +1,7 @@
 package ar.edu.itba.ss.g6.topology.particle;
 
 import ar.edu.itba.ss.g6.topology.vector.V2d;
+import org.jetbrains.annotations.NotNull;
 
 public class TheParticle implements Particle {
     private final String id;
@@ -54,14 +55,14 @@ public class TheParticle implements Particle {
     public String[] values() {
         return new String[] {
          getId(),
-         String.valueOf(position.x),
-         String.valueOf(position.y),
-         String.valueOf(velocity.x),
-         String.valueOf(velocity.y),
-         String.valueOf(acceleration.x),
-         String.valueOf(acceleration.y),
-         String.valueOf(prevAcceleration.x),
-         String.valueOf(prevAcceleration.y),
+         String.valueOf(position.getX()),
+         String.valueOf(position.getY()),
+         String.valueOf(velocity.getX()),
+         String.valueOf(velocity.getY()),
+         String.valueOf(acceleration.getX()),
+         String.valueOf(acceleration.getY()),
+         String.valueOf(prevAcceleration.getX()),
+         String.valueOf(prevAcceleration.getY()),
          String.valueOf(getRadius()),
          String.valueOf(getMass())
         };
@@ -97,10 +98,15 @@ public class TheParticle implements Particle {
     }
 
     public double distanceTo(TheParticle particle) {
-        position.distance(particle.getPosition());
         double radiusDistance = this.getRadius() + particle.getRadius();
         double rawDistance =  position.distance(particle.getPosition());
         return rawDistance - radiusDistance;
+    }
+
+    public double distanceTo2(TheParticle particle) {
+        double radiusDistance = this.getRadius() + particle.getRadius();
+        double rawDistance2 =  position.distance2(particle.getPosition());
+        return rawDistance2 - radiusDistance * radiusDistance;
     }
 
     public double getKineticEnergy() {
@@ -152,4 +158,5 @@ public class TheParticle implements Particle {
     public int hashCode() {
         return id.hashCode();
     }
+
 }
