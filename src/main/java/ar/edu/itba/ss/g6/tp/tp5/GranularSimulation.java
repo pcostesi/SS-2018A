@@ -63,7 +63,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         return particle;
     }
 
-    public GranularSimulation(double kn, double kt, double deltaT, double width, double height, double aperture, Set<TheParticle> particles, double fps) {
+    public GranularSimulation(double Mu, double Gamma, double deltaT, double width, double height, double aperture, Set<TheParticle> particles, double fps) {
         double radius = particles.stream().mapToDouble(TheParticle::getRadius).max().orElse(0) * 2;
         double side = Math.max(width, height);
 
@@ -78,7 +78,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.fps = fps;
 
         grid.set(this.particles);
-        force = new GranularForce(kn, kt);
+        force = new GranularForce(Mu, Gamma);
         if (W > L || D > W) {
             throw new IllegalArgumentException("L > W > D");
         }

@@ -10,8 +10,6 @@ import java.nio.file.Paths;
 public class CommandLineOptions {
     private boolean errorFree;
 
-
-
     @Option(name = "-i", aliases = { "--in" }, required = false, forbids = {"-g"},
      usage = "input file for the particles")
     private Path inFile;
@@ -50,22 +48,22 @@ public class CommandLineOptions {
     @Option(name = "-R", aliases = {"--maxDiameter"}, depends = {"-g"})
     private double maxDiameter = 0.03;
 
-    @Option(name = "--ect", usage = "elastic constant t", depends = {"-s"})
-    private double elasticConstantT = 20000;
+    @Option(name = "--mu", usage = "Mu", depends = {"-s"})
+    private double Mu = 0.7;
 
-    @Option(name = "--ecn", usage = "elastic constant n", depends = {"-s"})
-    private double elasticConstantN = 10000;
+    @Option(name = "--gamma", usage = "Gamma", depends = {"-s"})
+    private double Gamma = 100;
 
     @Option(name = "-m", aliases = {"--mass", "-M"}, usage = "The mass of the particles", depends = {"-s"})
     private double particleMass = 0.01;
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 10;
+    private double duration = 2;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .000005;
+    private double timeStep = .000001;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")
@@ -137,12 +135,12 @@ public class CommandLineOptions {
         return maxDiameter;
     }
 
-    public double getElasticConstantT() {
-        return elasticConstantT;
+    public double getMu() {
+        return Mu;
     }
 
-    public double getElasticConstantN() {
-        return elasticConstantN;
+    public double getGamma() {
+        return Gamma;
     }
 
     public double getParticleMass() {

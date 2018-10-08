@@ -136,11 +136,11 @@ public class TP5 {
         double aperture = values.getAperture();
         double deltaT = values.getTimeStep();
         Set<TheParticle> particles = loadParticles(values);
-        double kn = values.getElasticConstantN();
-        double kt = values.getElasticConstantT();
+        double Mu = values.getMu();
+        double Gamma = values.getGamma();
         double fps = values.getFps();
 
-        TimeDrivenSimulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(kn, kt, deltaT, width, height, aperture, particles, fps);
+        TimeDrivenSimulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(Mu, Gamma, deltaT, width, height, aperture, particles, fps);
         return simulation;
     }
 
