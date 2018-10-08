@@ -84,5 +84,15 @@
             <version>1.9.13</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/net.mikera/vectorz -->
+        <dependency>
+            <groupId>net.mikera</groupId>
+            <artifactId>vectorz</artifactId>
+            <version>0.66.0</version>
+        </dependency>
+
+
+
+
     </dependencies>
 </project>

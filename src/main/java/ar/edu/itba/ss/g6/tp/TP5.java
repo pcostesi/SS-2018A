@@ -4,7 +4,7 @@ import ar.edu.itba.ss.g6.exporter.ovito.Exporter;
 import ar.edu.itba.ss.g6.exporter.ovito.OvitoXYZExporter;
 import ar.edu.itba.ss.g6.loader.DynamicDataLoader;
 import ar.edu.itba.ss.g6.loader.ParticleLoader;
-import ar.edu.itba.ss.g6.simulation.Simulation;
+import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.particle.ParticleDyn2DWeigGenerator;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 import ar.edu.itba.ss.g6.tp.tp5.CommandLineOptions;
@@ -71,38 +71,43 @@ public class TP5 {
     }
 
     private static void simulate(CommandLineOptions values) {
-        Simulation<TheParticle, GranularSimulationFrame> simulation = granularSimulation(values);
+        TimeDrivenSimulation<TheParticle, GranularSimulationFrame> simulation = granularSimulation(values);
         GranularSimulationFrame frame;
+
         double stopTime = values.getDuration();
+        int frameCount = simulation.totalFrameCount(stopTime);
+
         Path output = values.getOutFile();
         Exporter<TheParticle> exporter = new OvitoXYZExporter<>();
-        double flow[] = new double[(int) Math.round(Math.ceil(stopTime)) + 1];
-        double totalKE[] = new double[(int) Math.round(Math.ceil(stopTime)) + 1];
 
-        int framesCaptured = 0;
-        double FPS = values.getFps();
-        double deltaT = values.getTimeStep();
         Set<TheParticle> boundaries = Set.of(new TheParticle("-1", 0, values.getLenght() * -0.1, 0, 0, 0.001, 0),
          new TheParticle("-2", values.getWidth(), values.getLenght(), 0, 0, 0.001, 0));
-        double prevTimestamp = -1;
+
+        double currentFlow = 0;
+        double[] totalKE = new double[frameCount];
+        double[] flow = new double[frameCount];
+
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
                 double ts = frame.getTimestamp();
-                flow[(int) Math.round(Math.ceil(ts))] += frame.getFlowed();
-                if (ts >= framesCaptured / FPS && ts < framesCaptured / FPS + deltaT) {
+                currentFlow += frame.getFlowed();
+                if (simulation.shouldCaptureFrame(ts)) {
+                    int currentFrame = simulation.frameNumber(ts);
                     Set<TheParticle> particles = new HashSet<>();
                     particles.addAll(boundaries);
                     particles.addAll(frame.getState());
-                    System.out.printf("%d - %f\n", framesCaptured, frame.getTimestamp());
+                    System.out.printf("%d - %f\n", currentFrame, frame.getTimestamp());
                     exporter.addFrameToFile(out, particles, frame.getTimestamp());
-                    framesCaptured += 1;
+
+                    totalKE[currentFrame] = frame.getState().parallelStream()
+                            .mapToDouble(TheParticle::getKineticEnergy)
+                            .sum();
+                    flow[currentFrame] = currentFlow;
+
+                    currentFlow = 0;
                 }
-                if (Math.ceil(prevTimestamp) < Math.ceil(ts)) {
-                    totalKE[(int) Math.round(Math.ceil(ts))] = frame.getState().parallelStream()
-                     .mapToDouble(TheParticle::getKineticEnergy)
-                     .sum();
-                }
-                prevTimestamp = ts;
+
+
             }
         } catch (IOException e) {
             System.err.println("Can't write sim 🤷🏻‍♂️");
@@ -125,7 +130,7 @@ public class TP5 {
         }
     }
 
-    private static Simulation<TheParticle, GranularSimulationFrame> granularSimulation(CommandLineOptions values) {
+    private static TimeDrivenSimulation<TheParticle, GranularSimulationFrame> granularSimulation(CommandLineOptions values) {
         double width = values.getWidth();
         double height = values.getLenght();
         double aperture = values.getAperture();
@@ -133,8 +138,9 @@ public class TP5 {
         Set<TheParticle> particles = loadParticles(values);
         double kn = values.getElasticConstantN();
         double kt = values.getElasticConstantT();
+        double fps = values.getFps();
 
-        Simulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(kn, kt, deltaT, width, height, aperture, particles);
+        TimeDrivenSimulation<TheParticle, GranularSimulationFrame> simulation = new GranularSimulation(kn, kt, deltaT, width, height, aperture, particles, fps);
         return simulation;
     }
 

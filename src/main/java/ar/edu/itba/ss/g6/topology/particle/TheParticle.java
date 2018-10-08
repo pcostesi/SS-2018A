@@ -2,6 +2,8 @@ package ar.edu.itba.ss.g6.topology.particle;
 
 import ar.edu.itba.ss.g6.topology.vector.V2d;
 
+import java.text.DecimalFormat;
+
 public class TheParticle implements Particle {
     private final String id;
     private final double radius;
@@ -52,18 +54,20 @@ public class TheParticle implements Particle {
 
     @Override
     public String[] values() {
+        DecimalFormat df = new DecimalFormat("#0.000000");
+
         return new String[] {
-         getId(),
-         String.valueOf(position.x),
-         String.valueOf(position.y),
-         String.valueOf(velocity.x),
-         String.valueOf(velocity.y),
-         String.valueOf(acceleration.x),
-         String.valueOf(acceleration.y),
-         String.valueOf(prevAcceleration.x),
-         String.valueOf(prevAcceleration.y),
-         String.valueOf(getRadius()),
-         String.valueOf(getMass())
+                getId(),
+                df.format(position.getX()),
+                df.format(position.getY()),
+                df.format(velocity.getX()),
+                df.format(velocity.getY()),
+                df.format(acceleration.getX()),
+                df.format(acceleration.getY()),
+                df.format(prevAcceleration.getX()),
+                df.format(prevAcceleration.getY()),
+                df.format(getRadius()),
+                df.format(getMass())
         };
     }
 
@@ -97,14 +101,21 @@ public class TheParticle implements Particle {
     }
 
     public double distanceTo(TheParticle particle) {
-        position.distance(particle.getPosition());
         double radiusDistance = this.getRadius() + particle.getRadius();
         double rawDistance =  position.distance(particle.getPosition());
         return rawDistance - radiusDistance;
     }
 
+    public double distanceTo2(TheParticle particle) {
+        double radiusDistance = this.getRadius() + particle.getRadius();
+        double rawDistance2 =  position.distance2(particle.getPosition());
+        return rawDistance2 - radiusDistance * radiusDistance;
+    }
+
     public double getKineticEnergy() {
-        return 0.5 * getMass() * (Math.pow(getVelocity().getX(), 2) + Math.pow(getVelocity().getY(), 2));
+        double vx2 = getVelocity().getX() * getVelocity().getX();
+        double vy2 = getVelocity().getY() * getVelocity().getY();
+        return 0.5 * getMass() * (vx2 + vy2);
     }
 
     @Override
@@ -152,4 +163,5 @@ public class TheParticle implements Particle {
     public int hashCode() {
         return id.hashCode();
     }
+
 }

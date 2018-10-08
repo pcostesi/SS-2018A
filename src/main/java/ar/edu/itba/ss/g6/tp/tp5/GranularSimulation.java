@@ -1,25 +1,20 @@
 package ar.edu.itba.ss.g6.tp.tp5;
 
-import ar.edu.itba.ss.g6.simulation.SimulationFrame;
 import ar.edu.itba.ss.g6.simulation.TimeDrivenSimulation;
 import ar.edu.itba.ss.g6.topology.force.Force;
 import ar.edu.itba.ss.g6.topology.force.GranularForce;
 import ar.edu.itba.ss.g6.topology.geometry.Vessel;
+import ar.edu.itba.ss.g6.topology.geometry.Wall;
 import ar.edu.itba.ss.g6.topology.grid.Grid;
-import ar.edu.itba.ss.g6.topology.grid.MapGrid2D;
-import ar.edu.itba.ss.g6.topology.grid.MapGridV2d;
-import ar.edu.itba.ss.g6.topology.particle.Particle;
+import ar.edu.itba.ss.g6.topology.grid.TheParticleGrid;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
-import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 import ar.edu.itba.ss.g6.topology.vector.V2d;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class GranularSimulation implements TimeDrivenSimulation<TheParticle, GranularSimulationFrame> {
     private final static double G = -9.8;
@@ -27,12 +22,16 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     private final double L;
     private final double D;
     private final double deltaT;
+    private double fps;
+
     private Set<TheParticle> particles;
+    private Grid<TheParticle> grid;
     private final Force force;
     private final Vessel vessel;
 
     private double timestamp;
-    private Map<TheParticle, TheParticle> flowed = new ConcurrentHashMap<>();
+    private AtomicInteger flowed = new AtomicInteger();
+
 
     private TheParticle warp(@NotNull TheParticle particle) {
         if (particle.getPosition().getY() <= (L * -0.1)) {
@@ -62,6 +61,58 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         }
         */
         return particle;
+    }
+
+    public GranularSimulation(double kn, double kt, double deltaT, double width, double height, double aperture, Set<TheParticle> particles, double fps) {
+        double radius = particles.stream().mapToDouble(TheParticle::getRadius).max().orElse(0) * 2;
+        double side = Math.max(width, height);
+
+        this.deltaT = deltaT;
+        this.W = width;
+        this.L = height;
+        this.D = aperture;
+        this.particles = particles;
+        this.vessel = new Vessel(height, width, aperture);
+        this.grid = new TheParticleGrid(10, side, radius);
+
+        this.fps = fps;
+
+        grid.set(this.particles);
+        force = new GranularForce(kn, kt);
+        if (W > L || D > W) {
+            throw new IllegalArgumentException("L > W > D");
+        }
+    }
+
+    private V2d getForce(@NotNull TheParticle particle) {
+        Collection<TheParticle> neighbors = grid.getNeighbors(particle);
+        double p2pForceX = 0;
+        double p2pForceY = 0;
+
+        double p2wForceX = 0;
+        double p2wForceY = 0;
+
+        for (TheParticle neighbor : neighbors) {
+            V2d interaction = force.getForce(particle, neighbor);
+            p2pForceX += interaction.getX();
+            p2pForceY += interaction.getY();
+        }
+
+        for (Wall neighbor : vessel.getWalls()) {
+            V2d interaction = force.getForce(particle, neighbor);
+            p2wForceX += interaction.getX();
+            p2wForceY += interaction.getY();
+        }
+
+        return new V2d(p2pForceX + p2wForceX, p2pForceY + p2wForceY);
+    }
+
+    private double getXAcceleration(@NotNull TheParticle particle) {
+        return getForce(particle).getX() / particle.getMass();
+    }
+
+    private double getYAcceleration(@NotNull TheParticle particle) {
+        return G + getForce(particle).getY() / particle.getMass();
     }
 
     private TheParticle move(@NotNull TheParticle particle) {
@@ -98,42 +149,9 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
         // did it flow?
         if (particle.getPosition().getY() > 0 && nRy <= 0) {
-            flowed.put(result, result);
+            flowed.incrementAndGet();
         }
         return result;
-    }
-
-    private V2d getForce(@NotNull TheParticle particle) {
-        V2d p2pForce = particles.parallelStream()
-            .map(neighbor -> force.getForce(particle, neighbor))
-            .reduce(new V2d(0, 0), (v1, v2) -> v1.add(v2));
-
-        V2d p2wForce = vessel.getWalls().parallelStream()
-            .map(wall -> force.getForce(particle, wall))
-            .reduce(new V2d(0, 0), (v1, v2) -> v1.add(v2));
-        return p2pForce.add(p2wForce);
-    }
-
-    private double getXAcceleration(@NotNull TheParticle particle) {
-        return getForce(particle).getX() / particle.getMass();
-    }
-
-    private double getYAcceleration(@NotNull TheParticle particle) {
-        return G + getForce(particle).getY() / particle.getMass();
-    }
-
-    public GranularSimulation(double kn, double kt, double deltaT, double width, double height, double aperture, Set<TheParticle> particles) {
-        this.deltaT = deltaT;
-        this.W = width;
-        this.L = height;
-        this.D = aperture;
-        this.particles = particles;
-        this.vessel = new Vessel(height, width, aperture);
-
-        force = new GranularForce(kn, kt);
-        if (W > L || D > W) {
-            throw new IllegalArgumentException("L > W > D");
-        }
     }
 
     @Override
@@ -143,12 +161,24 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             return new GranularSimulationFrame(0, particles, 0);
         }
         timestamp += deltaT;
-        flowed.clear();
+        flowed.set(0);
+
         Set<TheParticle> state = particles.parallelStream()
             .map(this::move)
             .map(this::warp)
             .collect(Collectors.toSet());
-        this.particles = state;
-        return new GranularSimulationFrame(timestamp, state, flowed.size());
+        particles = state;
+        grid.set(particles);
+        return new GranularSimulationFrame(timestamp, state, flowed.get());
+    }
+
+    @Override
+    public double getDeltaT() {
+        return deltaT;
+    }
+
+    @Override
+    public double getFPS() {
+        return fps;
     }
 }

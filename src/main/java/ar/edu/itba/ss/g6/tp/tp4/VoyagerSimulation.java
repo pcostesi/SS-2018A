@@ -50,4 +50,14 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
         }).toArray(n -> new CelestialBody2D[n]);
         return new VoyagerSimulationFrame(timestamp, bodies);
     }
+
+    @Override
+    public double getDeltaT() {
+        return 0;
+    }
+
+    @Override
+    public double getFPS() {
+        return 0;
+    }
 }

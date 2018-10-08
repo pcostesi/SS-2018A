@@ -2,106 +2,69 @@ package ar.edu.itba.ss.g6.topology.grid;
 
 import ar.edu.itba.ss.g6.topology.particle.Particle;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public abstract class MapGrid <T extends Particle, G extends Cell> implements Grid<T> {
-    private final long side;
+    private final double side;
     private final int buckets;
     private final double radius;
     private final boolean isPeriodic;
     private final CellProvider<T, G> cellProvider;
-    private final Map<T, Set<T>> neighborhoods = new HashMap<>();
-    private final Map<T, Set<T>> neighborhoodsBF = new HashMap<>();
+    private final Map<T, Collection<T>> neighborhoods = new HashMap<>();
+    private final Map<G, Collection<T>> grid = new HashMap();
 
-    private void addBothWays(T particle, T neighbor) {
-        Set<T> theirNeighborhood = neighborhoods.getOrDefault(neighbor, new HashSet<>());
+    synchronized private void addBothWays(T particle, T neighbor) {
+
+        Collection<T> theirNeighborhood = neighborhoods.get(neighbor);
         theirNeighborhood.add(particle);
         neighborhoods.put(neighbor, theirNeighborhood);
 
-        Set<T> myNeighborhood = neighborhoods.getOrDefault(particle, new HashSet<>());
+        Collection<T> myNeighborhood = neighborhoods.get(neighbor);
         myNeighborhood.add(neighbor);
         neighborhoods.put(particle, myNeighborhood);
     }
 
-//    private void addBothWaysBF(T particle, T neighbor) {
-//        Set<T> theirNeighborhood = neighborhoodsBF.getOrDefault(neighbor, new HashSet<>());
-//        theirNeighborhood.add(particle);
-//        neighborhoodsBF.put(neighbor, theirNeighborhood);
-//
-//        Set<T> myNeighborhood = neighborhoodsBF.getOrDefault(particle, new HashSet<>());
-//        myNeighborhood.add(neighbor);
-//        neighborhoodsBF.put(particle, myNeighborhood);
-//    }
-
-//    private void bruteForceSet(Collection<T> particles) {
-//        for (T particle : particles) {
-//            for (T other : particles) {
-//                if (areWithinDistance(particle, other, radius)) {
-//                    addBothWaysBF(particle, other);
-//                }
-//            }
-//        }
-//    }
-
     abstract boolean areWithinDistance(T p1, T p2, double distance);
 
-    private T place(Map<G, Set<T>> grid, T particle) {
-        G cell = cellProvider.provide(this, particle);
-        Set<T> particles = grid.get(cell);
-        if (particles == null) {
-            particles = new HashSet<>();
-            grid.put(cell, particles);
-        }
-        particles.add(particle);
-        return particle;
-    }
-
     private void cellIndexMethod(Collection<T> particles) {
-        Map<G, Set<T>> grid = new HashMap<>();
-        particles.forEach(particle -> place(grid, particle));
-        assert particles.size() == grid.values().stream().mapToInt(Set::size).sum();
+        particles.forEach(particle -> {
+            neighborhoods.put(particle, new HashSet<>());
 
-        for (G cell : grid.keySet()) {
-            Set<T> ownCellParticles = grid.get(cell);
-            Set<T> neighboringCellParticles = cell.semisphereNeighborhood()
+            G cell = cellProvider.provide(this, particle);
+            Collection<T> bucket = grid.computeIfAbsent(cell, k -> new HashSet<>());
+            bucket.add(particle);
+        });
+
+        grid.keySet().forEach(cell -> {
+            Collection<T> ownCellParticles = grid.get(cell);
+            if (ownCellParticles == null) {
+                return;
+            }
+
+            cell.semisphereNeighborhood()
+                    .parallel()
                 .map(grid::get)
                 .filter(Objects::nonNull)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet());
+                    .forEach(neighborhood -> {
+                        neighborhood.forEach(neighbor -> {
+                            for (T particle : ownCellParticles) {
+                                if (areWithinDistance(particle, neighbor, radius)) {
+                                    addBothWays(particle, neighbor);
+                                }
+                            }
+                        });
+                    });
 
-            for (T particle : ownCellParticles) {
-                for (T neighbor : neighboringCellParticles) {
-                    if (areWithinDistance(particle, neighbor, radius)) {
-                        addBothWays(particle, neighbor);
-                    }
-                }
-            }
-        }
+        });
     }
 
     public Grid<T> set(Collection<T> particles) {
         cellIndexMethod(particles);
-        //bruteForceSet(particles);
         return this;
     }
 
-    public Set<T> getNeighbors(T particle) {
-        //Set<T> usingBF = neighborhoodsBF.get(particle);
-        Set<T> usingCIM = neighborhoods.get(particle);
-//        assert usingBF.size() == usingCIM.size();
-//        for (T p : usingBF) {
-//            assert usingCIM.contains(p);
-//        }
-//        for (T p : usingCIM) {
-//            assert usingBF.contains(p);
-//        }
-        return usingCIM;
+    public Collection<T> getNeighbors(T particle) {
+        return neighborhoods.get(particle);
     }
 
     @Override
@@ -120,11 +83,11 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     }
 
     @Override
-    public long getSideLength() {
+    public double getSideLength() {
         return side;
     }
 
-    public MapGrid(long side, int buckets, double radius, boolean isPeriodic, CellProvider<T, G> cellProvider) {
+    public MapGrid(double side, int buckets, double radius, boolean isPeriodic, CellProvider<T, G> cellProvider) {
         this.side = side;
         this.buckets = buckets;
         this.isPeriodic = isPeriodic;

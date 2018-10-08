@@ -4,13 +4,13 @@ import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 
 
 public class MapGridV2d<T extends TheParticle> extends MapGrid<T, CellV2d> {
-    public MapGridV2d(long side, int buckets, double radius, boolean isPeriodic) {
+    public MapGridV2d(double side, int buckets, double radius, boolean isPeriodic) {
         super(side, buckets, radius, isPeriodic, CellV2d::new);
     }
 
 
     public boolean isWithinRadius(double radius, TheParticle p1, TheParticle p2) {
-        return p1.distanceTo(p2) <= radius;
+        return p1.distanceTo2(p2) <= radius * radius;
     }
 
 
@@ -19,7 +19,7 @@ public class MapGridV2d<T extends TheParticle> extends MapGrid<T, CellV2d> {
         boolean withinDistance = isWithinRadius(radius, p1, p2);
         boolean withinPeriodicDistance = false;
         if (isPeriodic()) {
-            long maxDist = this.getSideLength();
+            double maxDist = this.getSideLength();
             double thisX = p1.getPosition().getX();
             double thisY = p1.getPosition().getY();
             double otherX = p2.getPosition().getX();

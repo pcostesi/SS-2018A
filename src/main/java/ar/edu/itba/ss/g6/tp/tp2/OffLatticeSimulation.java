@@ -6,8 +6,8 @@ import ar.edu.itba.ss.g6.topology.grid.MapGrid2D;
 import ar.edu.itba.ss.g6.topology.particle.DynamicParticle2D;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OffLatticeSimulation implements TimeDrivenSimulation {
@@ -60,7 +60,17 @@ public class OffLatticeSimulation implements TimeDrivenSimulation {
 
     private double getNeighborsTheta(DynamicParticle2D particle) {
         // TODO Check this
-        Set<DynamicParticle2D> neighbors =  map.getNeighbors(particle);
+        Collection<DynamicParticle2D> neighbors =  map.getNeighbors(particle);
         return neighbors.stream().collect(Collectors.averagingDouble( x -> x.getDirection()));
+    }
+
+    @Override
+    public double getDeltaT() {
+        return 0;
+    }
+
+    @Override
+    public double getFPS() {
+        return 0;
     }
 }

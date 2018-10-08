@@ -1,0 +1,17 @@
+.circle {
+	cursor: pointer;
+	fill: blue;
+	-webkit-transition: r .2s ease-in-out;
+  -moz-transition: r .2s ease-in-out;
+  -ms-transition: r .2s ease-in-out;
+  -o-transition: r .2s ease-in-out;
+  transition: r .2s ease-in-out;
+}
+
+.circle.neighbour {
+	fill: green;
+}
+
+.circle:hover {
+	fill: red;
+}
