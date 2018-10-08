@@ -1,7 +1,8 @@
 package ar.edu.itba.ss.g6.topology.particle;
 
 import ar.edu.itba.ss.g6.topology.vector.V2d;
-import org.jetbrains.annotations.NotNull;
+
+import java.text.DecimalFormat;
 
 public class TheParticle implements Particle {
     private final String id;
@@ -53,18 +54,20 @@ public class TheParticle implements Particle {
 
     @Override
     public String[] values() {
+        DecimalFormat df = new DecimalFormat("#0.000000");
+
         return new String[] {
-         getId(),
-         String.valueOf(position.getX()),
-         String.valueOf(position.getY()),
-         String.valueOf(velocity.getX()),
-         String.valueOf(velocity.getY()),
-         String.valueOf(acceleration.getX()),
-         String.valueOf(acceleration.getY()),
-         String.valueOf(prevAcceleration.getX()),
-         String.valueOf(prevAcceleration.getY()),
-         String.valueOf(getRadius()),
-         String.valueOf(getMass())
+                getId(),
+                df.format(position.getX()),
+                df.format(position.getY()),
+                df.format(velocity.getX()),
+                df.format(velocity.getY()),
+                df.format(acceleration.getX()),
+                df.format(acceleration.getY()),
+                df.format(prevAcceleration.getX()),
+                df.format(prevAcceleration.getY()),
+                df.format(getRadius()),
+                df.format(getMass())
         };
     }
 
@@ -110,7 +113,9 @@ public class TheParticle implements Particle {
     }
 
     public double getKineticEnergy() {
-        return 0.5 * getMass() * (Math.pow(getVelocity().getX(), 2) + Math.pow(getVelocity().getY(), 2));
+        double vx2 = getVelocity().getX() * getVelocity().getX();
+        double vy2 = getVelocity().getY() * getVelocity().getY();
+        return 0.5 * getMass() * (vx2 + vy2);
     }
 
     @Override

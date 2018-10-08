@@ -195,6 +195,16 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
                 armonicParticle.getRadius(), armonicParticle.getWeight());
     }
 
+    @Override
+    public double getDeltaT() {
+        return 0;
+    }
+
+    @Override
+    public double getFPS() {
+        return 0;
+    }
+
     public enum IntegrationMethod {
         BEEMAN,
         GPCO5,

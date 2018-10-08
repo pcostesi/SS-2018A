@@ -1,6 +1,5 @@
 package ar.edu.itba.ss.g6.topology.grid;
 
-import ar.edu.itba.ss.g6.topology.particle.Particle2D;
 import ar.edu.itba.ss.g6.topology.particle.TheParticle;
 
 import java.util.Objects;
@@ -33,7 +32,7 @@ public class CellV2d<T extends TheParticle> implements Cell {
     @Override
     public int hashCode() {
 
-        return Objects.hash(side, buckets, xStart, yStart, grid);
+        return Objects.hash(xStart, yStart);
     }
 
     public CellV2d(Grid grid, TheParticle particle) {

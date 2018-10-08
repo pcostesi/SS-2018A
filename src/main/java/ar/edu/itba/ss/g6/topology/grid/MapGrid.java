@@ -3,9 +3,6 @@ package ar.edu.itba.ss.g6.topology.grid;
 import ar.edu.itba.ss.g6.topology.particle.Particle;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Collectors;
 
 public abstract class MapGrid <T extends Particle, G extends Cell> implements Grid<T> {
     private final double side;
@@ -34,28 +31,30 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
             neighborhoods.put(particle, new HashSet<>());
 
             G cell = cellProvider.provide(this, particle);
-            Collection<T> bucket = grid.computeIfAbsent(cell, k -> new HashSet<>(particles.size()));
+            Collection<T> bucket = grid.computeIfAbsent(cell, k -> new HashSet<>());
             bucket.add(particle);
         });
 
-        grid.keySet().parallelStream().forEach(cell -> {
+        grid.keySet().forEach(cell -> {
             Collection<T> ownCellParticles = grid.get(cell);
             if (ownCellParticles == null) {
                 return;
             }
 
             cell.semisphereNeighborhood()
+                    .parallel()
                 .map(grid::get)
                 .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .parallel()
-                .forEach(neighbor -> {
-                    for (T particle : ownCellParticles) {
-                        if (areWithinDistance(particle, neighbor, radius)) {
-                            addBothWays(particle, neighbor);
-                        }
-                    }
-                });
+                    .forEach(neighborhood -> {
+                        neighborhood.forEach(neighbor -> {
+                            for (T particle : ownCellParticles) {
+                                if (areWithinDistance(particle, neighbor, radius)) {
+                                    addBothWays(particle, neighbor);
+                                }
+                            }
+                        });
+                    });
+
         });
     }
 

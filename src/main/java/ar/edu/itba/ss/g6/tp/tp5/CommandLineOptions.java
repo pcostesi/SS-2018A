@@ -61,15 +61,15 @@ public class CommandLineOptions {
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 1;
+    private double duration = 10;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .00001;
+    private double timeStep = .000005;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")
-    private double fps = 30;
+    private double fps = 60;
 
 
     public CommandLineOptions(String... args) {

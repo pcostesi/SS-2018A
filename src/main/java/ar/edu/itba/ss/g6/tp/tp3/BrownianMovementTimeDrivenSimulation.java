@@ -20,6 +20,16 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
     private int fps = 30;
     private double currentTimeStep;
 
+    @Override
+    public double getDeltaT() {
+        return 0;
+    }
+
+    @Override
+    public double getFPS() {
+        return fps;
+    }
+
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {
 
         private final double timestamp;
