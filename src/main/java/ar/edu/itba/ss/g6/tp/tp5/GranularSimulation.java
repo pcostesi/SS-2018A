@@ -92,7 +92,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         double p2wForceX = 0;
         double p2wForceY = 0;
 
-        for (TheParticle neighbor : neighbors) {
+        for (TheParticle neighbor : particles) {
             V2d interaction = force.getForce(particle, neighbor);
             p2pForceX += interaction.getX();
             p2pForceY += interaction.getY();
