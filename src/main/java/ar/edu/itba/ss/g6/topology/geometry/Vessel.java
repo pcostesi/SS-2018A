@@ -48,10 +48,10 @@ public class Vessel {
          */
 
         walls.add(new Wall(new V2d(0, L), new V2d(W, L))); // upper wall
-        walls.add(new Wall(new V2d(0, L), new V2d(0, L * EXT_FACTOR))); // left wall
+        walls.add(new Wall(new V2d(0, L * EXT_FACTOR), new V2d(0, L))); // left wall
         walls.add(new Wall(new V2d(W, L), new V2d(W, L * EXT_FACTOR))); // right wall
         walls.add(new Wall(new V2d(0, 0), new V2d((W - D) / 2, 0))); // bottom left
-        walls.add(new Wall(new V2d((W + D) / 2, 0), new V2d(W, 0))); // bottom right
+        walls.add(new Wall(new V2d(W, 0), new V2d((W + D) / 2, 0))); // bottom right
         return walls;
     }
 
