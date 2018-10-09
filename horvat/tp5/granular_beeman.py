@@ -175,7 +175,7 @@ class GranularBeeman(Algorithm):
 						enx = dif_x / distance
 						eny = dif_y / distance
 						FN = - self.kN * r_dif
-						#					     (t = -eny,enx); dot(t v)
+						# #					     (t = -eny,enx); dot(t v)
 						FT = - self.kT * r_dif * (-eny * dif_vx + enx * dif_vy)
 
 						Fx += FN * enx + FT * (-eny)

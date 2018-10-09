@@ -8,35 +8,9 @@ import pprint
 from mpl_toolkits.mplot3d import Axes3D
 import math
 
-def init():
-	pass
-
-def parse_arguments():
-	arguments = {
-		'data': './config/config_beverloo.json',
-	}
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'hc:tn', ['data'])
-	
-	except getopt.GetoptError as err:
-		print str(err)  # will print something like "option -a not recognized"
-		usage()
-		sys.exit(2)
-	
-	for o, a in opts:
-		if o in ('-d', '--data'):
-			arguments['data'] = a
-		else:
-			assert False, 'unknown option `' + o + '`' 
-
-	return arguments
-
 def main():
-	arguments = parse_arguments()
 
-	init()
-
-	with open(arguments['data']) as data_file:
+	with open("beverloo.json") as data_file:
 		data = json.load(data_file)
 
 	Qob = data["Q"]
