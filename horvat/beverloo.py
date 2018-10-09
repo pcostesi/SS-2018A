@@ -37,7 +37,7 @@ def main():
 		Q.append(Qi)
 
 	legends = ['D = 0.15','D = 0.20','D = 0.25','D = 0.30', 'Total']
-	labels = {"x": "c [s]","y": "Error"}
+	labels = {"x": "c","y": "Error [part/s]"}
 	plot(Q,legends,labels)
 
 def plot(data,legends,labels):
