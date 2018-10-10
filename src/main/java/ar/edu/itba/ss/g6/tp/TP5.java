@@ -86,6 +86,7 @@ public class TP5 {
         double currentFlow = 0;
         double[] totalKE = new double[frameCount];
         double[] flow = new double[frameCount];
+        double stabilizedTimestamp = 0;
 
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             while ((frame = simulation.getNextStep()) != null && frame.getTimestamp() <= stopTime) {
@@ -104,17 +105,44 @@ public class TP5 {
                             .sum();
                     flow[currentFrame] = currentFlow;
 
+                    if(stabilizedTimestamp == 0 && currentFrame > 10) {
+                        double mean = mean(flow, currentFrame);
+                        double stDv = standard(flow, currentFrame, mean);
+                        if( currentFlow <= (mean + stDv) && currentFlow >= (mean - stDv)){
+                            stabilizedTimestamp = frame.getTimestamp();
+                        }
+                    }
+
                     currentFlow = 0;
                 }
 
 
             }
+            System.out.println("Flow stabilized at:" + stabilizedTimestamp);
+            System.out.println("Max Particle Height:" + simulation.getMaxHeight());
         } catch (IOException e) {
             System.err.println("Can't write sim 🤷🏻‍♂️");
             System.exit(4);
         }
 
         writeStatsToFile(values, flow, totalKE);
+    }
+
+    private static double mean(double[] m, int position) {
+        double sum = 0;
+        for (int i = position - 10; i <= position; i++) {
+            sum += m[i];
+        }
+        return sum / position;
+    }
+
+    private static double standard(double[] numbers, int position, double average){
+        double sd = 0;
+        for (int i = position - 10; i <= position; i++)
+        {
+            sd += Math.pow(numbers[i] - average, 2) / 10;
+        }
+        return Math.sqrt(sd);
     }
 
 

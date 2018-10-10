@@ -205,6 +205,11 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         return 0;
     }
 
+    @Override
+    public double getMaxHeight() {
+        return 0;
+    }
+
     public enum IntegrationMethod {
         BEEMAN,
         GPCO5,

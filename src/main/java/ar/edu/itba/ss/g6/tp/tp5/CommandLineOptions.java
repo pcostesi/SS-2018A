@@ -31,16 +31,16 @@ public class CommandLineOptions {
     private boolean simulate;
 
     @Option(name = "-l", aliases = {"--length", "-L"}, usage = "The height of the container")
-    private double lenght = 4;
+    private double lenght = 1.5;
 
     @Option(name = "-d", aliases = {"--aperture", "-D"}, usage = "The diameter of the aperture in the base")
-    private double aperture = 0.15;
+    private double aperture = 0;
 
     @Option(name = "-w", aliases = {"-W", "--width"}, usage = "The width of the container")
-    private double width = 2;
+    private double width = 1;
 
     @Option(name = "-p", aliases = {"--particles", "-P"}, usage = "The number of particles to generate", depends = {"-g"})
-    private int particles = 1000;
+    private int particles = 150;
 
     @Option(name = "-r", aliases = {"--minDiameter"}, depends = {"-g"})
     private double minDiameter = 0.02;
@@ -59,11 +59,11 @@ public class CommandLineOptions {
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 2;
+    private double duration = 0.1;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .00001;
+    private double timeStep = .000005;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")

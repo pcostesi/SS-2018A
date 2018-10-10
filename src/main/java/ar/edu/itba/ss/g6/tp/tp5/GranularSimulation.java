@@ -92,7 +92,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         double p2wForceX = 0;
         double p2wForceY = 0;
 
-        for (TheParticle neighbor : neighbors) {
+        for (TheParticle neighbor : particles) {
             V2d interaction = force.getForce(particle, neighbor);
             p2pForceX += interaction.getX();
             p2pForceY += interaction.getY();
@@ -180,5 +180,16 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     @Override
     public double getFPS() {
         return fps;
+    }
+
+    public double getMaxHeight() {
+        double heigth = 0;
+        for (TheParticle particle : particles) {
+            if( particle.getPosition().getY() > getMaxHeight()) {
+                heigth = particle.getPosition().getY();
+            }
+        }
+        //particles.stream().map(TheParticle::getPosition).map(V2d::getY).max();
+        return heigth;
     }
 }

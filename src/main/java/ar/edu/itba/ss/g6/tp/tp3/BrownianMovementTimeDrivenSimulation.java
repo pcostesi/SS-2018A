@@ -30,6 +30,11 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
         return fps;
     }
 
+    @Override
+    public double getMaxHeight() {
+        return 0;
+    }
+
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {
 
         private final double timestamp;

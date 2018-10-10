@@ -22,4 +22,6 @@ public interface TimeDrivenSimulation<T extends Particle, F extends SimulationFr
     default int frameNumber(double timestamp) {
         return shouldCaptureFrame(timestamp) ? (int) Math.floor(timestamp * getFPS()) + 1 : -1;
     }
+
+    double getMaxHeight();
 }

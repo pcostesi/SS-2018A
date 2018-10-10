@@ -73,4 +73,9 @@ public class OffLatticeSimulation implements TimeDrivenSimulation {
     public double getFPS() {
         return 0;
     }
+
+    @Override
+    public double getMaxHeight() {
+        return 0;
+    }
 }
