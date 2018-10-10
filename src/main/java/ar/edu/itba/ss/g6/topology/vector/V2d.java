@@ -35,6 +35,10 @@ public class V2d {
         return x * v2.x + y * v2.y;
     }
 
+    public double cross(final V2d v2){
+        return y*v2.x - x*v2.y;
+    }
+
     public double distance(final V2d v2) {
         return Math.sqrt(distance2(v2));
     }
@@ -67,5 +71,9 @@ public class V2d {
 
     public double getY() {
         return y;
+    }
+
+    public V2d sign(){
+        return new V2d(Math.signum(x), Math.signum(y));
     }
 }

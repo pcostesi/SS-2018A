@@ -21,19 +21,20 @@ public class GranularForce implements Force {
     public V2d getForce(final TheParticle particle, final TheParticle otherParticle) {
         if (particle.collides(otherParticle) && !particle.equals(otherParticle)) {
 
-            final double totalRadius = particle.getRadius() + otherParticle.getRadius();
-            final double distance = particle.getPosition().distance(otherParticle.getPosition());
+            final double distance2 = particle.getPosition().distance(otherParticle.getPosition());
+            final double totalRadius2 = particle.getRadius() + otherParticle.getRadius();
+            final double E = (totalRadius2- distance2);
+            final V2d normalDirection2 = particle.getPosition().substract(otherParticle.getPosition()).normalize();
+            final V2d normalForce2 = normalDirection2.scale(KN * E);
+            final V2d deltaVel = otherParticle.getVelocity().substract(particle.getVelocity());
+            final V2d normalForce22 = normalDirection2.scale(-KN * E - (Gamma * deltaVel.cross(normalDirection2)));
+            final V2d tangentialDirection2 = new V2d(-normalDirection2.y, normalDirection2.x);
+            // final double deltaVelocity = otherParticle.getVelocity().substract(particle.getVelocity()).dot(tangentialDirection2);
+            final V2d tangentialForce2 = tangentialDirection2.scale(KT * E * deltaVel.dot(tangentialDirection2));
+            final V2d tangentialForce22 = tangentialDirection2.scale(deltaVel.sign().scale(-Mu * normalForce22.module()).dot(tangentialDirection2));
 
-            final double E = (totalRadius - distance);
-            final V2d normalDirection = particle.getPosition().substract(otherParticle.getPosition()).normalize();
-            final V2d tangentialDirection = new V2d(-normalDirection.getY(), normalDirection.getX());
-
-            final double Ederived = otherParticle.getVelocity().substract(particle.getVelocity()).dot(normalDirection); //e.
-            final V2d normalForce = normalDirection.scale((-KN * E - Gamma * Ederived));
-
-            final V2d tangentialForce = tangentialDirection.scale(-Mu * normalForce.module() * Math.signum(Ederived));
-
-            return tangentialForce.add(normalForce);
+            return tangentialForce2.add(normalForce2);
+            // return tangentialForce22.add(normalForce22);
         }
         return new V2d(0, 0);
     }
@@ -46,12 +47,13 @@ public class GranularForce implements Force {
             final double E = (particle.getRadius() - distance);
             final V2d normalDirection = particle.getPosition().substract(intersectionPoint).normalize();
             final V2d tangentialDirection = new V2d(-normalDirection.getY(), normalDirection.getX());
-            final double Ederived = particle.getVelocity().dot(tangentialDirection); //e.
+            final V2d deltaVel = particle.getVelocity(); //e.
 
-            final V2d normalForce = normalDirection.scale(KN * E - (Gamma * Ederived));
-            final V2d tangentialForce = tangentialDirection.scale(-KT * (particle.getRadius() - distance) * Ederived);
+            final V2d normalForce = normalDirection.scale(KN * E - (Gamma * deltaVel.cross(normalDirection)));
+            final V2d tangentialForce = tangentialDirection.scale(-KT * E * deltaVel.dot(normalDirection));
+            final V2d tangentialForce5 = tangentialDirection.scale(deltaVel.sign().scale(-Mu * normalForce.module()).dot(tangentialDirection));
 
-            return normalForce.add(tangentialForce);
+            return normalForce.add(tangentialForce5);
         }
         return new V2d(0, 0);
     }
