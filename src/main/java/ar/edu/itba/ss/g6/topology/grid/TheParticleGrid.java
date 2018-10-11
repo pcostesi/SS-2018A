@@ -60,7 +60,7 @@ public class TheParticleGrid implements Grid<TheParticle> {
             V2d position = theParticle.getPosition();
             int row = (int) Math.floor(position.getX() * getBucketCount() / getSideLength());
             int col = (int) Math.floor(position.getY() * getBucketCount() / getSideLength());
-            buckets.computeIfAbsent(new Cell(row, col), (cell) -> new LinkedList<>());
+            buckets.computeIfAbsent(new Cell(row, col), (cell) -> new LinkedList<>()).add(theParticle);
             particles.put(theParticle, new LinkedList<>());
         });
 

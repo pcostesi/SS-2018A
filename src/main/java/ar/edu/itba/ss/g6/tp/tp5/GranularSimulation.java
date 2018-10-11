@@ -74,7 +74,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.D = aperture;
         this.particles = particles;
         this.vessel = new Vessel(height, width, aperture);
-        this.grid = new TheParticleGrid(10, side, radius);
+        this.grid = new TheParticleGrid((int) (side / radius) , side, radius);
 
         this.fps = fps;
 
@@ -87,6 +87,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private V2d getForce(@NotNull TheParticle particle) {
         Collection<TheParticle> neighbors = grid.getNeighbors(particle);
+        // Collection<TheParticle> neighbors = particles;
         double p2pForceX = 0;
         double p2pForceY = 0;
 

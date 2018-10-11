@@ -27,25 +27,22 @@ public class Wall {
 
 
     public V2d distanceLinePoint(final V2d point) {
-        double a = point.x - p0.x;
-        double b = point.y - p0.y;
-        double c = p1.x - p0.x;
-        double d = p1.y - p0.y;
-
-        double dot = a * c + b * d;
-        double lenSq = c * c + d * d;
+        V2d v1 = point.substract(p0);
+        V2d vp = p1.substract(p0);
+        double dot = v1.dot(vp);
+        double len = vp.module() * vp.module();
         double param = -1;
 
-        if (lenSq != 0) { //in case of 0 length line
-            param = dot / lenSq;
+        if (len != 0) { //in case of 0 length line
+            param = dot / len;
         }
 
         if (param < 0) {
-            return new V2d(p0.x, p0.y);
+            return p0;
         } else if (param > 1) {
-            return new V2d(p1.x, p1.y);
+            return p1;
         } else {
-            return new V2d(p0.x + param * c, p0.y + param * d);
+            return vp.scale(param).add(p0);
         }
     }
 
