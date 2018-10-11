@@ -9,13 +9,11 @@ public class GranularForce implements Force {
     private final double Mu;
     private final double Gamma;
     private final double KN;
-    private final double KT;
 
     public GranularForce(double Mu, double Gamma) {
         this.Mu = Mu;
         this.Gamma = Gamma;
         this.KN = 10 * 10 * 10 * 10 * 10; // N/m
-        this.KT = 2 * this.KN; // N/m
     }
 
     public V2d getForce(final TheParticle particle, final TheParticle otherParticle) {
@@ -26,12 +24,12 @@ public class GranularForce implements Force {
             final double E = (totalRadius- distance);
             final V2d normalDirection = particle.getPosition().substract(otherParticle.getPosition()).normalize();
             final V2d deltaVel = otherParticle.getVelocity().substract(particle.getVelocity());
-            final V2d normalForce = normalDirection.scale(KN * E);
+            final V2d normalForce = normalDirection.scale(KN * E - Gamma * E);
             final V2d tangentialDirection = new V2d(-normalDirection.y, normalDirection.x);
-            //final V2d tangentialForce2 = tangentialDirection.scale(KT * E * deltaVel.dot(tangentialDirection));
             final V2d tangentialForce = tangentialDirection.scale(Mu * normalForce.module() * Math.signum(deltaVel.dot(tangentialDirection)));
 
             //return tangentialForce2.add(normalForce2);
+            particle.addNormalForce(normalForce.module());
             return tangentialForce.add(normalForce);
         }
         return new V2d(0, 0);
@@ -47,7 +45,7 @@ public class GranularForce implements Force {
             final V2d tangentialDirection = new V2d(-normalDirection.getY(), normalDirection.getX());
             final V2d deltaVel = particle.getVelocity(); //e.
 
-            final V2d normalForce = normalDirection.scale(KN * E);
+            final V2d normalForce = normalDirection.scale(KN * E - Gamma * E);
             final V2d tangentialForce = tangentialDirection.scale(Mu * normalForce.module() * Math.signum(deltaVel.dot(tangentialDirection)));
 
             return normalForce.add(tangentialForce);

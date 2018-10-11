@@ -65,4 +65,9 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
     public double getMaxHeight() {
         return 0;
     }
+
+    @Override
+    public void resetNormalForce() {
+
+    }
 }

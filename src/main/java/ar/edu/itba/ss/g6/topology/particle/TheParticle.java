@@ -12,6 +12,7 @@ public class TheParticle implements Particle {
     private final V2d velocity;
     private final V2d acceleration;
     private final V2d prevAcceleration;
+    private double totalNormalForce = 0;
 
 
     public TheParticle(String id, V2d position, V2d velocity, V2d acceleration, V2d prevAcceleration, double radius, double mass) {
@@ -22,11 +23,20 @@ public class TheParticle implements Particle {
         this.prevAcceleration = prevAcceleration;
         this.radius = radius;
         this.mass = mass;
+        this.totalNormalForce = 0;
     }
 
-    public TheParticle(String id, double x, double y, double vx, double vy, double radius, double mass) {
-        this(id, x, y, vx, vy, 0, 0, 0, 0, radius, mass);
+    public TheParticle(String id, V2d position, V2d velocity, V2d acceleration, V2d prevAcceleration, double radius, double mass, double totalNormalForce) {
+        this.id = id;
+        this.position = position;
+        this.velocity = velocity;
+        this.acceleration = acceleration;
+        this.prevAcceleration = prevAcceleration;
+        this.radius = radius;
+        this.mass = mass;
+        this.totalNormalForce = totalNormalForce;
     }
+
 
     public TheParticle(String id, double x, double y, double vx, double vy, double ax, double ay, double pax, double pay, double radius, double mass) {
         this.id = id;
@@ -36,6 +46,26 @@ public class TheParticle implements Particle {
         this.prevAcceleration = new V2d(pax, pay);
         this.radius = radius;
         this.mass = mass;
+        this.totalNormalForce = 0;
+    }
+
+    public TheParticle(String id, double x, double y, double vx, double vy, double radius, double mass) {
+        this(id, x, y, vx, vy, 0, 0, 0, 0, radius, mass, 0);
+    }
+
+    public TheParticle(String id, double x, double y, double vx, double vy, double radius, double mass, double totalNormalForce) {
+        this(id, x, y, vx, vy, 0, 0, 0, 0, radius, mass, totalNormalForce);
+    }
+
+    public TheParticle(String id, double x, double y, double vx, double vy, double ax, double ay, double pax, double pay, double radius, double mass, double totalNormalForce) {
+        this.id = id;
+        this.position = new V2d(x, y);
+        this.velocity = new V2d(vx, vy);
+        this.acceleration = new V2d(ax, ay);
+        this.prevAcceleration = new V2d(pax, pay);
+        this.radius = radius;
+        this.mass = mass;
+        this.totalNormalForce = totalNormalForce;
     }
 
     @Override
@@ -67,7 +97,8 @@ public class TheParticle implements Particle {
                 df.format(prevAcceleration.getX()),
                 df.format(prevAcceleration.getY()),
                 df.format(getRadius()),
-                df.format(getMass())
+                df.format(getMass()),
+                df.format(this.getNormalForce()/(2 * 3.14159265 * radius * 60))
         };
     }
 
@@ -127,7 +158,8 @@ public class TheParticle implements Particle {
          getPosition().toString(),
          getVelocity().toString(),
          getAcceleration().toString(),
-         getPrevAcceleration().toString()
+         getPrevAcceleration().toString(),
+         Double.toString(this.getNormalForce())
         }) + ">";
     }
 
@@ -162,6 +194,18 @@ public class TheParticle implements Particle {
     @Override
     public int hashCode() {
         return id.hashCode();
+    }
+
+    public void addNormalForce(double normalForce) {
+        totalNormalForce += normalForce;
+    }
+
+    public void resetNormalForce() {
+        totalNormalForce = 0;
+    }
+
+    public double getNormalForce() {
+        return totalNormalForce;
     }
 
 }

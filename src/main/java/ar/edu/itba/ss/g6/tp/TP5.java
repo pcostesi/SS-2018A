@@ -71,6 +71,8 @@ public class TP5 {
     }
 
     private static void simulate(CommandLineOptions values) {
+        Set<TheParticle> walls = generateVisualWalls(values);
+
         TimeDrivenSimulation<TheParticle, GranularSimulationFrame> simulation = granularSimulation(values);
         GranularSimulationFrame frame;
 
@@ -97,8 +99,10 @@ public class TP5 {
                     Set<TheParticle> particles = new HashSet<>();
                     particles.addAll(boundaries);
                     particles.addAll(frame.getState());
+                    particles.addAll(walls);
                     System.out.printf("%d - %f\n", currentFrame, frame.getTimestamp());
                     exporter.addFrameToFile(out, particles, frame.getTimestamp());
+                    simulation.resetNormalForce();
 
                     totalKE[currentFrame] = frame.getState().parallelStream()
                             .mapToDouble(TheParticle::getKineticEnergy)
@@ -120,11 +124,11 @@ public class TP5 {
                         if(stabilizedTimestamp == 0 && currentFrame > 10) {
                             double mean = mean(totalKE, currentFrame);
                             double stDv = standard(totalKE, currentFrame, mean);
-                            if( totalKE[currentFrame] <= (mean + stDv) && totalKE[currentFrame] >= (mean - stDv)){
+                            if( totalKE[currentFrame] <= (mean + stDv/1.5) && totalKE[currentFrame] >= (mean - stDv/1.5)){
                                 stabilizedTimestamp = frame.getTimestamp();
                             }
                         }
-                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 4) {
+                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 2) {
                             break;
                         }
                     }
@@ -140,6 +144,18 @@ public class TP5 {
         }
 
         writeStatsToFile(values, flow, totalKE);
+    }
+
+    private static Set<TheParticle> generateVisualWalls(CommandLineOptions values) {
+        Set<TheParticle> walls = new HashSet<>();
+        int id = -3;
+        for(double i = 0; i < (values.getWidth() - values.getAperture())/2; i+=0.01, id--) {
+            walls.add(new TheParticle(Integer.toString(id), i, 0, 0, 0, 0.005, 0, -300));
+        }
+        for(double i = (values.getWidth() + values.getAperture())/2; i < values.getWidth(); i+=0.01, id--) {
+            walls.add(new TheParticle(Integer.toString(id), i, 0, 0, 0, 0.005, 0, -300));
+        }
+        return walls;
     }
 
     private static double mean(double[] m, int position) {

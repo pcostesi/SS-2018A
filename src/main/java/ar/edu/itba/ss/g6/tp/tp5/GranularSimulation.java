@@ -43,24 +43,6 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             return new TheParticle(particle.getId(), position, resting, resting, resting,
              particle.getRadius(), particle.getMass());
         }
-        /*
-        // in case we go out of bounds
-        if (particle.getPosition().getY() > L) {
-            V2d position = new V2d(particle.getPosition().getX(), L - particle.getRadius() * 1.1);
-            particle = new TheParticle(particle.getId(), position, particle.getVelocity(),
-                particle.getAcceleration(), particle.getPrevAcceleration(), particle.getRadius(), particle.getMass());
-        }
-        if (particle.getPosition().getX() - particle.getRadius() < 0) {
-            V2d position = new V2d(particle.getRadius(), particle.getPosition().getY());
-            particle = new TheParticle(particle.getId(), position, particle.getVelocity(),
-             particle.getAcceleration(), particle.getPrevAcceleration(), particle.getRadius(), particle.getMass());
-        }
-        if (particle.getPosition().getX() + particle.getRadius() > W) {
-            V2d position = new V2d(W - particle.getRadius(), particle.getPosition().getY());
-            particle = new TheParticle(particle.getId(), position, particle.getVelocity(),
-             particle.getAcceleration(), particle.getPrevAcceleration(), particle.getRadius(), particle.getMass());
-        }
-        */
         return particle;
     }
 
@@ -87,14 +69,13 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private V2d getForce(@NotNull TheParticle particle) {
         Collection<TheParticle> neighbors = grid.getNeighbors(particle);
-        // Collection<TheParticle> neighbors = particles;
         double p2pForceX = 0;
         double p2pForceY = 0;
 
         double p2wForceX = 0;
         double p2wForceY = 0;
 
-        for (TheParticle neighbor : particles) {
+        for (TheParticle neighbor : neighbors) {
             V2d interaction = force.getForce(particle, neighbor);
             p2pForceX += interaction.getX();
             p2pForceY += interaction.getY();
@@ -147,7 +128,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
         // Update particle with approximated speed
         TheParticle result = new TheParticle(particle.getId(), nRx, nRy, nVx, nVy, fAx, fAy, ax, ay,
-            particle.getRadius(), particle.getMass());
+            particle.getRadius(), particle.getMass(), particle.getNormalForce());
 
         // did it flow?
         if (particle.getPosition().getY() > 0 && nRy <= 0) {
@@ -191,5 +172,10 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             return max.get();
         }
         return 0;
+    }
+
+    @Override
+    public void resetNormalForce() {
+        particles.parallelStream().forEach(TheParticle::resetNormalForce);
     }
 }

@@ -35,6 +35,11 @@ public class BrownianMovementTimeDrivenSimulation implements TimeDrivenSimulatio
         return 0;
     }
 
+    @Override
+    public void resetNormalForce() {
+
+    }
+
     private static class BrownianMovementSimulationTimedFrame implements SimulationFrame<WeightedDynamicParticle2D> {
 
         private final double timestamp;

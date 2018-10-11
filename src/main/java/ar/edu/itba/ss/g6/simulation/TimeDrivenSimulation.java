@@ -24,4 +24,6 @@ public interface TimeDrivenSimulation<T extends Particle, F extends SimulationFr
     }
 
     double getMaxHeight();
+
+    void resetNormalForce();
 }

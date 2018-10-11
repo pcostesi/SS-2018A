@@ -78,4 +78,9 @@ public class OffLatticeSimulation implements TimeDrivenSimulation {
     public double getMaxHeight() {
         return 0;
     }
+
+    @Override
+    public void resetNormalForce() {
+
+    }
 }

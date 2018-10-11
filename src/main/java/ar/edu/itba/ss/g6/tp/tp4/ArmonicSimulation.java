@@ -210,6 +210,11 @@ public class ArmonicSimulation implements TimeDrivenSimulation {
         return 0;
     }
 
+    @Override
+    public void resetNormalForce() {
+
+    }
+
     public enum IntegrationMethod {
         BEEMAN,
         GPCO5,
