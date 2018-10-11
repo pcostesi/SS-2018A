@@ -7,7 +7,8 @@ import ar.edu.itba.ss.particle.Pair;
 import java.util.*;
 
 public class CellIndexMethod <T extends Particle> {
-
+	
+	private Map<T, Set<T>> map;
 	private Set<T>[][] matrix;
 	private double cellLength;
 	private List<T> particles;
@@ -32,7 +33,7 @@ public class CellIndexMethod <T extends Particle> {
 	}
 
 
-	private void fillMatrix(List<T> particles) {
+	public void fillMatrix(List<T> particles) {
 		matrix = new Set[m][m];
 		// Fill matrix with empty set
 		for (int i = 0; i < m; i++) {
@@ -52,9 +53,10 @@ public class CellIndexMethod <T extends Particle> {
 				System.err.println(p.x+" "+p.y+"  id: "+particle.getId());
 			}
 		}
+		generateNeighboursMap()
 	}
 
-	public Map<T, Set<T>> getNeighboursMap() {
+	public void getNeighboursMap() {
 		Map<T, Set<T>> neighbourhood = new HashMap<>();
 		fillMatrix(particles);
 		//Fills the map with empty sets
@@ -89,7 +91,7 @@ public class CellIndexMethod <T extends Particle> {
 				}
 			}
 		}
-		return neighbourhood;
+		this.map = neighbourhood;
 	}
 
 	private void checkNeighbourhood(T p, T q, Map<T, Set<T>> neighbours) {
@@ -110,5 +112,8 @@ public class CellIndexMethod <T extends Particle> {
 			neighbours.get(q).add(p);
 		}
 	}
-
+	
+	public Set<T> getNeighbour(T particle) {
+		return this.map.get(particle);
+	}
 }
