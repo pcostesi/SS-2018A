@@ -28,7 +28,6 @@ public class GranularForce implements Force {
             final V2d tangentialDirection = new V2d(-normalDirection.y, normalDirection.x);
             final V2d tangentialForce = tangentialDirection.scale(Mu * normalForce.module() * Math.signum(deltaVel.dot(tangentialDirection)));
 
-            //return tangentialForce2.add(normalForce2);
             particle.addNormalForce(normalForce.module());
             return tangentialForce.add(normalForce);
         }

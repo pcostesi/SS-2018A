@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -143,7 +144,7 @@ public class TP5 {
             System.exit(4);
         }
 
-        writeStatsToFile(values, flow, totalKE);
+        writeStatsToFile(values, flow, totalKE, stabilizedTimestamp);
     }
 
     private static Set<TheParticle> generateVisualWalls(CommandLineOptions values) {
@@ -176,8 +177,9 @@ public class TP5 {
     }
 
 
-    private static void writeStatsToFile(CommandLineOptions values, double flow[], double totalKE[]) {
+    private static void writeStatsToFile(CommandLineOptions values, double flow[], double totalKE[], double stabilizeTime) {
         Path output = values.getStatsFile();
+        output = Paths.get(output.toString() + "-stab-" +Double.toString(stabilizeTime));
         try (BufferedWriter out = Files.newBufferedWriter(output, Charset.defaultCharset())) {
             for (int i = 0; i < Math.min(flow.length, totalKE.length); i++) {
                 out.write(String.format("%d\t%e\t%e\n", i, flow[i], totalKE[i]));

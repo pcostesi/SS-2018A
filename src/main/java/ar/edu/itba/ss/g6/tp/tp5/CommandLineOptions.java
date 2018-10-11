@@ -59,7 +59,7 @@ public class CommandLineOptions {
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 15;
+    private double duration = 0.4;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
