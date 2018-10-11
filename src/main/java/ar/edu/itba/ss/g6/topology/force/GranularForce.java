@@ -25,13 +25,11 @@ public class GranularForce implements Force {
             final double totalRadius = particle.getRadius() + otherParticle.getRadius();
             final double E = (totalRadius- distance);
             final V2d normalDirection = particle.getPosition().substract(otherParticle.getPosition()).normalize();
-            //final V2d normalForce2 = normalDirection2.scale(KN * E);
             final V2d deltaVel = otherParticle.getVelocity().substract(particle.getVelocity());
             final V2d normalForce = normalDirection.scale(KN * E);
             final V2d tangentialDirection = new V2d(-normalDirection.y, normalDirection.x);
-            // final double deltaVelocity = otherParticle.getVelocity().substract(particle.getVelocity()).dot(tangentialDirection2);
-            //final V2d tangentialForce = tangentialDirection.scale(KT * E * deltaVel.dot(tangentialDirection));
-            final V2d tangentialForce = tangentialDirection.scale(deltaVel.sign().scale(Mu * normalForce.module()).dot(tangentialDirection));
+            //final V2d tangentialForce2 = tangentialDirection.scale(KT * E * deltaVel.dot(tangentialDirection));
+            final V2d tangentialForce = tangentialDirection.scale(Mu * normalForce.module() * Math.signum(deltaVel.dot(tangentialDirection)));
 
             //return tangentialForce2.add(normalForce2);
             return tangentialForce.add(normalForce);
@@ -49,11 +47,10 @@ public class GranularForce implements Force {
             final V2d tangentialDirection = new V2d(-normalDirection.getY(), normalDirection.getX());
             final V2d deltaVel = particle.getVelocity(); //e.
 
-            final V2d normalForce = normalDirection.scale(KN * E - (Gamma * deltaVel.cross(normalDirection)));
-            final V2d tangentialForce = tangentialDirection.scale(-KT * E * deltaVel.dot(normalDirection));
-            final V2d tangentialForce5 = tangentialDirection.scale(deltaVel.sign().scale(-Mu * normalForce.module()).dot(tangentialDirection));
+            final V2d normalForce = normalDirection.scale(KN * E);
+            final V2d tangentialForce = tangentialDirection.scale(Mu * normalForce.module() * Math.signum(deltaVel.dot(tangentialDirection)));
 
-            return normalForce.add(tangentialForce5);
+            return normalForce.add(tangentialForce);
         }
         return new V2d(0, 0);
     }

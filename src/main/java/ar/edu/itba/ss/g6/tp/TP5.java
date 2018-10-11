@@ -124,7 +124,7 @@ public class TP5 {
                                 stabilizedTimestamp = frame.getTimestamp();
                             }
                         }
-                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 1) {
+                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 4) {
                             break;
                         }
                     }
