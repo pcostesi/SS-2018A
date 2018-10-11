@@ -12,6 +12,7 @@ import ar.edu.itba.ss.g6.topology.vector.V2d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -184,12 +185,10 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     public double getMaxHeight() {
         double heigth = 0;
-        for (TheParticle particle : particles) {
-            if( particle.getPosition().getY() > getMaxHeight()) {
-                heigth = particle.getPosition().getY();
-            }
+        Optional<Double> max = particles.stream().map(TheParticle::getPosition).map(V2d::getY).max(Double::compareTo);
+        if (max.isPresent()){
+            return max.get();
         }
-        //particles.stream().map(TheParticle::getPosition).map(V2d::getY).max();
-        return heigth;
+        return 0;
     }
 }

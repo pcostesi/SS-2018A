@@ -40,7 +40,7 @@ public class CommandLineOptions {
     private double width = 1;
 
     @Option(name = "-p", aliases = {"--particles", "-P"}, usage = "The number of particles to generate", depends = {"-g"})
-    private int particles = 150;
+    private int particles = 100;
 
     @Option(name = "-r", aliases = {"--minDiameter"}, depends = {"-g"})
     private double minDiameter = 0.02;
@@ -49,7 +49,7 @@ public class CommandLineOptions {
     private double maxDiameter = 0.03;
 
     @Option(name = "--mu", usage = "Mu", depends = {"-s"})
-    private double Mu = 0.7;
+    private double Mu = 0.1;
 
     @Option(name = "--gamma", usage = "Gamma", depends = {"-s"})
     private double Gamma = 100;
@@ -59,7 +59,7 @@ public class CommandLineOptions {
 
     @Option(name = "-t", aliases = {"--time"}, required = false,
      usage = "simulation duration")
-    private double duration = 0.1;
+    private double duration = 20;
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")

@@ -105,17 +105,31 @@ public class TP5 {
                             .sum();
                     flow[currentFrame] = currentFlow;
 
-                    if(stabilizedTimestamp == 0 && currentFrame > 10) {
-                        double mean = mean(flow, currentFrame);
-                        double stDv = standard(flow, currentFrame, mean);
-                        if( currentFlow <= (mean + stDv) && currentFlow >= (mean - stDv)){
-                            stabilizedTimestamp = frame.getTimestamp();
+                    if(values.getAperture() != 0) {
+                        if(stabilizedTimestamp == 0 && currentFrame > 10) {
+                            double mean = mean(flow, currentFrame);
+                            double stDv = standard(flow, currentFrame, mean);
+                            if( currentFlow <= (mean + stDv) && currentFlow >= (mean - stDv)){
+                                stabilizedTimestamp = frame.getTimestamp();
+                            }
+                        }
+                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 4) {
+                            break;
+                        }
+                    } else {
+                        if(stabilizedTimestamp == 0 && currentFrame > 10) {
+                            double mean = mean(totalKE, currentFrame);
+                            double stDv = standard(totalKE, currentFrame, mean);
+                            if( totalKE[currentFrame] <= (mean + stDv) && totalKE[currentFrame] >= (mean - stDv)){
+                                stabilizedTimestamp = frame.getTimestamp();
+                            }
+                        }
+                        if(stabilizedTimestamp != 0 && frame.getTimestamp() > stabilizedTimestamp + 1) {
+                            break;
                         }
                     }
-
                     currentFlow = 0;
                 }
-
 
             }
             System.out.println("Flow stabilized at:" + stabilizedTimestamp);
