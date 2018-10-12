@@ -59,6 +59,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
             if(attempts >= 10) {
                 waitingPlacement.add(particle);
+                particles.remove(particle);
                 return null;
             }
             particles.add(new TheParticle(particle.getId(), position, resting, resting, resting,
@@ -81,7 +82,8 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
                         resting, resting, particle.getRadius(), particle.getMass(),0));
             }
         }
-        return particle;
+        particles.add(particle);
+        return null;
     }
 
     public GranularSimulation(double Mu, double Gamma, double deltaT, double width, double height, double aperture, Set<TheParticle> particles, double fps) {
@@ -192,12 +194,11 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
         Set<TheParticle> state = particles.parallelStream()
             .map(this::move).collect(Collectors.toSet());
-        particles = new HashSet<>();
-        state.parallelStream().forEach(this::warp);
-        particles = state;
+        particles.clear();
+        state.stream().forEach(this::warp);
         grid.set(particles);
         count++;
-        return new GranularSimulationFrame(timestamp, state, flowed.get());
+        return new GranularSimulationFrame(timestamp, particles, flowed.get());
     }
 
     @Override
