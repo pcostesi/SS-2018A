@@ -30,6 +30,8 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
     private final Force force;
     private final Vessel vessel;
 
+    private int count = 0;
+
     private double timestamp;
     private AtomicInteger flowed = new AtomicInteger();
 
@@ -52,6 +54,22 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
             return new TheParticle(particle.getId(), position, resting, resting, resting,
              particle.getRadius(), particle.getMass());
+        }
+        else if(count % 30 == 0) {
+            V2d position = new V2d(0, -L);
+            V2d resting = new V2d(0, 0);
+            if (particle.getPosition().getY() > L) {
+                return warp(new TheParticle(particle.getId(), position, resting,
+                        resting, resting, particle.getRadius(), particle.getMass(),0));
+            }
+            if (particle.getPosition().getX() - particle.getRadius() < 0) {
+                return warp(new TheParticle(particle.getId(), position, resting,
+                        resting, resting, particle.getRadius(), particle.getMass(),0));
+            }
+            if (particle.getPosition().getX() + particle.getRadius() > W) {
+                return warp(new TheParticle(particle.getId(), position, resting,
+                        resting, resting, particle.getRadius(), particle.getMass(),0));
+            }
         }
         return particle;
     }
@@ -162,6 +180,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             .collect(Collectors.toSet());
         particles = state;
         grid.set(particles);
+        count++;
         return new GranularSimulationFrame(timestamp, state, flowed.get());
     }
 

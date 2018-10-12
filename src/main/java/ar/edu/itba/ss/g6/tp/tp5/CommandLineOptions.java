@@ -63,7 +63,7 @@ public class CommandLineOptions {
 
     @Option(name = "-ts", aliases = { "--time-step" }, required = false,
      usage = "time step for simulation")
-    private double timeStep = .00003;
+    private double timeStep = .00001;
 
     @Option(name = "-f", aliases = { "--fps" }, required = false,
      usage = "frames per second")
