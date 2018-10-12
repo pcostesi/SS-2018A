@@ -36,12 +36,19 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private TheParticle warp(@NotNull TheParticle particle) {
         if (particle.getPosition().getY() <= (L * -0.1)) {
-            double x = Math.random() * W * 0.8 + W * 0.1;
-            double y = L - Math.random() * 0.25 * L - particle.getRadius() * 2;
-            V2d position = new V2d(x, y);
-            V2d resting = new V2d(0, 0);
-            return new TheParticle(particle.getId(), position, resting, resting, resting,
-             particle.getRadius(), particle.getMass());
+            int n = 1000;
+            do {
+                double x = Math.random() * W * 0.8 + W * 0.1;
+                double y = L - Math.random() * 0.25 * L - particle.getRadius() * 2;
+                V2d position = new V2d(x, y);
+                V2d resting = new V2d(0, 0);
+                TheParticle newParticle = new TheParticle(particle.getId(), position, resting, resting, resting,
+                        particle.getRadius(), particle.getMass());
+                boolean collides = grid.getWouldBeNeighbors(particle).stream()
+                        .anyMatch(neighbor -> newParticle.distanceTo(neighbor) < particle.getRadius());
+                if (!collides) return newParticle;
+            } while (n --> 0);
+            System.out.println("Will try again later");
         }
         return particle;
     }

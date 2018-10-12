@@ -5,6 +5,7 @@ import ar.edu.itba.ss.g6.topology.vector.V2d;
 
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TheParticleGrid implements Grid<TheParticle> {
@@ -13,6 +14,8 @@ public class TheParticleGrid implements Grid<TheParticle> {
     private final double actionRadius;
     private final Map<TheParticle, Collection<TheParticle>> particles = new HashMap<>();
     private boolean checkBruteForce = false;
+    final Map<Cell, Collection<TheParticle>> buckets = new HashMap<>();
+
 
     public TheParticleGrid(int bucketCount, double sideSize, double actionRadius) {
         this.bucketCount = bucketCount;
@@ -53,8 +56,8 @@ public class TheParticleGrid implements Grid<TheParticle> {
 
     @Override
     public Grid<TheParticle> set(Collection<TheParticle> originalParticles) {
-        final Map<Cell, Collection<TheParticle>> buckets = new HashMap<>();
         particles.clear();
+        buckets.clear();
 
         originalParticles.forEach(theParticle -> {
             V2d position = theParticle.getPosition();
@@ -165,5 +168,34 @@ public class TheParticleGrid implements Grid<TheParticle> {
         public int getCol() {
             return col;
         }
+    }
+
+    @Override
+    public Collection<TheParticle> getWouldBeNeighbors(TheParticle theParticle) {
+        V2d position = theParticle.getPosition();
+        int row = (int) Math.floor(position.getX() * getBucketCount() / getSideLength());
+        int col = (int) Math.floor(position.getY() * getBucketCount() / getSideLength());
+
+        Cell leftCell = col > 1 ? new Cell(row, col - 1) : null;
+        Cell selfCell = new Cell(row, col);
+        Cell rightCell = col < bucketCount - 1 ? new Cell(row, col + 1) : null;
+
+        Cell upperLeftCell = row < bucketCount - 1 && col > 1 ? new Cell(row + 1, col - 1) : null;
+        Cell upperCell = row < bucketCount - 1 ? new Cell(row + 1, col) : null;
+        Cell upperRightCell = row < bucketCount - 1 && col < bucketCount - 1 ? new Cell(row + 1, col + 1) : null;
+
+        Cell bottomLeftCell = row > 0 && col > 1 ? new Cell(row - 1, col - 1) : null;
+        Cell bottomCell = row > 0 ? new Cell(row - 1, col) : null;
+        Cell bottomRightCell = row > 0 && col < bucketCount - 1 ? new Cell(row - 1, col + 1) : null;
+
+        return Stream.of(
+                upperLeftCell,  upperCell,  upperRightCell,
+                leftCell,       selfCell,   rightCell,
+                bottomLeftCell, bottomCell, bottomRightCell
+        ).filter(Objects::nonNull)
+                .map(buckets::get)
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 }

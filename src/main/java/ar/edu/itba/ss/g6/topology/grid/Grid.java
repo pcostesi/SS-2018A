@@ -14,4 +14,5 @@ public interface Grid<T extends Particle> {
     double getSideLength();
     Collection<T> getParticles();
     int countParticles();
+    Collection<T> getWouldBeNeighbors(T particle);
 }

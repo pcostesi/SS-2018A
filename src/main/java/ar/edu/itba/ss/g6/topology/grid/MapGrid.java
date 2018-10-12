@@ -104,4 +104,5 @@ public abstract class MapGrid <T extends Particle, G extends Cell> implements Gr
     public Set<T> getParticles() {
         return neighborhoods.keySet();
     }
+
 }

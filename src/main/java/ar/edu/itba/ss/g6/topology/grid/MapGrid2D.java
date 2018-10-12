@@ -2,6 +2,8 @@ package ar.edu.itba.ss.g6.topology.grid;
 
 import ar.edu.itba.ss.g6.topology.particle.Particle2D;
 
+import java.util.Collection;
+
 
 public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
     public MapGrid2D(long side, int buckets, double radius, boolean isPeriodic) {
@@ -52,5 +54,10 @@ public class MapGrid2D<T extends Particle2D> extends MapGrid<T, Cell2D> {
             withinPeriodicDistance = rawDistance2 - sumOfRadius * sumOfRadius <= radius * radius;
         }
         return withinDistance || withinPeriodicDistance;
+    }
+
+    @Override
+    public Collection<T> getWouldBeNeighbors(T particle) {
+        return null;
     }
 }
