@@ -1,6 +1,9 @@
 package ar.edu.itba.ss.g6.exporter.ovito;
 
 import ar.edu.itba.ss.g6.topology.particle.Particle;
+import ar.edu.itba.ss.g6.topology.particle.TheParticle;
+import ar.edu.itba.ss.g6.tp.tp5.CommandLineOptions;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,8 +18,8 @@ import java.util.stream.Stream;
 
 public abstract class Exporter<T extends Particle> {
 
-    public void addFrameToFile(BufferedWriter w, Collection<T> particles, double timeStep) throws IOException {
-        w.write(exportFrame(particles, timeStep).collect(Collectors.joining("\n")));
+    public void addFrameToFile(BufferedWriter w, Collection<T> particles, double timeStep, CommandLineOptions values) throws IOException {
+        w.write(exportFrame(particles.stream().filter( p -> withinBounds(((TheParticle) p), values)).collect(Collectors.toSet()), timeStep).collect(Collectors.joining("\n")));
         w.write('\n');
     }
 
@@ -47,6 +50,10 @@ public abstract class Exporter<T extends Particle> {
 
     public abstract String serializeParticle(T particle);
 
+    private boolean withinBounds(TheParticle p, CommandLineOptions values){
+        return p.getPosition().getY() < values.getLenght() && p.getPosition().getX() - p.getRadius() > 0 &&
+                p.getPosition().getX() + p.getRadius() < values.getWidth();
+    }
     public Stream<String> exportAnimation(List<? extends Collection<T>> timeline, double timeStep) {
         return IntStream.range(0, timeline.size())
          .mapToObj(index -> exportFrame(timeline.get(index), index * timeStep))

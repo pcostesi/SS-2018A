@@ -320,7 +320,7 @@ public class TP4b {
                 VoyagerSimulationFrame frame = simulator.getNextStep();
 
                 if (Math.round(frame.getTimestamp()) % CAPTURE_EVERY_N_FRAMES == 0) {
-                    exporter.addFrameToFile(w, frame.getState(), 0);
+                    exporter.addFrameToFile(w, frame.getState(), 0, null);
                 }
                 frames.add(frame.getState());
             double speed = frame.getState().stream()

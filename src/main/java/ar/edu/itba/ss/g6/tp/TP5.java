@@ -102,7 +102,7 @@ public class TP5 {
                     particles.addAll(frame.getState());
                     particles.addAll(walls);
                     System.out.printf("%d - %f\n", currentFrame, frame.getTimestamp());
-                    exporter.addFrameToFile(out, particles, frame.getTimestamp());
+                    exporter.addFrameToFile(out, particles, frame.getTimestamp(), values);
                     simulation.resetNormalForce();
 
                     totalKE[currentFrame] = frame.getState().parallelStream()
