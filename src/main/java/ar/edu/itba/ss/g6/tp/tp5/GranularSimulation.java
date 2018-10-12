@@ -12,8 +12,10 @@ import ar.edu.itba.ss.g6.topology.vector.V2d;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
 
     private Set<TheParticle> particles;
     private Grid<TheParticle> grid;
+    private Set<TheParticle> waitingPlacement;
     private final Force force;
     private final Vessel vessel;
 
@@ -43,7 +46,9 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             boolean safeToPlace = false;
             V2d position = new V2d(0, 0);
             V2d resting = new V2d(0, 0);
-            while(!safeToPlace) {
+            int attempts = 0;
+            while(!safeToPlace && attempts < 10) {
+                attempts++;
                 x = Math.random() * W * 0.8 + W * 0.1;
                 y = L - Math.random() * 0.25 * L - particle.getRadius() * 2;
                 position = new V2d(x, y);
@@ -52,8 +57,13 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
                         .noneMatch(p -> p.overlapsWith(particle) && !p.equals(particle));
             }
 
-            return new TheParticle(particle.getId(), position, resting, resting, resting,
-             particle.getRadius(), particle.getMass());
+            if(attempts >= 10) {
+                waitingPlacement.add(particle);
+                return null;
+            }
+            particles.add(new TheParticle(particle.getId(), position, resting, resting, resting,
+                    particle.getRadius(), particle.getMass()));
+            return null;
         }
         else if(count % 30 == 0) {
             V2d position = new V2d(0, -L);
@@ -85,6 +95,7 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
         this.particles = particles;
         this.vessel = new Vessel(height, width, aperture);
         this.grid = new TheParticleGrid((int) (side / radius) , side, radius);
+        this.waitingPlacement = new HashSet<>();
 
         this.fps = fps;
 
@@ -171,13 +182,18 @@ public class GranularSimulation implements TimeDrivenSimulation<TheParticle, Gra
             timestamp += deltaT;
             return new GranularSimulationFrame(0, particles, 0);
         }
+        if (count % 100 == 0) {
+            Set<TheParticle> aux = waitingPlacement;
+            waitingPlacement = new HashSet<>();
+            aux.parallelStream().forEach(this::warp);
+        }
         timestamp += deltaT;
         flowed.set(0);
 
         Set<TheParticle> state = particles.parallelStream()
-            .map(this::move)
-            .map(this::warp)
-            .collect(Collectors.toSet());
+            .map(this::move).collect(Collectors.toSet());
+        particles = new HashSet<>();
+        state.parallelStream().forEach(this::warp);
         particles = state;
         grid.set(particles);
         count++;
