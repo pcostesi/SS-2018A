@@ -2,8 +2,6 @@ package ar.edu.itba.ss.g6.tp.tp4;
 
 import ar.edu.itba.ss.g6.topology.particle.WeightedDynamicParticle2D;
 
-import java.util.Arrays;
-
 public class BeemanForceSimulator implements ForceSimulator {
     private double deltaT;
     private final double G = 6.67408E-20;
@@ -100,10 +98,17 @@ public class BeemanForceSimulator implements ForceSimulator {
 
         double distanceX = body1.getRx()[0] - body2.getRx()[0];
         double distanceY = body1.getRy()[0] - body2.getRy()[0];
-        double angle = Math.atan2(distanceY, distanceX);
-        double distance2 = (Math.pow(distanceX, 2) + Math.pow(distanceY, 2));
+        // double angle = Math.atan2(distanceY, distanceX);
+        double distance2 = (distanceX * distanceX) + (distanceY * distanceY);
         double factor = -G * body1.getMass() * body2.getMass();
         double force = factor / distance2;
-        return Axis.X.equals(axis) ? force * Math.cos(angle) : force * Math.sin(angle);
+        if (Axis.X.equals(axis)) {
+            // Math.cos(angle) == distanceX / Math.sqrt(distance2);
+            // assert Math.cos(angle) == distanceX / Math.sqrt(distance2);
+            return force * distanceX / Math.sqrt(distance2);
+        }
+        // Math.sin(angle) == distanceY / Math.sqrt(distance2);
+        // assert Math.cos(angle) == distanceY / Math.sqrt(distance2);
+        return force * distanceY / Math.sqrt(distance2);
     }
 }

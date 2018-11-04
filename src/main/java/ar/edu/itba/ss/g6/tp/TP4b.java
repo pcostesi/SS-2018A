@@ -4,18 +4,19 @@ import ar.edu.itba.ss.g6.exporter.ovito.Exporter;
 import ar.edu.itba.ss.g6.exporter.ovito.OvitoXYZExporter;
 import ar.edu.itba.ss.g6.simulation.Simulation;
 import ar.edu.itba.ss.g6.topology.particle.CelestialBody2D;
-import ar.edu.itba.ss.g6.tp.tp4.CelestialData;
-import ar.edu.itba.ss.g6.tp.tp4.Ephemeris;
-import ar.edu.itba.ss.g6.tp.tp4.VoyagerData;
-import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulation;
-import ar.edu.itba.ss.g6.tp.tp4.VoyagerSimulationFrame;
-import org.codehaus.jackson.map.ObjectMapper;
 import ar.edu.itba.ss.g6.tp.tp4.*;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -28,16 +29,10 @@ public class TP4b {
     public static void main(String... args) throws IOException {
         File ephemerisFile = Paths.get("ephemeris.json").toFile();
 
+//        MinDistanceTrajectory traj = new MinDistanceTrajectory(null, 4500.000000, 15.742999999999949,0);
+//        exerciseThreePointFour(ephemerisFile, traj);
+//        System.exit(0);
 
-        /*
-        CelestialData data = loadEphemeris(ephemerisFile);
-        CelestialBody2D[] bodies;
-        bodies = loadBodies(data, 200, 15.0, 0);
-        Simulation<CelestialBody2D, VoyagerSimulationFrame> simulator;
-        simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
-        simulate(simulator, data, bodies, "posta");
-        System.exit(-1);
-        */
         MinDistanceTrajectory bestTrajectory = exerciseThreePointOne(ephemerisFile);
         //MinDistanceTrajectory bestTrajectory = new MinDistanceTrajectory(null, 200, 15.0, 0);
         int bestDay = exerciseThreePointFour(ephemerisFile, bestTrajectory);
@@ -80,7 +75,7 @@ public class TP4b {
 
         System.out.println("Simulating alternative year using the optimal trajectory data");
         System.out.println("This will perform " + 250 + " simulations.");
-        List<double[]> trajectories = IntStream.range(1, 250).mapToObj(year -> {
+        List<double[]> trajectories = IntStream.range(1, 250).parallel().mapToObj(year -> {
             System.out.println(year + " years from launch");
             CelestialBody2D[] bodies = loadBodiesDelta(data, bestTrajectory, year * 365);
             VoyagerSimulation simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
@@ -109,7 +104,7 @@ public class TP4b {
 
         System.out.println("Simulating alternative dates using the optimal trajectory data");
         System.out.println("This will perform " + (30 * 2) + " simulations.");
-        List<double[]> trajectories = IntStream.range(-30, 30).mapToObj(day -> {
+        List<double[]> trajectories = IntStream.range(-30, 30).parallel().mapToObj(day -> {
             System.out.println(day + " days from launch");
             CelestialBody2D[] bodies = loadBodiesDelta(data, bestTrajectory, day);
             VoyagerSimulation simulator = new VoyagerSimulation(data.getDeltaT(), bodies);
@@ -270,14 +265,27 @@ public class TP4b {
         while (stop-- > 0) {
             VoyagerSimulationFrame frame = simulator.getNextStep();
 
-            CelestialBody2D voyager = frame.getState().stream()
-                    .filter(p -> p.getId().equals("100")).findFirst().get();
+            CelestialBody2D voyager = null;
+            CelestialBody2D jupiter = null;
+            CelestialBody2D saturn = null;
 
-            CelestialBody2D jupiter = frame.getState().stream()
-                    .filter(p -> p.getId().equals("5")).findFirst().get();
+            for (CelestialBody2D body : frame.getState()) {
+                switch (body.getId()) {
+                    case "100":
+                        voyager = body;
+                        break;
+                    case "5":
+                        jupiter = body;
+                        break;
+                    case "6":
+                        saturn = body;
+                        break;
+                }
+            }
 
-            CelestialBody2D saturn = frame.getState().stream()
-                    .filter(p -> p.getId().equals("6")).findFirst().get();
+            if (voyager == null || jupiter == null || saturn == null) {
+                throw new IllegalArgumentException("You forgot a planet or something?");
+            }
 
             double distanceToJupiter = voyager.distanceTo(jupiter);
             double distanceToSaturn = voyager.distanceTo(saturn);
@@ -310,7 +318,6 @@ public class TP4b {
         double CAPTURE_EVERY_N_FRAMES = SECONDS_IN_A_DAY / fpd;
 
         Exporter<CelestialBody2D> exporter = new OvitoXYZExporter<>();
-        List<Collection<CelestialBody2D>> frames = new LinkedList<>();
         long stop = Math.round(Math.ceil(days * SECONDS_IN_A_DAY / deltaT));
         List<Double> speedList = new ArrayList<>();
 
@@ -322,7 +329,6 @@ public class TP4b {
                 if (Math.round(frame.getTimestamp()) % CAPTURE_EVERY_N_FRAMES == 0) {
                     exporter.addFrameToFile(w, frame.getState(), 0, null);
                 }
-                frames.add(frame.getState());
             double speed = frame.getState().stream()
                 .filter(p -> p.getId().equals("100"))
                 .mapToDouble(p -> p.getSpeed()).findFirst().orElse(0);

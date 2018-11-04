@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 public abstract class Exporter<T extends Particle> {
 
     public void addFrameToFile(BufferedWriter w, Collection<T> particles, double timeStep, CommandLineOptions values) throws IOException {
-        w.write(exportFrame(particles.stream().filter( p -> withinBounds(((TheParticle) p), values)).collect(Collectors.toSet()), timeStep).collect(Collectors.joining("\n")));
+        w.write(exportFrame(new HashSet<>(particles), timeStep).collect(Collectors.joining("\n")));
         w.write('\n');
     }
 
@@ -41,20 +42,21 @@ public abstract class Exporter<T extends Particle> {
         saveFrameToFile(Paths.get(path), particles, time);
     }
 
-    public Stream<String> exportFrame(Collection<T> particles, double time) {
+    Stream<String> exportFrame(Collection<T> particles, double time) {
         Stream<String> header = Stream.of(String.valueOf(particles.size()), String.format("t%10f", time));
         Stream<String> particleStream = particles.stream()
          .map(this::serializeParticle);
         return Stream.concat(header, particleStream);
     }
 
-    public abstract String serializeParticle(T particle);
+    protected abstract String serializeParticle(T particle);
 
     private boolean withinBounds(TheParticle p, CommandLineOptions values){
         return p.getPosition().getY() < values.getLenght() && p.getPosition().getX() - p.getRadius() > 0 &&
                 p.getPosition().getX() + p.getRadius() < values.getWidth();
     }
-    public Stream<String> exportAnimation(List<? extends Collection<T>> timeline, double timeStep) {
+
+    Stream<String> exportAnimation(List<? extends Collection<T>> timeline, double timeStep) {
         return IntStream.range(0, timeline.size())
          .mapToObj(index -> exportFrame(timeline.get(index), index * timeStep))
          .flatMap(Function.identity());

@@ -11,7 +11,6 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
     private final CelestialBody2D[] firmament;
     private final ForceSimulator forceSimulator;
     private TrajectoryData[] simulationData;
-    private double scaler = 10000;
 
     public VoyagerSimulation(double deltaT, CelestialBody2D... firmament) {
         this.deltaT = deltaT;
@@ -39,13 +38,13 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
 
     private VoyagerSimulationFrame toSimulationFrame(double timestamp, TrajectoryData[] data) {
         CelestialBody2D[] bodies = Arrays.stream(data).map(b -> {
-            double rx = b.getRx()[0] / scaler;
-            double ry = b.getRy()[0] / scaler;
-            double vx = b.getRx()[1] / scaler;
-            double vy = b.getRy()[1] / scaler;
+            double rx = b.getRx()[0];
+            double ry = b.getRy()[0];
+            double vx = b.getRx()[1];
+            double vy = b.getRy()[1];
             String id = b.getId();
-            double mass = b.getMass() / scaler;
-            double radius = 1000; //b.getRadius();
+            double mass = b.getMass();
+            double radius = b.getRadius();
             return new CelestialBody2D(id, rx, ry, vx, vy, radius, mass);
         }).toArray(n -> new CelestialBody2D[n]);
         return new VoyagerSimulationFrame(timestamp, bodies);

@@ -18,8 +18,10 @@ public interface ForceSimulator {
     double computeForceInAxis(Axis axis, TrajectoryData body1, TrajectoryData body2);
 
     default double computeEffectiveForceInAxis(Axis axis, TrajectoryData target, TrajectoryData... system) {
-        return Arrays.stream(system)
-            .mapToDouble(particle -> computeForceInAxis(axis, target, particle))
-            .sum();
+        double force = 0;
+        for (TrajectoryData particle : system) {
+            force += computeForceInAxis(axis, target, particle);
+        }
+        return force;
     }
 }
