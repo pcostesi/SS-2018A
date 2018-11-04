@@ -8,9 +8,11 @@ public interface ForceSimulator {
     TrajectoryData moveParticle(TrajectoryData target, TrajectoryData... system);
 
     default TrajectoryData[] move(TrajectoryData... particles) {
-        return Arrays.stream(particles)
-            .map(target -> moveParticle(target, particles))
-            .toArray(n -> new TrajectoryData[n]);
+        TrajectoryData[] newParticles = new TrajectoryData[particles.length];
+        for (int i = 0; i < particles.length; i++) {
+            newParticles[i] = moveParticle(particles[i], particles);
+        }
+        return newParticles;
     }
 
     TrajectoryData[] initParticles(WeightedDynamicParticle2D... system);

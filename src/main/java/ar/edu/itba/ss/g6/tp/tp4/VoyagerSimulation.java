@@ -37,7 +37,9 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
     }
 
     private VoyagerSimulationFrame toSimulationFrame(double timestamp, TrajectoryData[] data) {
-        CelestialBody2D[] bodies = Arrays.stream(data).map(b -> {
+        CelestialBody2D[] bodies = new CelestialBody2D[data.length];
+        for (int i = 0; i < data.length; i++) {
+            TrajectoryData b = data[i];
             double rx = b.getRx()[0];
             double ry = b.getRy()[0];
             double vx = b.getRx()[1];
@@ -45,8 +47,8 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
             String id = b.getId();
             double mass = b.getMass();
             double radius = b.getRadius();
-            return new CelestialBody2D(id, rx, ry, vx, vy, radius, mass);
-        }).toArray(n -> new CelestialBody2D[n]);
+            bodies[i] = new CelestialBody2D(id, rx, ry, vx, vy, radius, mass);
+        }
         return new VoyagerSimulationFrame(timestamp, bodies);
     }
 
