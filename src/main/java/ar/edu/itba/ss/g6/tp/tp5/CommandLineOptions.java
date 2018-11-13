@@ -34,7 +34,7 @@ public class CommandLineOptions {
     private double lenght = 1.5;
 
     @Option(name = "-d", aliases = {"--aperture", "-D"}, usage = "The diameter of the aperture in the base")
-    private double aperture = 0.15;
+    private double aperture = 0.2;
 
     @Option(name = "-w", aliases = {"-W", "--width"}, usage = "The width of the container")
     private double width = 1;

@@ -37,9 +37,11 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
     }
 
     private VoyagerSimulationFrame toSimulationFrame(double timestamp, TrajectoryData[] data) {
+
         CelestialBody2D[] bodies = new CelestialBody2D[data.length];
         for (int i = 0; i < data.length; i++) {
             TrajectoryData b = data[i];
+
             double rx = b.getRx()[0];
             double ry = b.getRy()[0];
             double vx = b.getRx()[1];
@@ -54,7 +56,7 @@ public class VoyagerSimulation implements TimeDrivenSimulation<CelestialBody2D, 
 
     @Override
     public double getDeltaT() {
-        return 0;
+        return deltaT;
     }
 
     @Override
